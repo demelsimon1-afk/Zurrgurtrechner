@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer } from 'lucide-react';
+import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText } from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -15,7 +15,7 @@ const LashingStrapIcon = ({ className }) => (
 );
 
 const HeaderLogo = () => (
-  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm">
+  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm print:text-slate-400 print:border-slate-300">
     Demel
   </span>
 );
@@ -24,45 +24,63 @@ const HeaderLogo = () => (
 const PrintStyles = () => (
     <style dangerouslySetInnerHTML={{__html: `
       @media print {
-        @page { margin: 10mm; size: A4; }
+        @page { margin: 15mm; size: A4 portrait; }
         html, body { 
-          height: auto !important; 
-          min-height: auto !important;
-          overflow: visible !important; 
           background-color: white !important;
           -webkit-print-color-adjust: exact !important; 
           print-color-adjust: exact !important; 
+          font-size: 11pt;
         }
         
         /* Navigation und UI-Elemente ausblenden */
         .no-print, nav, .fixed.bottom-0, .print-hide-button { display: none !important; }
         
-        /* Layout Reset für Druck */
+        /* Layout Reset für Druck - Nutzt die volle Breite */
         .min-h-screen, .flex-1, .flex-col { 
            display: block !important; 
-           position: static !important;
-           height: auto !important; 
-           min-height: 0 !important;
+           width: 100% !important;
+           height: auto !important;
            overflow: visible !important;
-           flex: none !important;
+           margin-bottom: 0 !important;
         }
 
         .pb-24 { padding-bottom: 0 !important; }
-        .max-w-md { max-w: 100% !important; margin: 0 !important; width: 100% !important; }
+        .max-w-md { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
         
-        /* Container Styling für Druck */
+        /* Grid Layout für den Druck erstellen */
+        .print-grid-container {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important; /* 2 Spalten */
+            gap: 1rem !important;
+            align-items: start !important;
+            margin-bottom: 2cm !important; /* Platz für Footer */
+        }
+        
+        /* Elemente die volle Breite brauchen */
+        .print-full-width {
+            grid-column: 1 / -1 !important;
+        }
+
+        /* Container Styling für Druck - sauberer Dokumentenstil */
         .bg-slate-50 { background-color: white !important; }
-        .shadow-sm, .shadow-xl { box-shadow: none !important; border: 1px solid #ccc !important; }
-        .gap-2 { gap: 0.5rem !important; }
+        .shadow-sm, .shadow-xl { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
         
-        /* Header Farben erzwingen */
-        .bg-emerald-600 { background-color: #059669 !important; color: white !important; }
-        .bg-blue-600 { background-color: #2563eb !important; color: white !important; }
-        .bg-indigo-600 { background-color: #4f46e5 !important; color: white !important; }
-        .text-white { color: white !important; }
+        /* Header Anpassung für Druck */
+        .sticky.top-0 { 
+            position: static !important; 
+            background: white !important;
+            color: black !important;
+            border-bottom: 2px solid #333;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-bottom: 1.5rem !important;
+            box-shadow: none !important;
+        }
         
-        /* Seitenumbrüche steuern */
-        .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+        /* Farben im Header für Text umkehren, da Hintergrund weiß wird */
+        .sticky.top-0 h1 { color: #1e293b !important; } /* Slate-800 */
+        .sticky.top-0 p { color: #64748b !important; } /* Slate-500 */
+        .sticky.top-0 svg { color: #1e293b !important; }
         
         /* Eingabefelder im Druck flach darstellen */
         input, select { 
@@ -70,16 +88,56 @@ const PrintStyles = () => (
             background: transparent !important; 
             padding-left: 0 !important; 
             font-weight: bold !important; 
-            color: black !important;
+            color: #0f172a !important; /* Slate-900 */
             appearance: none !important;
+            box-shadow: none !important;
         }
-        .relative.group { border-bottom: 1px solid #eee; margin-bottom: 0.25rem; }
+        .relative.group { border-bottom: 1px solid #f1f5f9; margin-bottom: 0.25rem; }
         input { padding-left: 1.5rem !important; }
         
         /* Verstecke Placeholder im Druck wenn leer */
         input:placeholder-shown { opacity: 0; }
+        
+        /* Button-Styles entfernen */
+        button { border: none !important; background: none !important; }
+
+        /* Seitenumbrüche */
+        .break-inside-avoid { break-inside: avoid; }
+        
+        /* GLOBALER FOOTER AUF JEDER SEITE */
+        .global-print-footer {
+            display: flex !important;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 9pt;
+            color: #94a3b8;
+        }
       }
     `}} />
+);
+
+// Footer Component (Druck)
+const GlobalPrintFooter = () => (
+    <div className="hidden global-print-footer">
+        <div className="flex items-center gap-1.5">
+             <ShieldCheck className="w-3 h-3" />
+             <span className="font-mono">Demel App v1.1</span>
+        </div>
+    </div>
+);
+
+// Footer Component (App Display)
+const AppVersionFooter = () => (
+    <div className="text-center text-[10px] text-slate-300 font-mono py-2 no-print select-none">
+        Demel App v1.1
+    </div>
 );
 
 // Export Button Component
@@ -89,7 +147,7 @@ const ExportButton = () => (
         try { window.focus(); } catch(e){}
         window.print();
     }}
-    className="print-hide-button mt-6 w-full py-4 bg-slate-800 text-white rounded-xl flex items-center justify-center gap-2.5 font-bold shadow-lg hover:bg-slate-700 transition-all active:scale-95 mb-8 text-base"
+    className="print-hide-button mt-6 w-full py-4 bg-slate-800 text-white rounded-xl flex items-center justify-center gap-2.5 font-bold shadow-lg hover:bg-slate-700 transition-all active:scale-95 mb-4 text-base"
   >
     <Printer className="w-5 h-5" />
     Ergebnis als PDF exportieren
@@ -177,18 +235,24 @@ export default function App() {
           <OverloadCalculator />
         ) : activeTab === 'wood' ? (
           <WoodCalculator />
+        ) : activeTab === 'info' ? (
+          <InfoView />
         ) : (
           <LashingCalculator />
         )}
       </div>
       
+      {/* Footer für den Druck (immer im DOM, aber nur beim Drucken sichtbar) */}
+      <GlobalPrintFooter />
+
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print">
         <div className="max-w-md mx-auto flex justify-around p-2">
           {[
             { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
             { id: 'overload', icon: Scale, label: 'Gewicht', color: 'text-blue-600' },
-            { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' }
+            { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' },
+            { id: 'info', icon: FileText, label: 'Hinweise', color: 'text-slate-600' }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -205,6 +269,65 @@ export default function App() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// --- INFO VIEW ---
+function InfoView() {
+  const dateTime = useDateTime();
+  return (
+    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+      <div className="bg-slate-800/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-slate-900/10">
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
+            <FileText className="w-6 h-6 shrink-0" />
+            Rechtliche Hinweise
+          </h1>
+          <p className="text-slate-400 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8">
+             <Clock className="w-3 h-3" />
+             {dateTime}
+          </p>
+        </div>
+        <HeaderLogo />
+      </div>
+
+      <div className="p-4 space-y-4 animate-in slide-in-from-bottom-4 duration-500 print-grid-container">
+        
+        {/* Card 1: Zweck */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+            <div className="flex items-center gap-2 mb-3 text-slate-700 border-b border-slate-50 pb-2">
+                <Info className="w-5 h-5 text-blue-500" />
+                <h3 className="font-black uppercase tracking-wide text-sm">Zweckbestimmung</h3>
+            </div>
+            <p className="text-slate-600 text-sm leading-relaxed text-justify">
+                Die Berechnungen und Ergebnisse dieser Anwendung dienen ausschließlich als Orientierungshilfe zur Verdachtsgewinnung. Sie stellen keinen rechtsverbindlichen Beweis dar.
+            </p>
+        </div>
+
+        {/* Card 2: Haftung */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+            <div className="flex items-center gap-2 mb-3 text-slate-700 border-b border-slate-50 pb-2">
+                <ShieldAlert className="w-5 h-5 text-amber-500" />
+                <h3 className="font-black uppercase tracking-wide text-sm">Haftungsausschluss</h3>
+            </div>
+            <p className="text-slate-600 text-sm leading-relaxed text-justify">
+                Sämtliche Angaben erfolgen ohne Gewähr. Für die Richtigkeit, Vollständigkeit und Aktualität der bereitgestellten Inhalte, Formeln und Rechenergebnisse wird keine Haftung übernommen.
+            </p>
+        </div>
+
+        {/* Card 3: Urheberrecht */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+            <div className="flex items-center gap-2 mb-3 text-slate-700 border-b border-slate-50 pb-2">
+                <Gavel className="w-5 h-5 text-slate-500" />
+                <h3 className="font-black uppercase tracking-wide text-sm">Geistiges Eigentum</h3>
+            </div>
+            <p className="text-slate-600 text-sm leading-relaxed text-justify">
+                Das geistige Eigentum an der Konzeption, dem Design, dem Quellcode sowie den zugrundeliegenden logischen Strukturen dieser Anwendung bleibt ausdrücklich vorbehalten. Eine Vervielfältigung, Verbreitung oder unbefugte Nutzung ist untersagt.
+            </p>
+        </div>
+      </div>
+      <AppVersionFooter />
     </div>
   );
 }
@@ -299,7 +422,7 @@ function WoodCalculator() {
         <HeaderLogo />
       </div>
 
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2 print-grid-container">
         
         {/* FAHRZEUGGEWICHTE CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
@@ -387,13 +510,13 @@ function WoodCalculator() {
 
         {/* ERGEBNIS */}
         {calculatedLoadWeight > 0 && (
-          <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500 fade-in break-inside-avoid">
-            <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl shadow-emerald-200">
-              <p className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-1">Berechnetes Ladungsgewicht</p>
-              <div className="text-5xl font-black tracking-tighter drop-shadow-sm">
+          <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500 fade-in break-inside-avoid print-full-width">
+            <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl shadow-emerald-200 print:shadow-none print:border print:border-emerald-700 print:text-black print:bg-none">
+              <p className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-1 print:text-emerald-800">Berechnetes Ladungsgewicht</p>
+              <div className="text-5xl font-black tracking-tighter drop-shadow-sm print:text-black">
                 {calculatedLoadWeight.toLocaleString('de-DE')} <span className="text-2xl font-bold opacity-70">kg</span>
               </div>
-              <p className="text-xs text-emerald-100 mt-2 font-medium opacity-80">
+              <p className="text-xs text-emerald-100 mt-2 font-medium opacity-80 print:text-emerald-700">
                 * Basis: 70% Holz / 30% Luft (Bayerische LWF)
               </p>
             </div>
@@ -461,6 +584,7 @@ function WoodCalculator() {
         )}
         <ExportButton />
       </div>
+      <AppVersionFooter />
     </div>
   );
 }
@@ -498,11 +622,33 @@ function OverloadCalculator() {
         else difference = Math.ceil(difference);
 
         let percentage = (difference > 0 && allowed > 0) ? (difference / allowed) * 100 : 0;
+        
+        // --- NEU: Check auf Einziehung ---
+        let confiscationPossible = false;
+        if (allowed > 0 && difference > 0) {
+            if (allowed <= 7500) {
+                // Bis 7,5t (hier spezifiziert der Nutzer <= 3,5t, aber meist gilt diese Regel für die "kleinen" Fahrzeuge generell, ich halte mich aber strikt an die User-Vorgabe <= 3.5t)
+                // User requirement: "<= 3,5 t und 20%"
+                if (allowed <= 3500 && percentage >= 20) {
+                    confiscationPossible = true;
+                }
+                 // User requirement: "> 3,5 t und 15%"
+                else if (allowed > 3500 && percentage >= 15) {
+                    confiscationPossible = true;
+                }
+            } else {
+                 // > 7,5t fällt auch unter "> 3,5t", also 15%
+                 if (percentage >= 15) {
+                    confiscationPossible = true;
+                 }
+            }
+        }
 
         return {
             actual, allowed, tolerance, netWeight, difference, percentage,
             isOverloaded: allowed > 0 && difference > 0,
-            isValidInput: !isNaN(allowed) && !isNaN(actual)
+            isValidInput: !isNaN(allowed) && !isNaN(actual),
+            confiscationPossible
         };
     };
 
@@ -534,7 +680,7 @@ function OverloadCalculator() {
         <HeaderLogo />
       </div>
 
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2 print-grid-container">
         
         {/* FAHRZEUG 1 CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
@@ -561,15 +707,15 @@ function OverloadCalculator() {
         </div>
 
         {!result && (
-          <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100">
+          <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width">
             <Info className="w-5 h-5 shrink-0" />
-            <p>Bitte geben Sie die Gewichte für mindestens ein Fahrzeug ein. Messtoleranzen werden automatisch berücksichtigt.</p>
+            <p>Bitte geben Sie die Gewichte für mindestens ein Fahrzeug ein. Die Messtoleranzen der Waage der GZA Weil am Rhein werden dabei automatisch berücksichtigt.</p>
           </div>
         )}
       </div>
 
       {result && (
-        <div className="bg-slate-100 border-t border-slate-200 p-4 animate-in slide-in-from-bottom-4 duration-500 pb-20">
+        <div className="bg-slate-100 border-t border-slate-200 p-4 animate-in slide-in-from-bottom-4 duration-500 pb-20 print-full-width">
           <h3 className="text-lg font-black text-slate-700 mb-3">Ergebnis</h3>
 
           <div className="space-y-3">
@@ -593,9 +739,19 @@ function OverloadCalculator() {
                     <ProgressBar current={result.vehicle1.netWeight} max={result.vehicle1.allowed} isOverloaded={result.vehicle1.isOverloaded} />
 
                      {result.vehicle1.isOverloaded && (
-                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 flex justify-between">
-                             <span>Überschuss:</span>
-                             <span>+ {result.vehicle1.difference.toLocaleString()} kg ({result.vehicle1.percentage.toFixed(2)}%)</span>
+                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600">
+                             <div className="flex justify-between mb-1">
+                                <span>Überschuss:</span>
+                                <span>+ {result.vehicle1.difference.toLocaleString()} kg ({result.vehicle1.percentage.toFixed(2)}%)</span>
+                             </div>
+                             
+                             {/* Einziehungshinweis */}
+                             {result.vehicle1.confiscationPossible && (
+                                <div className="mt-2 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2">
+                                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                                    <span>Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                             )}
                          </div>
                      )}
                  </div>
@@ -621,9 +777,19 @@ function OverloadCalculator() {
                     <ProgressBar current={result.vehicle2.netWeight} max={result.vehicle2.allowed} isOverloaded={result.vehicle2.isOverloaded} />
 
                      {result.vehicle2.isOverloaded && (
-                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 flex justify-between">
-                             <span>Überschuss:</span>
-                             <span>+ {result.vehicle2.difference.toLocaleString()} kg ({result.vehicle2.percentage.toFixed(2)}%)</span>
+                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600">
+                             <div className="flex justify-between mb-1">
+                                <span>Überschuss:</span>
+                                <span>+ {result.vehicle2.difference.toLocaleString()} kg ({result.vehicle2.percentage.toFixed(2)}%)</span>
+                             </div>
+
+                             {/* Einziehungshinweis */}
+                             {result.vehicle2.confiscationPossible && (
+                                <div className="mt-2 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2">
+                                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                                    <span>Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                             )}
                          </div>
                      )}
                  </div>
@@ -645,6 +811,7 @@ function OverloadCalculator() {
         </div>
       )}
       <ExportButton />
+      <AppVersionFooter />
     </div>
   );
 }
@@ -666,7 +833,7 @@ function LashingCalculator() {
   const [bodyCert, setBodyCert] = useState('NONE'); 
   const [isTipping, setIsTipping] = useState(false);
   const [lashingResult, setLashingResult] = useState(null);
-  const [weightWarning, setWeightWarning] = useState(null);
+  const [fineGroups, setFineGroups] = useState([]);
   const dateTime = useDateTime();
 
   const getStandardForces = () => {
@@ -688,7 +855,7 @@ function LashingCalculator() {
   }, [bodyCert, allowedWeight, emptyWeight]);
 
   useEffect(() => {
-    setWeightWarning(null);
+    setFineGroups([]);
     const m = parseFloat(loadWeight);
     const mu = parseFloat(friction);
     const s_tf = parseFloat(stf);
@@ -700,9 +867,49 @@ function LashingCalculator() {
       setLashingResult(null); return;
     }
     
-    if (maxWeight > 0 && (m + empty) > maxWeight) {
-      setWeightWarning({ total: Math.floor(m + empty), diff: Math.floor((m + empty) - maxWeight) });
+    // Bußgeld-Logik berechnen (Gruppen)
+    let groups = [];
+    if (maxWeight > 0) {
+        if (maxWeight > 3500) {
+            // LKW > 3,5t
+            groups.push({
+                title: 'LKW bzw. dessen Anhänger (> 3,5t)',
+                items: [
+                    { role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' },
+                    { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                ]
+            });
+        } else {
+            // Bis 3,5t
+            if (bodyCert === 'L' || bodyCert === 'XL') {
+                // Mit Code L/XL -> wird wie LKW behandelt
+                groups.push({
+                    title: 'LKW bzw. dessen Anhänger',
+                    items: [
+                        { role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' },
+                        { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                    ]
+                });
+            } else {
+                // PKW / Anhänger ohne Zertifikat -> Unterscheidung oft schwierig, daher beide anzeigen
+                groups.push({
+                    title: 'PKW bzw. dessen Anhänger',
+                    items: [
+                        { role: 'Fahrer', code: '122100', cost: '35 €', points: '' },
+                        { role: 'Halter', code: '331630', cost: '135 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                    ]
+                });
+                groups.push({
+                    title: 'LKW bzw. dessen Anhänger',
+                    items: [
+                        { role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' },
+                        { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                    ]
+                });
+            }
+        }
     }
+    setFineGroups(groups);
 
     const g = 9.81; 
     const radAlpha = (alpha * Math.PI) / 180;
@@ -759,7 +966,7 @@ function LashingCalculator() {
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
             <LashingStrapIcon className="w-5 h-5 shrink-0" />
-            Niederzurren
+            LaSi-Niederzurren
           </h1>
           <p className="text-indigo-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-7">
              <Clock className="w-3 h-3" />
@@ -769,7 +976,7 @@ function LashingCalculator() {
         <HeaderLogo />
       </div>
 
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2 print-grid-container">
         
         {/* AUFBAU CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
@@ -941,7 +1148,7 @@ function LashingCalculator() {
         </div>
 
         {/* KIPPGEFAHR */}
-        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
+        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
           <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
             {isTipping && <CheckSquare className="w-4 h-4" />}
           </div>
@@ -951,7 +1158,7 @@ function LashingCalculator() {
 
         {/* RESULTAT */}
         {lashingResult !== null && (
-          <div className="space-y-3 pb-20 break-inside-avoid">
+          <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
             <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
               
               <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
@@ -983,21 +1190,61 @@ function LashingCalculator() {
                </div>
             </div>
 
-            {weightWarning && (
-              <div className="bg-red-50 border border-red-100 p-3 rounded-xl flex items-start gap-2 shadow-sm">
-                 <div className="p-1.5 bg-red-100 rounded-full text-red-600"><AlertTriangle className="w-5 h-5" /></div>
-                 <div>
-                   <h4 className="font-bold text-red-800 text-sm">Überladungswarnung</h4>
-                   <p className="text-xs text-red-700 mt-0.5">
-                     Gesamt: <strong>{weightWarning.total.toLocaleString('de-DE')} kg</strong> (+{weightWarning.diff.toLocaleString('de-DE')} kg)
-                   </p>
-                 </div>
+            
+            {fineGroups.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
+                <div className="flex items-center gap-2 mb-1">
+                   <Gavel className="w-5 h-5 text-slate-400" />
+                   <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
+                </div>
+                
+                {fineGroups.map((group, gIdx) => (
+                    <div key={gIdx} className="mt-4 first:mt-2">
+                        {group.title && (
+                            <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                        )}
+                        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                          <table className="w-full text-left text-sm">
+                            <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                              <tr>
+                                <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
+                                <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
+                                <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {group.items.map((fine, fIdx) => (
+                                <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="px-3 py-2.5">
+                                    <div className="flex items-start gap-2">
+                                       <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                       <div>
+                                            <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                            {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                       </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                    <div className="mt-0.5">{fine.code}</div>
+                                  </td>
+                                  <td className="px-3 py-2.5 text-right align-top">
+                                    <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                    {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                    </div>
+                ))}
               </div>
             )}
           </div>
         )}
       </div>
       <ExportButton />
+      <AppVersionFooter />
     </div>
   );
 }
