@@ -167,6 +167,11 @@ const PrintStyles = () => (
             break-inside: avoid;
         }
         
+        /* Tabellen im Druck */
+        table { width: 100% !important; border-collapse: collapse !important; }
+        th { text-align: left !important; font-size: 9pt !important; color: #64748b !important; border-bottom: 1px solid #cbd5e1 !important; padding-bottom: 4px !important; }
+        td { font-size: 10pt !important; color: #000 !important; padding: 4px 0 !important; border-bottom: 1px solid #f1f5f9 !important; }
+
         /* Button-Styles entfernen */
         button { border: none !important; background: none !important; }
 
@@ -239,15 +244,50 @@ const FormulaFraction = ({ numerator, denominator, label, equals, className = ""
   </div>
 );
 
-const LashingFormulaDisplay = ({ values }) => {
+const LashingDetailTable = ({ data }) => (
+  <div className="mt-4 border-t border-slate-200 pt-3">
+    <div className="mb-2 text-[10px] text-slate-400 font-bold uppercase tracking-wide">Detaillierte Berechnungswerte</div>
+    <table className="w-full text-xs text-left">
+      <thead>
+        <tr className="text-slate-400 border-b border-slate-100">
+          <th className="pb-1 font-bold">Richtung</th>
+          <th className="pb-1 font-bold hidden sm:table-cell print:table-cell">Gleit-Reib. μ</th>
+          <th className="pb-1 font-bold">Beschl. c</th>
+          <th className="pb-1 font-bold hidden sm:table-cell print:table-cell">Winkel α</th>
+          <th className="pb-1 font-bold">Formschluss</th>
+          <th className="pb-1 font-bold">F<sub>Form</sub> (daN)</th>
+          <th className="pb-1 text-right font-black">Ergebnis</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-50">
+        {data.map((row, i) => (
+            <tr key={i} className="text-slate-700">
+                <td className="py-1.5 font-bold">{row.label}</td>
+                <td className="py-1.5 hidden sm:table-cell print:table-cell">{row.mu}</td>
+                <td className="py-1.5">{row.c} g</td>
+                <td className="py-1.5 hidden sm:table-cell print:table-cell">{row.angle}°</td>
+                <td className="py-1.5">
+                    {row.hasFit ? (
+                        <span className="text-emerald-600 font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Ja</span>
+                    ) : (
+                        <span className="text-slate-400 text-[10px]">Nein</span>
+                    )}
+                </td>
+                <td className="py-1.5">{row.force}</td>
+                <td className="py-1.5 text-right font-black">{row.result} Gurte</td>
+            </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+const LashingFormulaDisplay = ({ values, details }) => {
   if (!values) return null;
   const { weightForceN, c, formForceN, mu, alphaRad, stfNewton, safety } = values;
 
   // Formatierung der Zahlen für die Anzeige
   const f_G = Math.round(weightForceN).toLocaleString();
-  const f_form = Math.round(formForceN).toLocaleString();
-  const f_stf = Math.round(stfNewton).toLocaleString();
-  const f_sin = Math.sin(alphaRad).toFixed(2);
   
   return (
     <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300">
@@ -257,7 +297,7 @@ const LashingFormulaDisplay = ({ values }) => {
         </div>
         
         {/* Allgemeine Formel */}
-        <div className="mb-4 pb-3 border-b border-slate-200">
+        <div className="mb-2 pb-3">
              <div className="text-[10px] text-slate-400 font-bold mb-1 text-center uppercase">Allgemein (VDI 2700)</div>
              <FormulaFraction 
                 label={<span className="italic">n</span>}
@@ -265,32 +305,12 @@ const LashingFormulaDisplay = ({ values }) => {
                 numerator={<span>(F<sub>G</sub> · c) - F<sub>Form</sub> - (F<sub>G</sub> · μ)</span>}
                 denominator={<span>2 · μ · sin(α) · STF</span>}
              />
-             <div className="text-center mt-1">· S (Sicherheitsfaktor)</div>
+             <div className="text-center mt-1">· S (Sicherheitsfaktor 1.1 / 1.25 / 1.8 je nach Richtung & Klasse)</div>
         </div>
+        
+        {/* Detail-Tabelle */}
+        {details && <LashingDetailTable data={details} />}
 
-        {/* Konkrete Berechnung */}
-        <div>
-             <div className="text-[10px] text-indigo-400 font-bold mb-1 text-center uppercase">Konkret (Ihre Werte)</div>
-             <FormulaFraction 
-                label={<span className="italic text-indigo-700">n</span>}
-                equals="≥"
-                numerator={
-                    <span className="text-indigo-900">
-                        ({f_G} · {values.c}) - {f_form} - ({f_G} · {mu})
-                    </span>
-                }
-                denominator={
-                    <span className="text-indigo-900">
-                         2 · {mu} · {f_sin} · {f_stf}
-                    </span>
-                }
-             />
-             <div className="text-center mt-1 text-indigo-900 font-bold">· {safety}</div>
-        </div>
-
-        <div className="mt-3 text-[10px] text-slate-400 text-center leading-tight">
-            F<sub>G</sub> = {f_G} N (Gewichtskraft) | c = {values.c} (Beschleunigung)
-        </div>
     </div>
   );
 };
@@ -1218,6 +1238,8 @@ function LashingCalculator() {
 
     // Berechnungsdaten für die Anzeige vorbereiten (Wir nehmen den kritischsten Wert)
     let displayValues = null;
+    let detailRows = [];
+
     if (m > 0) {
         // Wir zeigen die Formel für den Wert an, der die meisten Gurte erfordert
         const maxN = Math.max(nForward, nSide, nRear);
@@ -1243,13 +1265,21 @@ function LashingCalculator() {
             stfNewton: stfInNewton,
             safety: safety
         };
+
+        // Tabelle für alle Richtungen
+        detailRows = [
+            { label: 'Vorne', mu: mu, c: accFwd, angle: angle, hasFit: fitFront, force: fitFront ? wallFront : 0, result: nForward },
+            { label: 'Seite', mu: mu, c: accSide, angle: angle, hasFit: fitSide, force: fitSide ? wallSide : 0, result: nSide },
+            { label: 'Hinten', mu: mu, c: accRear, angle: angle, hasFit: fitRear, force: fitRear ? wallRear : 0, result: nRear },
+        ];
     }
 
     setLashingResult({
       forward: nForward, side: nSide, rear: nRear,
       factorForward: accFwd, factorSide: accSide, factorRear: accRear,
       weightClassInfo: !maxWeight ? '< 2000 kg (Standard)' : maxWeight <= 1999 ? '< 2000 kg' : maxWeight <= 3500 ? '2000 - 3500 kg' : '> 3500 kg',
-      displayValues: displayValues
+      displayValues: displayValues,
+      detailRows: detailRows
     });
   }, [loadWeight, friction, stf, angle, allowedWeight, emptyWeight, isTipping, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
 
@@ -1512,14 +1542,21 @@ function LashingCalculator() {
               
               <div className="grid grid-cols-3 gap-3">
                 {[
-                    { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward },
-                    { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide },
-                    { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear }
+                    { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward, hasFit: fitFront },
+                    { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
+                    { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
                 ].map((res, idx) => (
                     <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50 print:bg-transparent">
                         <span className={`text-4xl font-black ${isTipping ? 'text-amber-600 print:text-black' : 'text-indigo-600 print:text-black'}`}>{res.count}</span>
                         <span className="text-xs font-bold uppercase text-slate-400 mt-0.5 print:text-black">{res.label}</span>
-                        <span className="text-[10px] text-slate-300 print:text-black">({res.factor}g)</span>
+                        <div className="flex flex-col items-center gap-0.5">
+                            <span className="text-[10px] text-slate-300 print:text-black">({res.factor}g)</span>
+                            <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'} print:text-black`}>
+                                {res.hasFit ? (
+                                    <span className="flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" /> Formschl.</span>
+                                ) : 'Kein Formschl.'}
+                            </span>
+                        </div>
                     </div>
                 ))}
               </div>
@@ -1531,8 +1568,8 @@ function LashingCalculator() {
                  </div>
                </div>
                
-               {/* FORMEL ANZEIGE */}
-               <LashingFormulaDisplay values={lashingResult.displayValues} />
+               {/* FORMEL ANZEIGE MIT DETAIL-TABELLE */}
+               <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} />
             </div>
 
             
