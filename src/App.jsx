@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText, X, Edit3, Calculator } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText, X, Edit3, Calculator, Smartphone, RotateCw } from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -469,6 +469,191 @@ const useDateTime = () => {
   return dateTime;
 };
 
+// --- ANGLE MEASUREMENT MODAL ---
+const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
+    const [step, setStep] = useState(1); // 1: Info/Start, 2: Nullen, 3: Messen
+    const [referenceBeta, setReferenceBeta] = useState(null);
+    const [currentBeta, setCurrentBeta] = useState(0);
+    const [measuredAngle, setMeasuredAngle] = useState(0);
+    const [permissionGranted, setPermissionGranted] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
+    useEffect(() => {
+        if (isOpen) {
+            setStep(1);
+            setReferenceBeta(null);
+            setMeasuredAngle(0);
+            setErrorMsg('');
+        }
+    }, [isOpen]);
+
+    const handleOrientation = (event) => {
+        // beta ist der Tilt vor/zurück (-180 bis 180)
+        const beta = event.beta; 
+        if (beta !== null) {
+            setCurrentBeta(beta);
+            if (referenceBeta !== null) {
+                 // Einfache Differenzberechnung
+                 let diff = Math.abs(beta - referenceBeta);
+                 // Begrenzung auf 90 Grad
+                 if (diff > 90) diff = 90;
+                 
+                 // --- RUNDUNG AUF NÄCHSTEN 5er SCHRITT (AUFRUNDEN) ---
+                 // Wir runden immer auf den nächsten vollen 5er Schritt nach oben auf.
+                 const rounded = Math.ceil(diff / 5) * 5;
+                 setMeasuredAngle(rounded);
+            }
+        }
+    };
+
+    const requestAccess = async () => {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const response = await DeviceOrientationEvent.requestPermission();
+                if (response === 'granted') {
+                    setPermissionGranted(true);
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    setStep(2);
+                } else {
+                    setErrorMsg('Zugriff auf Sensoren verweigert.');
+                }
+            } catch (e) {
+                setErrorMsg('Fehler beim Anfordern der Sensoren: ' + e.message);
+            }
+        } else {
+            setPermissionGranted(true);
+            window.addEventListener('deviceorientation', handleOrientation);
+            setStep(2);
+        }
+    };
+
+    const handleZero = () => {
+        setReferenceBeta(currentBeta);
+        setStep(3);
+    };
+
+    const stopSensors = () => {
+         window.removeEventListener('deviceorientation', handleOrientation);
+    };
+
+    const handleClose = () => {
+        stopSensors();
+        onClose();
+    };
+
+    const handleApply = () => {
+        stopSensors();
+        onApply(measuredAngle);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl">
+                <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                     <h3 className="font-black text-slate-800 flex items-center gap-2">
+                        <Smartphone className="w-5 h-5 text-indigo-600" />
+                        Winkelmesser
+                     </h3>
+                     <button onClick={handleClose} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
+                        <X className="w-4 h-4 text-slate-500" />
+                     </button>
+                </div>
+
+                {errorMsg && (
+                    <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold mb-4 flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                        {errorMsg}
+                    </div>
+                )}
+
+                <div className="min-h-[200px] flex flex-col justify-center">
+                    {step === 1 && (
+                        <div className="text-center space-y-4">
+                            <div className="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600">
+                                <RotateCw className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-slate-700 text-lg">Kalibrierung starten</h4>
+                                <p className="text-slate-500 text-sm mt-1">
+                                    Um den Winkel exakt zu messen, nutzen wir die Sensoren Ihres Geräts.
+                                </p>
+                            </div>
+                            <button 
+                                onClick={requestAccess} 
+                                className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 active:scale-95 transition-all"
+                            >
+                                Messung starten
+                            </button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                         <div className="text-center space-y-6">
+                             <div className="relative">
+                                 <div className="w-full h-1 bg-slate-200 rounded absolute top-1/2 -translate-y-1/2"></div>
+                                 <div 
+                                    className="w-full h-1 bg-indigo-500 rounded absolute top-1/2 -translate-y-1/2 transition-transform duration-300" 
+                                    style={{ transform: `rotate(${currentBeta}deg)` }}
+                                 ></div>
+                                 <Smartphone className="w-12 h-12 text-slate-800 mx-auto relative z-10 bg-white p-1 rounded-lg border-2 border-slate-100" />
+                             </div>
+                             
+                             <div>
+                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Schritt 1</div>
+                                 <h4 className="font-bold text-slate-700 text-lg">Sensor Nullen</h4>
+                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">
+                                     Legen Sie das Gerät flach auf den <strong>Ladeboden</strong> (Fahrzeugfläche).
+                                 </p>
+                             </div>
+
+                             <button 
+                                onClick={handleZero} 
+                                className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all"
+                            >
+                                Jetzt Nullen (Referenz)
+                            </button>
+                         </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="text-center space-y-6">
+                            <div className="py-4">
+                                <span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">
+                                    {measuredAngle}°
+                                </span>
+                                <p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Gerundeter Wert (+5° Schritt)</p>
+                            </div>
+
+                            <div>
+                                 <div className="inline-block bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Schritt 2</div>
+                                 <p className="text-slate-500 text-sm leading-relaxed">
+                                     Legen Sie das Gerät nun auf den <strong>Zurrgurt</strong>.
+                                 </p>
+                             </div>
+
+                             <button 
+                                onClick={handleApply} 
+                                className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                <CheckCircle className="w-5 h-5" />
+                                Wert übernehmen
+                            </button>
+                            <button 
+                                onClick={() => setStep(2)} 
+                                className="text-xs font-bold text-slate-400 hover:text-slate-600 underline"
+                            >
+                                Neu Nullen
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- MAIN APP COMPONENT ---
 
 export default function App() {
@@ -595,7 +780,7 @@ function WoodCalculator() {
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
-  const [woodType, setWoodType] = useState('Fichte lufttrocken'); 
+  const [woodType, setWoodType] = useState('Akazie ganz frisch'); 
   const dateTime = useDateTime();
 
   useEffect(() => {
@@ -1080,6 +1265,7 @@ function LashingCalculator() {
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
+  const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
   
   // Reibbeiwert-State Management
   // Wir speichern die ID der Auswahl separat vom tatsächlichen Rechenwert
@@ -1116,7 +1302,7 @@ function LashingCalculator() {
   }, [selectedFrictionId, customFrictionVal]);
 
   const [stf, setStf] = useState('500');
-  const [angle, setAngle] = useState('90');
+  const [angle, setAngle] = useState(90); // Geändert auf Number für flexiblere Eingabe
   const [wallFront, setWallFront] = useState(''); 
   const [wallSide, setWallSide] = useState('');   
   const [wallRear, setWallRear] = useState('');   
@@ -1311,6 +1497,16 @@ function LashingCalculator() {
 
       <PrintDocumentHeader title="Protokoll: Ladungssicherung" />
 
+      {/* Angle Measurement Modal */}
+      <AngleMeasureModal 
+        isOpen={isMeasureModalOpen} 
+        onClose={() => setIsMeasureModalOpen(false)}
+        onApply={(measuredAngle) => {
+            setAngle(measuredAngle);
+            setIsMeasureModalOpen(false);
+        }}
+      />
+
       <div className="p-2 space-y-2 print-grid-container">
         
         {/* AUFBAU CARD */}
@@ -1392,12 +1588,35 @@ function LashingCalculator() {
                 )}
             </div>
 
+            {/* Winkel-Eingabe mit Mess-Funktion */}
             <div className="relative col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
-                <select value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0">
-                    {Array.from({ length: 19 }, (_, i) => i * 5).map((val) => (<option key={val} value={val}>{val}°</option>))}
-                </select>
+                <div className="flex gap-2">
+                    <div className="relative w-full">
+                         <input 
+                            list="angle-options"
+                            type="number" 
+                            min="0"
+                            max="90"
+                            value={angle} 
+                            onChange={(e) => setAngle(e.target.value)} 
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0"
+                         />
+                         <datalist id="angle-options">
+                             {Array.from({ length: 19 }, (_, i) => i * 5).map((val) => (<option key={val} value={val} />))}
+                         </datalist>
+                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none print:hidden">°</span>
+                    </div>
+                    <button 
+                        onClick={() => setIsMeasureModalOpen(true)}
+                        className="bg-indigo-600 text-white rounded-xl px-3 flex items-center justify-center shadow-md hover:bg-indigo-700 active:scale-95 transition-all print:hidden"
+                        title="Winkel messen mit Handy-Sensor"
+                    >
+                        <Ruler className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
+
             <div className="col-span-2 relative">
                  <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
                  <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0">
