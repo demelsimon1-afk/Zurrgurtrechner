@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText, X, Edit3 } from 'lucide-react';
+import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText, X, Edit3, Calculator } from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -24,12 +24,18 @@ const HeaderLogo = () => (
 const PrintStyles = () => (
     <style dangerouslySetInnerHTML={{__html: `
       @media print {
-        @page { margin: 15mm; size: A4 portrait; }
+        @page { 
+            margin: 10mm; 
+            size: A4 portrait; 
+        }
+        
         html, body { 
           background-color: white !important;
           -webkit-print-color-adjust: exact !important; 
           print-color-adjust: exact !important; 
-          font-size: 11pt;
+          font-size: 10pt; /* Etwas kleinere Schrift für Kompaktheit */
+          height: 100%;
+          overflow: hidden; /* Versuch, auf einer Seite zu bleiben */
         }
         
         /* Navigation und UI-Elemente ausblenden */
@@ -47,13 +53,18 @@ const PrintStyles = () => (
         .pb-24 { padding-bottom: 0 !important; }
         .max-w-md { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
         
+        /* Skalierung um alles auf eine Seite zu bekommen */
+        .print-scale-wrapper {
+            zoom: 0.9; 
+        }
+
         /* Grid Layout für den Druck erstellen */
         .print-grid-container {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important; /* 2 Spalten */
-            gap: 1rem !important;
+            gap: 0.75rem !important;
             align-items: start !important;
-            margin-bottom: 2cm !important; /* Platz für Footer */
+            margin-bottom: 1cm !important; /* Platz für Footer */
         }
         
         /* Elemente die volle Breite brauchen */
@@ -73,7 +84,7 @@ const PrintStyles = () => (
             border-bottom: 2px solid #333;
             padding-left: 0 !important;
             padding-right: 0 !important;
-            margin-bottom: 1.5rem !important;
+            margin-bottom: 1rem !important;
             box-shadow: none !important;
         }
         
@@ -92,8 +103,8 @@ const PrintStyles = () => (
             appearance: none !important;
             box-shadow: none !important;
         }
-        .relative.group { border-bottom: 1px solid #f1f5f9; margin-bottom: 0.25rem; }
-        input { padding-left: 1.5rem !important; }
+        .relative.group { border-bottom: 1px solid #f1f5f9; margin-bottom: 0.15rem; }
+        input { padding-left: 1.5rem !important; padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
         
         /* Verstecke Placeholder im Druck wenn leer */
         input:placeholder-shown { opacity: 0; }
@@ -101,7 +112,7 @@ const PrintStyles = () => (
         /* Button-Styles entfernen */
         button { border: none !important; background: none !important; }
 
-        /* Seitenumbrüche */
+        /* Seitenumbrüche verhindern */
         .break-inside-avoid { break-inside: avoid; }
         
         /* GLOBALER FOOTER AUF JEDER SEITE */
@@ -114,9 +125,9 @@ const PrintStyles = () => (
             justify-content: center;
             align-items: center;
             background: white;
-            padding-top: 10px;
+            padding-top: 5px;
             border-top: 1px solid #e2e8f0;
-            font-size: 9pt;
+            font-size: 8pt;
             color: #94a3b8;
         }
       }
@@ -128,7 +139,7 @@ const GlobalPrintFooter = () => (
     <div className="hidden global-print-footer">
         <div className="flex items-center gap-1.5">
              <ShieldCheck className="w-3 h-3" />
-             <span className="font-mono">Demel App v1.3</span>
+             <span className="font-mono">Demel App v1.4</span>
         </div>
     </div>
 );
@@ -136,7 +147,7 @@ const GlobalPrintFooter = () => (
 // Footer Component (App Display)
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 no-print select-none">
-        Demel App v1.3
+        Demel App v1.4
     </div>
 );
 
@@ -172,6 +183,79 @@ const ProgressBar = ({ current, max, isOverloaded }) => {
     </div>
   );
 };
+
+// Formel-Anzeige Komponenten für die verschiedenen Rechner
+
+const LashingFormulaDisplay = () => (
+    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300">
+        <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]">
+             <Calculator className="w-3 h-3" />
+             <span>Berechnungsformel (Niederzurren)</span>
+        </div>
+        <div className="flex items-center justify-center gap-3 font-mono text-sm overflow-x-auto py-1">
+             <span className="font-bold italic">n</span>
+             <span>≥</span>
+             <div className="flex flex-col items-center">
+                <div className="border-b border-slate-400 pb-1 px-1 text-center whitespace-nowrap">
+                   (F<sub>G</sub> · c) - F<sub>Form</sub> - (F<sub>G</sub> · μ)
+                </div>
+                <div className="pt-1 text-center whitespace-nowrap">
+                   2 · μ · sin(α) · STF
+                </div>
+             </div>
+             <span>· S</span>
+        </div>
+        <div className="mt-2 text-[10px] text-slate-400 text-center leading-tight">
+            c = Beschl.-Faktor | S = Sicherheitsbeiwert
+        </div>
+    </div>
+);
+
+const WoodFormulaDisplay = () => (
+    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300">
+        <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]">
+             <Calculator className="w-3 h-3" />
+             <span>Berechnungsformel (Holzgewicht)</span>
+        </div>
+        <div className="space-y-1 font-mono text-sm">
+             <div className="flex justify-between border-b border-slate-200 pb-1">
+                <span>Raummaß</span>
+                <span>= L · B · H</span>
+             </div>
+             <div className="flex justify-between border-b border-slate-200 py-1">
+                <span>Festmeter</span>
+                <span>= Raummaß · 0,7 (Umrechnungsfaktor)</span>
+             </div>
+             <div className="flex justify-between pt-1 font-bold">
+                <span>Gewicht</span>
+                <span>= Festmeter · Dichte</span>
+             </div>
+        </div>
+    </div>
+);
+
+const OverloadFormulaDisplay = () => (
+    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300 break-inside-avoid">
+        <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]">
+             <Calculator className="w-3 h-3" />
+             <span>Berechnungsformel (Überladung)</span>
+        </div>
+         <div className="space-y-1 font-mono text-sm">
+             <div className="flex justify-between border-b border-slate-200 pb-1">
+                <span>Netto</span>
+                <span>= Brutto - Toleranz</span>
+             </div>
+             <div className="flex justify-between border-b border-slate-200 py-1">
+                <span>Differenz</span>
+                <span>= Netto - zGM</span>
+             </div>
+             <div className="flex justify-between pt-1 font-bold">
+                <span>Prozent</span>
+                <span>= (Differenz / zGM) · 100</span>
+             </div>
+        </div>
+    </div>
+);
 
 // Input Field mit Icon - GRÖSSERE SCHRIFT
 const InputWithIcon = ({ icon: Icon, label, value, onChange, placeholder, type="number", disabled=false, onBlur }) => (
@@ -235,7 +319,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
       <PrintStyles />
-      <div className="flex-1 pb-24 z-10 relative">
+      <div className="flex-1 pb-24 z-10 relative print-scale-wrapper">
         {activeTab === 'overload' ? (
           <OverloadCalculator />
         ) : activeTab === 'wood' ? (
@@ -585,6 +669,9 @@ function WoodCalculator() {
                     </div>
                 </div>
             </div>
+            
+            {/* FORMEL ANZEIGE */}
+            <WoodFormulaDisplay />
           </div>
         )}
         <ExportButton />
@@ -809,6 +896,9 @@ function OverloadCalculator() {
                 <div className="flex justify-between"><span>&gt; 40t:</span> <span>-60 kg</span></div>
              </div>
           </div>
+          
+           {/* FORMEL ANZEIGE */}
+           <OverloadFormulaDisplay />
 
           <button onClick={resetForm} className="print-hide-button mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">
             Alle Eingaben löschen
@@ -1262,6 +1352,9 @@ function LashingCalculator() {
                     {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
                  </div>
                </div>
+               
+               {/* FORMEL ANZEIGE */}
+               <LashingFormulaDisplay />
             </div>
 
             
