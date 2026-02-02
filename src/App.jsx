@@ -60,14 +60,17 @@ const PrintStyles = () => (
           print-color-adjust: exact !important; 
         }
 
+        /* Verstecke App-UI Elemente (ABER NICHT den global-print-footer) */
         .no-print, nav, .fixed.bottom-0, .print-hide-button, .sticky.top-0, .print-hidden-icon { 
             display: none !important; 
         }
         
+        /* Footer explizit anzeigen im Druck */
         .global-print-footer {
             display: flex !important;
         }
 
+        /* Layout Reset */
         .min-h-screen, .flex-1, .flex-col { 
            display: block !important; 
            width: 100% !important;
@@ -78,11 +81,13 @@ const PrintStyles = () => (
 
         .max-w-md { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
         
+        /* Grid Container wird zum linearen Dokument */
         .print-grid-container {
             display: block !important;
             gap: 0 !important;
         }
         
+        /* Karten-Styling entfernen -> Clean Look */
         .bg-white, .bg-slate-50, .bg-slate-100 { 
             background-color: transparent !important; 
             box-shadow: none !important; 
@@ -92,6 +97,7 @@ const PrintStyles = () => (
             border-radius: 0 !important;
         }
 
+        /* Rahmen für Sektionen im Druck */
         .print-grid-container > div {
             border-bottom: 1px solid #eee !important;
             padding-bottom: 1rem !important;
@@ -99,8 +105,9 @@ const PrintStyles = () => (
             break-inside: avoid;
         }
         
+        /* Labels und Inputs transformieren */
         label {
-            color: #64748b !important; 
+            color: #64748b !important; /* Slate-500 */
             font-size: 9pt !important;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -108,7 +115,7 @@ const PrintStyles = () => (
 
         input, select {
             border: none !important;
-            border-bottom: 1px dotted #cbd5e1 !important; 
+            border-bottom: 1px dotted #cbd5e1 !important; /* Dotted line like a form */
             background: transparent !important;
             padding: 0 !important;
             padding-bottom: 2px !important;
@@ -122,14 +129,17 @@ const PrintStyles = () => (
             box-shadow: none !important;
         }
         
+        /* Entferne Dropdown-Pfeile im Druck */
         .absolute.right-3 { display: none !important; }
         input { padding-left: 0 !important; }
         
+        /* Icons neben Inputs kleiner/grau */
         .relative > .absolute.inset-y-0.left-0 {
-            display: none !important; 
+            display: none !important; /* Icons in Inputs ausblenden für cleaneren Look */
         }
-        .pl-10 { padding-left: 0 !important; } 
+        .pl-10 { padding-left: 0 !important; } /* Reset padding since icon is gone */
 
+        /* Ergebnis-Boxen Styling für Druck */
         .bg-gradient-to-br, .border-2 {
             background: white !important;
             border: 2px solid #000 !important;
@@ -138,28 +148,34 @@ const PrintStyles = () => (
             border-radius: 8px !important;
         }
         
+        /* Textfarben im Ergebnis erzwingen */
         .text-white, .text-emerald-100, .text-indigo-100, .text-blue-100 {
             color: black !important;
         }
         
+        /* Progressbar im Druck */
         .bg-slate-200 { border: 1px solid #ccc !important; background: white !important; }
         .bg-emerald-500, .bg-amber-500, .bg-red-500 { 
             -webkit-print-color-adjust: exact !important; 
             print-color-adjust: exact !important; 
         }
 
+        /* Formel-Bereich im Druck */
         .mt-4.p-3 {
             border: 1px solid #94a3b8 !important;
             background: #f8fafc !important;
             break-inside: avoid;
         }
         
+        /* Tabellen im Druck */
         table { width: 100% !important; border-collapse: collapse !important; }
         th { text-align: left !important; font-size: 9pt !important; color: #64748b !important; border-bottom: 1px solid #cbd5e1 !important; padding-bottom: 4px !important; }
         td { font-size: 10pt !important; color: #000 !important; padding: 4px 0 !important; border-bottom: 1px solid #f1f5f9 !important; }
 
+        /* Button-Styles entfernen */
         button { border: none !important; background: none !important; }
 
+        /* Seitenumbrüche verhindern */
         .break-inside-avoid { break-inside: avoid; }
       }
     `}} />
@@ -453,193 +469,12 @@ const useDateTime = () => {
   return dateTime;
 };
 
-// --- ANGLE MEASUREMENT MODAL ---
-const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
-    const [step, setStep] = useState(1); 
-    const referenceBetaRef = useRef(null); // Ref verhindert Closure-Probleme beim Event-Listener
-    const [currentBeta, setCurrentBeta] = useState(0);
-    const [measuredAngle, setMeasuredAngle] = useState(0);
-    const [errorMsg, setErrorMsg] = useState('');
-
-    useEffect(() => {
-        if (isOpen) {
-            setStep(1);
-            referenceBetaRef.current = null;
-            setMeasuredAngle(0);
-            setErrorMsg('');
-        }
-    }, [isOpen]);
-
-    // Sensor-Handler
-    const handleOrientation = (event) => {
-        const beta = event.beta; 
-        if (beta !== null) {
-            setCurrentBeta(beta);
-            
-            // Wenn genullt wurde, Differenz in Echtzeit berechnen
-            if (referenceBetaRef.current !== null) {
-                 let diff = Math.abs(beta - referenceBetaRef.current);
-                 if (diff > 90) diff = 90;
-                 
-                 // --- RUNDUNG AUF NÄCHSTEN 5er SCHRITT (FÜR SICHERHEIT AUFRUNDEN) ---
-                 // Beispiel: 41.2° -> 45°
-                 const rounded = Math.ceil(diff / 5) * 5;
-                 setMeasuredAngle(rounded);
-            }
-        }
-    };
-
-    const requestAccess = async () => {
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            try {
-                const response = await DeviceOrientationEvent.requestPermission();
-                if (response === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                    setStep(2);
-                } else {
-                    setErrorMsg('Zugriff auf Sensoren verweigert.');
-                }
-            } catch (e) {
-                setErrorMsg('Fehler beim Anfordern der Sensoren: ' + e.message);
-            }
-        } else {
-            window.addEventListener('deviceorientation', handleOrientation);
-            setStep(2);
-        }
-    };
-
-    const handleZero = () => {
-        referenceBetaRef.current = currentBeta;
-        setStep(3);
-    };
-
-    const stopSensors = () => {
-         window.removeEventListener('deviceorientation', handleOrientation);
-    };
-
-    const handleClose = () => {
-        stopSensors();
-        onClose();
-    };
-
-    const handleApply = () => {
-        stopSensors();
-        onApply(measuredAngle);
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl">
-                <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                     <h3 className="font-black text-slate-800 flex items-center gap-2">
-                        <Smartphone className="w-5 h-5 text-indigo-600" />
-                        Winkelmesser
-                     </h3>
-                     <button onClick={handleClose} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
-                        <X className="w-4 h-4 text-slate-500" />
-                     </button>
-                </div>
-
-                {errorMsg && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold mb-4 flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                        {errorMsg}
-                    </div>
-                )}
-
-                <div className="min-h-[200px] flex flex-col justify-center">
-                    {step === 1 && (
-                        <div className="text-center space-y-4">
-                            <div className="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600">
-                                <RotateCw className="w-8 h-8" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-700 text-lg">Kalibrierung starten</h4>
-                                <p className="text-slate-500 text-sm mt-1">
-                                    Um den Winkel exakt zu messen, nutzen wir die Sensoren Ihres Geräts.
-                                </p>
-                            </div>
-                            <button 
-                                onClick={requestAccess} 
-                                className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 active:scale-95 transition-all"
-                            >
-                                Messung starten
-                            </button>
-                        </div>
-                    )}
-
-                    {step === 2 && (
-                         <div className="text-center space-y-6">
-                             <div className="relative">
-                                 <div className="w-full h-1 bg-slate-200 rounded absolute top-1/2 -translate-y-1/2"></div>
-                                 <div 
-                                    className="w-full h-1 bg-indigo-500 rounded absolute top-1/2 -translate-y-1/2 transition-transform duration-300" 
-                                    style={{ transform: `rotate(${currentBeta}deg)` }}
-                                 ></div>
-                                 <Smartphone className="w-12 h-12 text-slate-800 mx-auto relative z-10 bg-white p-1 rounded-lg border-2 border-slate-100" />
-                             </div>
-                             
-                             <div>
-                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Schritt 1</div>
-                                 <h4 className="font-bold text-slate-700 text-lg">Sensor Nullen</h4>
-                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">
-                                     Legen Sie das Gerät flach auf den <strong>Ladeboden</strong> (Fahrzeugfläche).
-                                 </p>
-                             </div>
-
-                             <button 
-                                onClick={handleZero} 
-                                className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all"
-                            >
-                                Jetzt Nullen (Referenz)
-                            </button>
-                         </div>
-                    )}
-
-                    {step === 3 && (
-                        <div className="text-center space-y-6">
-                            <div className="py-4">
-                                <span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">
-                                    {measuredAngle}°
-                                </span>
-                                <p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit-Wert (Aufgerundet +5°)</p>
-                            </div>
-
-                            <div>
-                                 <div className="inline-block bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Schritt 2</div>
-                                 <p className="text-slate-500 text-sm leading-relaxed">
-                                     Legen Sie das Gerät nun auf den <strong>Zurrgurt</strong>.
-                                 </p>
-                             </div>
-
-                             <button 
-                                onClick={handleApply} 
-                                className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"
-                            >
-                                <CheckCircle className="w-5 h-5" />
-                                Wert übernehmen
-                            </button>
-                            <button 
-                                onClick={() => { referenceBetaRef.current = null; setStep(2); }} 
-                                className="text-xs font-bold text-slate-400 hover:text-slate-600 underline"
-                            >
-                                Neu Nullen
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 // --- MAIN APP COMPONENT ---
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('lashing');
 
+  // Scrollt automatisch nach oben, wenn der Tab gewechselt wird
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeTab]);
@@ -659,8 +494,10 @@ export default function App() {
         )}
       </div>
       
+      {/* Footer für den Druck (immer im DOM, aber nur beim Drucken sichtbar) */}
       <GlobalPrintFooter />
 
+      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print">
         <div className="max-w-md mx-auto flex justify-around p-2">
           {[
@@ -711,6 +548,7 @@ function InfoView() {
 
       <div className="p-4 space-y-4 animate-in slide-in-from-bottom-4 duration-500 print-grid-container">
         
+        {/* Card 1: Zweck */}
         <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
             <div className="flex items-center gap-2 mb-3 text-slate-700 border-b border-slate-50 pb-2 print:border-b print:border-slate-300">
                 <Info className="w-5 h-5 text-blue-500 print:text-black" />
@@ -721,6 +559,7 @@ function InfoView() {
             </p>
         </div>
 
+        {/* Card 2: Haftung */}
         <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
             <div className="flex items-center gap-2 mb-3 text-slate-700 border-b border-slate-50 pb-2 print:border-b print:border-slate-300">
                 <ShieldAlert className="w-5 h-5 text-amber-500 print:text-black" />
@@ -731,6 +570,7 @@ function InfoView() {
             </p>
         </div>
 
+        {/* Card 3: Urheberrecht */}
         <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
             <div className="flex items-center gap-2 mb-3 text-slate-700 border-b border-slate-50 pb-2 print:border-b print:border-slate-300">
                 <Gavel className="w-5 h-5 text-slate-500 print:text-black" />
@@ -803,11 +643,17 @@ function WoodCalculator() {
   const volume = (parseFloat(length) || 0) * (parseFloat(width) || 0) * (parseFloat(height) || 0);
   const solidFactor = 0.70;
   const solidVolume = volume * solidFactor;
+
   const selectedWood = woodTypes.find(w => w.name === woodType);
   const currentDensity = selectedWood ? selectedWood.density : 0;
+
   const rawWeight = solidVolume * currentDensity;
   const maxWeight = parseFloat(allowedWeight) || 0;
-  const calculatedLoadWeight = (!maxWeight || maxWeight <= 3500) ? Math.floor(rawWeight) : Math.ceil(rawWeight);
+  
+  const calculatedLoadWeight = (!maxWeight || maxWeight <= 3500) 
+    ? Math.floor(rawWeight) 
+    : Math.ceil(rawWeight);
+  
   const totalWeight = (parseFloat(emptyWeight) || 0) + calculatedLoadWeight;
   const difference = totalWeight - maxWeight;
   const isOverloaded = maxWeight > 0 && difference > 0;
@@ -834,6 +680,7 @@ function WoodCalculator() {
 
       <div className="p-2 space-y-2 print-grid-container">
         
+        {/* FAHRZEUGGEWICHTE CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="flex items-center gap-1.5 mb-2 text-emerald-700 print:text-black">
               <Truck className="w-5 h-5 print:hidden" />
@@ -865,6 +712,7 @@ function WoodCalculator() {
            )}
         </div>
 
+        {/* DIMENSIONEN CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="flex items-center gap-1.5 mb-2 text-emerald-700 print:text-black">
               <Ruler className="w-5 h-5 print:hidden" />
@@ -882,6 +730,7 @@ function WoodCalculator() {
            )}
         </div>
 
+        {/* HOLZART CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
           <label className="flex items-center gap-1.5 text-sm font-black text-emerald-700 uppercase tracking-wide mb-2 print:text-black">
             <Trees className="w-5 h-5 print:hidden" /> Art des Holzes
@@ -908,11 +757,13 @@ function WoodCalculator() {
              </div>
              <div className="grid grid-cols-2 gap-1.5 text-xs text-slate-600 print:block">
                 <div className="bg-white/60 p-1.5 rounded flex justify-between print:hidden"><span>Ganz frisch:</span> <span className="font-bold">&gt; 30%</span></div>
+                {/* Im Druck nur die Dichte anzeigen */}
                 <div className="hidden print:block font-bold">Zugrunde gelegte Dichte: {currentDensity} kg/m³</div>
              </div>
           </div>
         </div>
 
+        {/* ERGEBNIS */}
         {calculatedLoadWeight > 0 && (
           <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500 fade-in break-inside-avoid print-full-width">
             <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl shadow-emerald-200 print:shadow-none print:border-2 print:border-black print:text-black print:bg-none print:rounded-lg">
@@ -927,7 +778,9 @@ function WoodCalculator() {
 
             {(parseFloat(allowedWeight) > 0 && parseFloat(emptyWeight) > 0) && (
               <div className={`p-3 rounded-2xl border-2 shadow-sm flex flex-col gap-2 transition-colors duration-300 print:border-black print:rounded-lg ${
-                isOverloaded ? 'bg-red-50 border-red-100' : 'bg-white border-emerald-100'
+                isOverloaded 
+                  ? 'bg-red-50 border-red-100' 
+                  : 'bg-white border-emerald-100'
               }`}>
                  <div className="flex items-center gap-2">
                     {isOverloaded ? (
@@ -969,10 +822,15 @@ function WoodCalculator() {
                   )}
               </div>
             )}
+            
+            {/* FORMEL ANZEIGE */}
             <WoodFormulaDisplay values={{ l: length, w: width, h: height, vol: volume.toFixed(2), factor: solidFactor, solidVol: solidVolume.toFixed(2), density: currentDensity, weight: calculatedLoadWeight }} />
           </div>
         )}
         <ExportButton />
+      </div>
+      <div className="hidden signature-section pt-8 border-t border-slate-300 print:hidden">
+          {/* Leeres Unterschriftenfeld für zukünftige Nutzung */}
       </div>
       <AppVersionFooter />
     </div>
@@ -1013,13 +871,33 @@ function OverloadCalculator() {
 
         let percentage = (difference > 0 && allowed > 0) ? (difference / allowed) * 100 : 0;
         
+        // --- NEU: Check auf Einziehung ---
         let confiscationPossible = false;
         if (allowed > 0 && difference > 0) {
-            if (allowed <= 3500 && percentage >= 20) confiscationPossible = true;
-            else if (allowed > 3500 && percentage >= 15) confiscationPossible = true;
+            if (allowed <= 7500) {
+                // Bis 7,5t (hier spezifiziert der Nutzer <= 3,5t, aber meist gilt diese Regel für die "kleinen" Fahrzeuge generell, ich halte mich aber strikt an die User-Vorgabe <= 3.5t)
+                // User requirement: "<= 3,5 t und 20%"
+                if (allowed <= 3500 && percentage >= 20) {
+                    confiscationPossible = true;
+                }
+                 // User requirement: "> 3,5 t und 15%"
+                else if (allowed > 3500 && percentage >= 15) {
+                    confiscationPossible = true;
+                }
+            } else {
+                 // > 7,5t fällt auch unter "> 3,5t", also 15%
+                 if (percentage >= 15) {
+                    confiscationPossible = true;
+                 }
+            }
         }
 
-        return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(allowed) && !isNaN(actual), confiscationPossible };
+        return {
+            actual, allowed, tolerance, netWeight, difference, percentage,
+            isOverloaded: allowed > 0 && difference > 0,
+            isValidInput: !isNaN(allowed) && !isNaN(actual),
+            confiscationPossible
+        };
     };
 
     setResult({
@@ -1054,6 +932,7 @@ function OverloadCalculator() {
 
       <div className="p-2 space-y-2 print-grid-container">
         
+        {/* FAHRZEUG 1 CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="flex items-center gap-2 mb-2 text-blue-700 print:text-black">
               <Truck className="w-5 h-5 print:hidden" />
@@ -1065,6 +944,7 @@ function OverloadCalculator() {
            </div>
         </div>
 
+        {/* FAHRZEUG 2 CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="flex items-center gap-2 mb-2 text-blue-700 print:text-black">
               <Box className="w-5 h-5 print:hidden" />
@@ -1075,56 +955,121 @@ function OverloadCalculator() {
               <InputWithIcon icon={Scale} label="Gewogenes Gewicht (kg)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} placeholder="0" />
            </div>
         </div>
+
+        {!result && (
+          <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width print:bg-transparent print:border-none print:text-black">
+            <Info className="w-5 h-5 shrink-0 print:hidden" />
+            <p>Bitte geben Sie die Gewichte für mindestens ein Fahrzeug ein.</p>
+          </div>
+        )}
       </div>
 
       {result && (
         <div className="bg-slate-100 border-t border-slate-200 p-4 animate-in slide-in-from-bottom-4 duration-500 pb-20 print-full-width print:bg-transparent print:border-t-0 print:p-0">
+          <h3 className="text-lg font-black text-slate-700 mb-3 print:hidden">Ergebnis</h3>
+
           <div className="space-y-3">
-             {result.vehicle1?.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm break-inside-avoid print:rounded-lg print:border-black ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5 font-bold text-sm">
-                        <span className="text-slate-700 flex items-center gap-1.5"><Truck className="w-4 h-4 text-slate-400 print:hidden"/> Zugfahrzeug</span>
-                        <span className={`px-2 py-0.5 rounded text-xs uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
+             {/* Resultat Zugfahrzeug */}
+             {result.vehicle1 && result.vehicle1.isValidInput && (
+                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid print:rounded-lg print:border-black ${
+                    result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'
+                 }`}>
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm print:text-black"><Truck className="w-4 h-4 text-slate-400 print:hidden"/> Zugfahrzeug</span>
+                        <span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase print:border print:border-black print:bg-transparent print:text-black ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                            {result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}
+                        </span>
                     </div>
+                    
                     <div className="flex justify-between items-end mb-1">
-                        <span className="text-xs text-slate-500 print:font-bold">Vorwerfbar:</span>
-                        <span className="text-xl font-black">{result.vehicle1.netWeight.toLocaleString()} kg</span>
+                        <span className="text-xs text-slate-500 print:text-black print:font-bold">Vorwerfbar:</span>
+                        <span className="text-xl font-black text-slate-800 print:text-black">{result.vehicle1.netWeight.toLocaleString()} kg</span>
                     </div>
+
                     <ProgressBar current={result.vehicle1.netWeight} max={result.vehicle1.allowed} isOverloaded={result.vehicle1.isOverloaded} />
+
                      {result.vehicle1.isOverloaded && (
-                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 print:text-black">
-                             <div className="flex justify-between"><span>Überschuss:</span><span>+ {result.vehicle1.difference.toLocaleString()} kg ({result.vehicle1.percentage.toFixed(2)}%)</span></div>
-                             {result.vehicle1.confiscationPossible && <div className="mt-2 bg-amber-50 rounded p-2 border border-amber-200 text-amber-800 text-xs">! Gewerblich: Einziehung möglich!</div>}
+                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 print:text-black print:border-t-black">
+                             <div className="flex justify-between mb-1">
+                                <span>Überschuss:</span>
+                                <span>+ {result.vehicle1.difference.toLocaleString()} kg ({result.vehicle1.percentage.toFixed(2)}%)</span>
+                             </div>
+                             
+                             {/* Einziehungshinweis */}
+                             {result.vehicle1.confiscationPossible && (
+                                <div className="mt-2 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2 print:bg-transparent print:border print:border-black print:text-black">
+                                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 print:hidden" />
+                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                             )}
                          </div>
                      )}
+                     
+                     {/* FORMEL ANZEIGE */}
                      <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />
                  </div>
              )}
-             {result.vehicle2?.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm break-inside-avoid print:rounded-lg print:border-black ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5 font-bold text-sm">
-                        <span className="text-slate-700 flex items-center gap-1.5"><Box className="w-4 h-4 text-slate-400 print:hidden"/> Anhänger</span>
-                        <span className={`px-2 py-0.5 rounded text-xs uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span>
+
+             {/* Resultat Anhänger */}
+             {result.vehicle2 && result.vehicle2.isValidInput && (
+                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid print:rounded-lg print:border-black ${
+                    result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'
+                 }`}>
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm print:text-black"><Box className="w-4 h-4 text-slate-400 print:hidden"/> Anhänger</span>
+                        <span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase print:border print:border-black print:bg-transparent print:text-black ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                            {result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}
+                        </span>
                     </div>
+
                     <div className="flex justify-between items-end mb-1">
-                        <span className="text-xs text-slate-500 print:font-bold">Vorwerfbar:</span>
-                        <span className="text-xl font-black">{result.vehicle2.netWeight.toLocaleString()} kg</span>
+                        <span className="text-xs text-slate-500 print:text-black print:font-bold">Vorwerfbar:</span>
+                        <span className="text-xl font-black text-slate-800 print:text-black">{result.vehicle2.netWeight.toLocaleString()} kg</span>
                     </div>
+
                     <ProgressBar current={result.vehicle2.netWeight} max={result.vehicle2.allowed} isOverloaded={result.vehicle2.isOverloaded} />
+
                      {result.vehicle2.isOverloaded && (
-                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 print:text-black">
-                             <div className="flex justify-between"><span>Überschuss:</span><span>+ {result.vehicle2.difference.toLocaleString()} kg ({result.vehicle2.percentage.toFixed(2)}%)</span></div>
-                             {result.vehicle2.confiscationPossible && <div className="mt-2 bg-amber-50 rounded p-2 border border-amber-200 text-amber-800 text-xs">! Gewerblich: Einziehung möglich!</div>}
+                         <div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 print:text-black print:border-t-black">
+                             <div className="flex justify-between mb-1">
+                                <span>Überschuss:</span>
+                                <span>+ {result.vehicle2.difference.toLocaleString()} kg ({result.vehicle2.percentage.toFixed(2)}%)</span>
+                             </div>
+
+                             {/* Einziehungshinweis */}
+                             {result.vehicle2.confiscationPossible && (
+                                <div className="mt-2 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2 print:bg-transparent print:border print:border-black print:text-black">
+                                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 print:hidden" />
+                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                             )}
                          </div>
                      )}
+                     
+                     {/* FORMEL ANZEIGE */}
                      <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />
                  </div>
              )}
           </div>
-          <button onClick={resetForm} className="print-hide-button mt-6 w-full py-2.5 text-slate-400 text-sm font-bold uppercase">Eingaben löschen</button>
+
+          <div className="mt-4 pt-3 border-t border-slate-200 print:hidden">
+             <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs text-slate-500 shadow-sm break-inside-avoid">
+                <p className="font-bold uppercase text-slate-400 mb-1">Toleranz-Abzug (GZA Weil am Rhein)</p>
+                <div className="flex justify-between"><span>≤ 10t:</span> <span>-20 kg</span></div>
+                <div className="flex justify-between"><span>≤ 40t:</span> <span>-40 kg</span></div>
+                <div className="flex justify-between"><span>&gt; 40t:</span> <span>-60 kg</span></div>
+             </div>
+          </div>
+
+          <button onClick={resetForm} className="print-hide-button mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">
+            Alle Eingaben löschen
+          </button>
         </div>
       )}
       <ExportButton />
+      <div className="hidden signature-section pt-8 border-t border-slate-300 print:hidden">
+          {/* Leeres Unterschriftenfeld für zukünftige Nutzung */}
+      </div>
       <AppVersionFooter />
     </div>
   );
@@ -1135,33 +1080,31 @@ function LashingCalculator() {
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
-  const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
   
+  // Reibbeiwert-State Management
+  // Wir speichern die ID der Auswahl separat vom tatsächlichen Rechenwert
   const FRICTION_OPTIONS = [
-    { id: '0.2_dirty', val: 0.2, label: '0,20 μ - Verschmutzt (DIN EN 12195-1)' },
-    { id: '0.2_metal', val: 0.2, label: '0,20 μ - Metall auf Metall' },
-    { id: '0.25_gitter', val: 0.25, label: '0,25 μ - Gitterbox / Palette' },
-    { id: '0.3_holz', val: 0.3, label: '0,30 μ - Holzpalette auf Siebdruck' },
-    { id: '0.6_antirutsch', val: 0.6, label: '0,60 μ - Antirutschmatte' },
+    { id: '0.2_dirty', val: 0.2, label: '0,20 μ - Nicht besenrein (verschmutzt) (DIN EN 12195-1)' },
+    { id: '0.2_metal', val: 0.2, label: '0,20 μ - Metall auf Metall (DIN EN 12195-1)' },
+    { id: '0.25_gitter', val: 0.25, label: '0,25 μ - Gitterbox auf Siebdruckboden (TUL-LOG)' },
+    { id: '0.25_kunststoff', val: 0.25, label: '0,25 μ - Kunststoffpalette auf Siebdruckboden (DGUV)' },
+    { id: '0.25_papier', val: 0.25, label: '0,25 μ - Papierrolle auf Siebdruckboden (VDI 2700)' },
+    { id: '0.3_holz', val: 0.3, label: '0,30 μ - Holzpalette Mehrweg auf Siebdruckboden (DEKRA)' },
+    { id: '0.35_papier', val: 0.35, label: '0,35 μ - Papierrolle auf Siebdruckboden mit Joloda (VDI 2700)' },
+    { id: '0.35_stroh', val: 0.35, label: '0,35 μ - Strohballen auf Siebdruckboden (DEKRA)' },
+    { id: '0.4_kantholz', val: 0.4, label: '0,40 μ - Kantholz auf Siebdruckboden (DIN EN 12195-1)' },
+    { id: '0.45_einweg', val: 0.45, label: '0,45 μ - Holzpalette Einweg auf Siebdruckboden (Fraunhofer)' },
+    { id: '0.45_stahl', val: 0.45, label: '0,45 μ - Stahlkiste auf Siebdruckboden (DIN EN 12195-1)' },
+    { id: '0.45_gummi', val: 0.45, label: '0,45 μ - Gummireifen auf Siebdruckboden (DEKRA)' },
+    { id: '0.55_beton', val: 0.55, label: '0,55 μ - Betonware auf Siebdruckboden (Fraunhofer)' },
+    { id: '0.6_antirutsch', val: 0.6, label: '0,60 μ - Antirutschmatte (DIN EN 12195-1)' },
   ];
 
-  const [selectedFrictionId, setSelectedFrictionId] = useState('0.3_holz');
+  const [selectedFrictionId, setSelectedFrictionId] = useState('0.3_holz'); // Standardauswahl
   const [customFrictionVal, setCustomFrictionVal] = useState(''); 
-  const [friction, setFriction] = useState(0.3);
-  const [stf, setStf] = useState('500');
-  const [angle, setAngle] = useState(90); 
-  const [wallFront, setWallFront] = useState(''); 
-  const [wallSide, setWallSide] = useState('');   
-  const [wallRear, setWallRear] = useState('');   
-  const [fitFront, setFitFront] = useState(false);
-  const [fitSide, setFitSide] = useState(false);
-  const [fitRear, setFitRear] = useState(false);
-  const [bodyCert, setBodyCert] = useState('NONE'); 
-  const [isTipping, setIsTipping] = useState(false);
-  const [lashingResult, setLashingResult] = useState(null);
-  const [fineGroups, setFineGroups] = useState([]);
-  const dateTime = useDateTime();
+  const [friction, setFriction] = useState(0.3); // Tatsächlicher Rechenwert
 
+  // Effekt: Aktualisiere den Rechenwert, wenn sich die Auswahl ändert
   useEffect(() => {
     if (selectedFrictionId === 'CUSTOM') {
        const val = parseFloat(customFrictionVal);
@@ -1172,6 +1115,25 @@ function LashingCalculator() {
     }
   }, [selectedFrictionId, customFrictionVal]);
 
+  const [stf, setStf] = useState('500');
+  const [angle, setAngle] = useState('90');
+  const [wallFront, setWallFront] = useState(''); 
+  const [wallSide, setWallSide] = useState('');   
+  const [wallRear, setWallRear] = useState('');   
+  const [fitFront, setFitFront] = useState(false);
+  const [fitSide, setFitSide] = useState(false);
+  const [fitRear, setFitRear] = useState(false);
+  const [bodyCert, setBodyCert] = useState('NONE'); 
+  const [isTipping, setIsTipping] = useState(false);
+  const [lashingResult, setLashingResult] = useState(null);
+  const [fineGroups, setFineGroups] = useState([]);
+  
+  // -- MESSUNG WINKEL --
+  const [isMeasuringAngle, setIsMeasuringAngle] = useState(false);
+  const [liveAngle, setLiveAngle] = useState(0);
+
+  const dateTime = useDateTime();
+
   const getStandardForces = () => {
     const total = parseFloat(allowedWeight) || 0;
     const empty = parseFloat(emptyWeight) || 0;
@@ -1181,145 +1143,587 @@ function LashingCalculator() {
     return { front: 0, side: 0, rear: 0 };
   };
 
+  // Winkel-Messung Event Handler
+  const handleOrientation = (event) => {
+      // Beta ist die Neigung vorne/hinten (-180 bis 180)
+      // Wir brauchen den Absolutwert und begrenzen auf 90 Grad (Senkrecht)
+      if (event.beta !== null) {
+          let angle = Math.abs(Math.round(event.beta));
+          if (angle > 90) angle = 90; // Begrenzung, falls das Handy "überkippt"
+          setLiveAngle(angle);
+      }
+  };
+
+  const toggleMeasureAngle = () => {
+      if (isMeasuringAngle) {
+          // Stoppen
+          setIsMeasuringAngle(false);
+          window.removeEventListener('deviceorientation', handleOrientation);
+      } else {
+          // Starten
+          // iOS 13+ Berechtigungsanfrage
+          if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+              DeviceOrientationEvent.requestPermission()
+                  .then(permissionState => {
+                      if (permissionState === 'granted') {
+                          setIsMeasuringAngle(true);
+                          window.addEventListener('deviceorientation', handleOrientation);
+                      } else {
+                          alert("Berechtigung für Sensoren verweigert.");
+                      }
+                  })
+                  .catch(console.error);
+          } else {
+              // Android / ältere iOS
+              setIsMeasuringAngle(true);
+              window.addEventListener('deviceorientation', handleOrientation);
+          }
+      }
+  };
+
+  const applyMeasuredAngle = () => {
+      setAngle(liveAngle.toString());
+      toggleMeasureAngle(); // Beendet Messung
+  };
+
   useEffect(() => {
     const standards = getStandardForces();
-    if (bodyCert === 'NONE') { setWallFront('0'); setWallSide('0'); setWallRear('0'); } 
-    else { setWallFront(standards.front.toString()); setWallSide(standards.side.toString()); setWallRear(standards.rear.toString()); }
+    if (bodyCert === 'NONE' || bodyCert === null) {
+       setWallFront('0'); setWallSide('0'); setWallRear('0');
+    } else {
+       setWallFront(standards.front.toString()); setWallSide(standards.side.toString()); setWallRear(standards.rear.toString());
+    }
   }, [bodyCert, allowedWeight, emptyWeight]);
 
   useEffect(() => {
+    setFineGroups([]);
     const m = parseFloat(loadWeight);
     const mu = parseFloat(friction);
     const s_tf = parseFloat(stf);
     const alpha = parseFloat(angle);
     const maxWeight = parseFloat(allowedWeight);
+    const empty = parseFloat(emptyWeight) || 0;
 
-    if (isNaN(m) || m <= 0) { setLashingResult(null); return; }
+    if (isNaN(m) || m <= 0) {
+      setLashingResult(null); return;
+    }
     
+    // Bußgeld-Logik berechnen (Gruppen)
+    let groups = [];
+    if (maxWeight > 0) {
+        if (maxWeight > 3500) {
+            // LKW > 3,5t
+            groups.push({
+                title: 'LKW bzw. dessen Anhänger (> 3,5t)',
+                items: [
+                    { role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' },
+                    { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                ]
+            });
+        } else {
+            // Bis 3,5t
+            if (bodyCert === 'L' || bodyCert === 'XL') {
+                // Mit Code L/XL -> wird wie LKW behandelt
+                groups.push({
+                    title: 'LKW bzw. dessen Anhänger',
+                    items: [
+                        { role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' },
+                        { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                    ]
+                });
+            } else {
+                // PKW / Anhänger ohne Zertifikat -> Unterscheidung oft schwierig, daher beide anzeigen
+                groups.push({
+                    title: 'PKW bzw. dessen Anhänger',
+                    items: [
+                        { role: 'Fahrer', code: '122100', cost: '35 €', points: '' },
+                        { role: 'Halter', code: '331630', cost: '135 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                    ]
+                });
+                groups.push({
+                    title: 'LKW bzw. dessen Anhänger',
+                    items: [
+                        { role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' },
+                        { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }
+                    ]
+                });
+            }
+        }
+    }
+    setFineGroups(groups);
+
     const g = 9.81; 
     const radAlpha = (alpha * Math.PI) / 180;
     const stfInNewton = s_tf * 10; 
 
-    let accFwd = isTipping ? 0.96 : 0.80, accSide = isTipping ? 0.60 : 0.50, accRear = isTipping ? 0.60 : 0.50;
-    if (maxWeight > 0 && maxWeight <= 3500) { accFwd = isTipping ? 1.08 : 0.90; accSide = isTipping ? 0.84 : 0.70; }
+    let accFwd, accSide, accRear;
+    if (!maxWeight || maxWeight <= 1999) {
+      accFwd = isTipping ? 1.08 : 0.90; accSide = isTipping ? 0.84 : 0.70; accRear = isTipping ? 0.60 : 0.50;
+    } else if (maxWeight <= 3500) {
+      accFwd = isTipping ? 0.98 : 0.80; accSide = isTipping ? 0.72 : 0.60; accRear = isTipping ? 0.60 : 0.50;
+    } else {
+      accFwd = isTipping ? 0.96 : 0.80; accSide = isTipping ? 0.60 : 0.50; accRear = isTipping ? 0.60 : 0.50;
+    }
 
     const calculateN = (acc, blockingDaN, direction) => {
        const weightForce = m * g;
        const blockingForce = (parseFloat(blockingDaN) || 0) * 10; 
-       let safetyFactor = (maxWeight > 3500) ? (direction === 'forward' ? 1.25 : 1.1) : 1.8;
-       const num = (weightForce * acc) - blockingForce - (weightForce * mu);
-       if (num <= 0) return 0;
-       const den = stfInNewton * 2 * mu * Math.sin(radAlpha);
-       const n = (num / den) * safetyFactor;
-       return (maxWeight > 3500) ? Math.ceil(n) : Math.floor(n);
+       let safetyFactor = 1.0;
+       if (!maxWeight || maxWeight <= 3500) safetyFactor = 1.8;
+       else safetyFactor = (direction === 'forward') ? 1.25 : 1.1; 
+
+       const numerator = (weightForce * acc) - blockingForce - (weightForce * mu);
+       if (numerator <= 0) return 0;
+       const denominator = stfInNewton * 2 * mu * Math.sin(radAlpha);
+       if (denominator <= 0) return 0; 
+       const n = (numerator / denominator) * safetyFactor;
+       return (!maxWeight || maxWeight <= 3500) ? Math.floor(n) : Math.ceil(n);
     };
 
     const nForward = calculateN(accFwd, fitFront ? wallFront : 0, 'forward');
     const nSide = calculateN(accSide, fitSide ? wallSide : 0, 'side');
     const nRear = calculateN(accRear, fitRear ? wallRear : 0, 'rear');
 
+    // Berechnungsdaten für die Anzeige vorbereiten (Wir nehmen den kritischsten Wert)
+    let displayValues = null;
+    let detailRows = [];
+
+    if (m > 0) {
+        // Wir zeigen die Formel für den Wert an, der die meisten Gurte erfordert
+        const maxN = Math.max(nForward, nSide, nRear);
+        let direction = 'forward';
+        let acc = accFwd;
+        let block = fitFront ? wallFront : 0;
+        let safety = (!maxWeight || maxWeight <= 3500) ? 1.8 : 1.25;
+
+        if (nSide > nForward && nSide >= nRear) {
+             direction = 'side'; acc = accSide; block = fitSide ? wallSide : 0;
+             safety = (!maxWeight || maxWeight <= 3500) ? 1.8 : 1.1;
+        } else if (nRear > nForward && nRear > nSide) {
+             direction = 'rear'; acc = accRear; block = fitRear ? wallRear : 0;
+             safety = (!maxWeight || maxWeight <= 3500) ? 1.8 : 1.1;
+        }
+        
+        displayValues = {
+            weightForceN: m * g,
+            c: acc,
+            formForceN: (parseFloat(block) || 0) * 10,
+            mu: mu,
+            alphaRad: radAlpha,
+            stfNewton: stfInNewton,
+            safety: safety
+        };
+
+        // Tabelle für alle Richtungen
+        detailRows = [
+            { label: 'Vorne', mu: mu, c: accFwd, angle: angle, hasFit: fitFront, force: fitFront ? wallFront : 0, result: nForward },
+            { label: 'Seite', mu: mu, c: accSide, angle: angle, hasFit: fitSide, force: fitSide ? wallSide : 0, result: nSide },
+            { label: 'Hinten', mu: mu, c: accRear, angle: angle, hasFit: fitRear, force: fitRear ? wallRear : 0, result: nRear },
+        ];
+    }
+
     setLashingResult({
-      forward: nForward, side: nSide, rear: nRear, factorForward: accFwd, factorSide: accSide, factorRear: accRear,
-      displayValues: { weightForceN: m * g, c: accFwd, formForceN: (fitFront ? wallFront : 0)*10, mu, alphaRad: radAlpha, stfNewton: stfInNewton },
-      detailRows: [
-        { label: 'Vorne', mu, c: accFwd, angle, hasFit: fitFront, force: fitFront ? wallFront : 0, result: nForward },
-        { label: 'Seite', mu, c: accSide, angle, hasFit: fitSide, force: fitSide ? wallSide : 0, result: nSide },
-        { label: 'Hinten', mu, c: accRear, angle, hasFit: fitRear, force: fitRear ? wallRear : 0, result: nRear },
-      ]
+      forward: nForward, side: nSide, rear: nRear,
+      factorForward: accFwd, factorSide: accSide, factorRear: accRear,
+      weightClassInfo: !maxWeight ? '< 2000 kg (Standard)' : maxWeight <= 1999 ? '< 2000 kg' : maxWeight <= 3500 ? '2000 - 3500 kg' : '> 3500 kg',
+      displayValues: displayValues,
+      detailRows: detailRows
     });
-  }, [loadWeight, friction, stf, angle, allowedWeight, isTipping, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
+  }, [loadWeight, friction, stf, angle, allowedWeight, emptyWeight, isTipping, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
+
+  const handleBlur = (type, value, setter) => {
+    if (!bodyCert || bodyCert === 'NONE') return;
+    const standards = getStandardForces();
+    let minVal = 0;
+    if (type === 'front') minVal = standards.front;
+    if (type === 'side') minVal = standards.side;
+    if (type === 'rear') minVal = standards.rear;
+    if ((parseFloat(value) || 0) < minVal) setter(minVal.toString());
+  };
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-      <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg">
-        <h1 className="text-xl font-bold flex items-center gap-2"><LashingStrapIcon className="w-5 h-5" /> LaSi-Niederzurren</h1>
+      <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-indigo-900/10">
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
+            <LashingStrapIcon className="w-5 h-5 shrink-0" />
+            LaSi-Niederzurren
+          </h1>
+          <p className="text-indigo-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-7">
+             <Clock className="w-3 h-3" />
+             {dateTime}
+          </p>
+        </div>
         <HeaderLogo />
       </div>
 
       <PrintDocumentHeader title="Protokoll: Ladungssicherung" />
-      <AngleMeasureModal isOpen={isMeasureModalOpen} onClose={() => setIsMeasureModalOpen(false)} onApply={(a) => setAngle(a)} />
+
+      {/* OVERLAY WINKELMESSUNG */}
+      {isMeasuringAngle && (
+        <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white no-print">
+            <div className="bg-indigo-600 rounded-full p-4 mb-6 animate-pulse">
+                <RotateCw className="w-12 h-12" />
+            </div>
+            <h2 className="text-2xl font-black mb-2 uppercase tracking-tight">Winkel messen</h2>
+            <p className="text-indigo-200 text-center mb-8 max-w-[280px] leading-relaxed">
+                Lege dein Gerät flach auf den Spanngurt, um den Winkel zu ermitteln.
+            </p>
+            
+            <div className="text-8xl font-black mb-2 font-mono tracking-tighter">
+                {liveAngle}°
+            </div>
+            <div className="h-1 w-32 bg-slate-700 rounded-full overflow-hidden mb-12">
+                <div className="h-full bg-indigo-500 transition-all duration-100" style={{ width: `${(liveAngle / 90) * 100}%` }}></div>
+            </div>
+
+            <button onClick={applyMeasuredAngle} className="w-full max-w-xs bg-white text-indigo-900 font-bold py-4 rounded-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-lg mb-3">
+                Winkel übernehmen
+            </button>
+            <button onClick={toggleMeasureAngle} className="text-slate-400 font-bold text-sm uppercase tracking-wide py-2">
+                Abbrechen
+            </button>
+        </div>
+      )}
 
       <div className="p-2 space-y-2 print-grid-container">
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-            <div className="mb-2 text-xs font-bold text-slate-400 uppercase">Fahrzeugaufbau</div>
-            <div className="grid grid-cols-2 gap-2">
-                 <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold border-2 ${bodyCert === 'NONE' ? 'bg-slate-700 text-white' : 'bg-white text-slate-400'}`}>Kein Zertifikat</button>
-                 <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold border-2 ${bodyCert === 'L' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400'}`}>Code L</button>
-                 <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold border-2 ${bodyCert === 'XL' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400'}`}>Code XL</button>
+        
+        {/* AUFBAU CARD */}
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+            <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5 print:text-black">
+                <ShieldCheck className="w-3.5 h-3.5 print:hidden" /> Fahrzeugaufbau wählen
+            </div>
+            <div className="grid grid-cols-2 gap-2 print:block">
+                 <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all print:border-none print:justify-start print:pl-0 ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02] print:text-black print:bg-transparent print:shadow-none' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 print:hidden'}`}>
+                    <span>Kein geprüfter Aufbau</span>
+                </button>
+                <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all print:border-none print:justify-start print:pl-0 ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02] print:text-black print:bg-transparent print:shadow-none' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 print:hidden'}`}>
+                    <span>Code L</span>
+                </button>
+                 <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all print:border-none print:justify-start print:pl-0 ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02] print:text-black print:bg-transparent print:shadow-none' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 print:hidden'}`}>
+                    <span>Code XL</span>
+                </button>
             </div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+        {/* GEWICHTE CARD */}
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+           <div className="flex items-center gap-1.5 mb-2 text-indigo-700 print:text-black">
+              <Scale className="w-5 h-5 print:hidden" />
+              <span className="text-sm font-black uppercase tracking-wide">Massen & Gewicht</span>
+           </div>
            <div className="grid grid-cols-2 gap-2 mb-2">
              <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
-             <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
+             <InputWithIcon icon={ShieldCheck} label="Zul. Gesamt (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
            </div>
            <InputWithIcon icon={Box} label="Ladungsgewicht (kg) *" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
         </div>
 
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+        {/* SETTINGS CARD */}
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+          <div className="flex items-center gap-1.5 mb-2 text-indigo-700 print:text-black">
+              <Settings className="w-5 h-5 print:hidden" />
+              <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
+           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div className="relative col-span-2">
+            
+            {/* Reibbeiwert (Mit erweiterter Logik für Custom Input) */}
+            <div className="relative col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
-                <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base font-medium">
-                    {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
+                {selectedFrictionId === 'CUSTOM' ? (
+                  <div className="flex gap-1">
+                    <div className="relative w-full">
+                       <input 
+                         type="number" 
+                         step="0.01" 
+                         value={customFrictionVal} 
+                         onChange={(e) => setCustomFrictionVal(e.target.value)}
+                         className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800 print:border-none print:pl-0"
+                         placeholder="z.B. 0.33"
+                         autoFocus
+                       />
+                       <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none print:hidden">μ</span>
+                    </div>
+                    <button 
+                      onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} 
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors print:hidden"
+                      title="Zurück zur Liste"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                ) : (
+                  <select 
+                    value={selectedFrictionId} 
+                    onChange={(e) => setSelectedFrictionId(e.target.value)} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8 print:border-b print:border-slate-300 print:rounded-none print:pl-0"
+                  >
+                    {FRICTION_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                    <option disabled>──────────</option>
                     <option value="CUSTOM">Eigener Wert...</option>
-                </select>
-                {selectedFrictionId === 'CUSTOM' && <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full mt-2 border-2 border-indigo-500 rounded-xl px-3 py-2.5" placeholder="0.33" />}
+                  </select>
+                )}
             </div>
 
-            <div className="relative col-span-2">
+            {/* Winkel-Eingabe mit Mess-Button */}
+            <div className="relative col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
-                <div className="flex gap-2">
-                    <input type="number" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base font-medium" />
-                    <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-4 shadow-md"><Smartphone className="w-5 h-5" /></button>
+                <div className="flex gap-1.5">
+                    <div className="relative w-full">
+                         <input 
+                             type="number"
+                             min="0"
+                             max="90"
+                             value={angle} 
+                             onChange={(e) => setAngle(e.target.value)} 
+                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0"
+                             placeholder="90"
+                         />
+                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none print:hidden">°</span>
+                    </div>
+                    <button 
+                        onClick={toggleMeasureAngle}
+                        className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 print:hidden"
+                        title="Winkel mit Handy messen"
+                    >
+                        <Smartphone className="w-5 h-5" />
+                    </button>
                 </div>
+            </div>
+
+            <div className="col-span-2 relative">
+                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
+                 <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0">
+                    {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600].map((val) => (<option key={val} value={val}>{val} daN</option>))}
+                </select>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+        {/* FORMSCHLUSS CARD */}
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+           <div className="flex items-center gap-1.5 mb-2 text-indigo-700 print:text-black">
+              <Box className="w-5 h-5 print:hidden" />
+              <span className="text-sm font-black uppercase tracking-wide">Aufbau Belastbarkeit (daN)</span>
+           </div>
+           
+           {/* Formschluss Inputs - Wieder im übersichtlichen 3-Spalten-Layout */}
            <div className="grid grid-cols-3 gap-2">
-             {[{ id: 'front', label: 'Stirnwand', fit: fitFront, setFit: setFitFront, val: wallFront, setVal: setWallFront },
-               { id: 'side', label: 'Seite', fit: fitSide, setFit: setFitSide, val: wallSide, setVal: setWallSide },
-               { id: 'rear', label: 'Heck', fit: fitRear, setFit: setFitRear, val: wallRear, setVal: setWallRear }
-             ].map((w) => (
-                <div key={w.id} className="flex flex-col">
-                    <label className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        <input type="checkbox" checked={w.fit} onChange={(e) => w.setFit(e.target.checked)} /> {w.label}
-                    </label>
-                    <input type="number" disabled={!w.fit} value={w.val} onChange={(e) => w.setVal(e.target.value)} className={`w-full border rounded p-1.5 text-xs text-center ${w.fit ? 'bg-white border-indigo-300' : 'bg-slate-50 border-slate-200 text-slate-300'}`} />
-                </div>
-             ))}
+             
+             {/* Stirnwand */}
+             <div className="flex flex-col">
+               <div className="flex items-center gap-1 mb-1">
+                 <input
+                    type="checkbox"
+                    checked={fitFront}
+                    onChange={(e) => setFitFront(e.target.checked)}
+                    id="cb_front"
+                    className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer print:hidden"
+                 />
+                 <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none print:text-black">
+                   Formschluss
+                 </label>
+               </div>
+               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 print:hidden">Stirnwand</label>
+               <input
+                  type="number"
+                  inputMode="numeric"
+                  disabled={!fitFront}
+                  value={wallFront}
+                  onChange={(e) => setWallFront(e.target.value)}
+                  onBlur={(e) => handleBlur('front', e.target.value, setWallFront)}
+                  placeholder="0"
+                  className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all print:text-left print:pl-0 print:border-b print:border-slate-300 print:rounded-none ${
+                    fitFront 
+                      ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' 
+                      : 'bg-slate-100 border-slate-200 text-slate-400 print:bg-transparent'
+                  }`}
+               />
+             </div>
+
+             {/* Seite */}
+             <div className="flex flex-col">
+               <div className="flex items-center gap-1 mb-1">
+                 <input
+                    type="checkbox"
+                    checked={fitSide}
+                    onChange={(e) => setFitSide(e.target.checked)}
+                    id="cb_side"
+                    className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer print:hidden"
+                 />
+                 <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none print:text-black">
+                   Formschluss
+                 </label>
+               </div>
+               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 print:hidden">Seite</label>
+               <input
+                  type="number"
+                  inputMode="numeric"
+                  disabled={!fitSide}
+                  value={wallSide}
+                  onChange={(e) => setWallSide(e.target.value)}
+                  onBlur={(e) => handleBlur('side', e.target.value, setWallSide)}
+                  placeholder="0"
+                  className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all print:text-left print:pl-0 print:border-b print:border-slate-300 print:rounded-none ${
+                    fitSide 
+                      ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' 
+                      : 'bg-slate-100 border-slate-200 text-slate-400 print:bg-transparent'
+                  }`}
+               />
+             </div>
+
+             {/* Heck */}
+             <div className="flex flex-col">
+               <div className="flex items-center gap-1 mb-1">
+                 <input
+                    type="checkbox"
+                    checked={fitRear}
+                    onChange={(e) => setFitRear(e.target.checked)}
+                    id="cb_rear"
+                    className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer print:hidden"
+                 />
+                 <label htmlFor="cb_rear" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none print:text-black">
+                   Formschluss
+                 </label>
+               </div>
+               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 print:hidden">Heck</label>
+               <input
+                  type="number"
+                  inputMode="numeric"
+                  disabled={!fitRear}
+                  value={wallRear}
+                  onChange={(e) => setWallRear(e.target.value)}
+                  onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)}
+                  placeholder="0"
+                  className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all print:text-left print:pl-0 print:border-b print:border-slate-300 print:rounded-none ${
+                    fitRear 
+                      ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' 
+                      : 'bg-slate-100 border-slate-200 text-slate-400 print:bg-transparent'
+                  }`}
+               />
+             </div>
+           </div>
+           
+           <div className="mt-2 flex gap-2 items-start text-xs text-slate-500 bg-slate-50 p-2 rounded-xl print:bg-transparent print:p-0 print:text-black">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400 print:hidden" />
+              <p>Formschluss gilt bis 5 cm Abstand (hinten max. 30 cm).</p>
            </div>
         </div>
 
-        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 cursor-pointer ${isTipping ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-100'}`}>
-          <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="w-5 h-5 text-amber-500" />
-          <span className="font-bold text-sm text-slate-600 uppercase">Ladung ist kippgefährdet</span>
+        {/* KIPPGEFAHR */}
+        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width print:border-none print:pl-0 ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm print:bg-transparent' : 'bg-white border-slate-100 print:bg-transparent'}`}>
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center print:hidden ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
+            {isTipping && <CheckSquare className="w-4 h-4" />}
+          </div>
+          <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
+          <span className={`font-bold text-sm ${isTipping ? 'text-amber-800 print:text-black' : 'text-slate-500 print:text-black'}`}>
+             Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
+          </span>
         </label>
 
-        {lashingResult && (
-          <div className="space-y-3 pb-20">
-            <div className="bg-white border-2 border-indigo-100 rounded-2xl p-4 shadow-xl print:border-black">
+        {/* RESULTAT */}
+        {lashingResult !== null && (
+          <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
+            <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl print:shadow-none print:border-2 print:border-black print:rounded-lg ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
+              
+              <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 print:border-slate-300">
+                <h3 className="text-sm font-black uppercase tracking-wider text-slate-400 print:text-black">Erforderliche Gurte</h3>
+                <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500 print:bg-transparent print:text-black print:border print:border-black">
+                  {lashingResult.weightClassInfo}
+                </span>
+              </div>
+              
               <div className="grid grid-cols-3 gap-3">
-                {[{ l: 'Vorne', c: lashingResult.forward }, { l: 'Seite', c: lashingResult.side }, { l: 'Hinten', c: lashingResult.rear }].map((r, i) => (
-                    <div key={i} className="flex flex-col items-center p-2 rounded-xl bg-slate-50 print:bg-transparent">
-                        <span className="text-4xl font-black text-indigo-600 print:text-black">{r.c}</span>
-                        <span className="text-[10px] font-bold uppercase text-slate-400">{r.l}</span>
+                {[
+                    { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward, hasFit: fitFront },
+                    { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
+                    { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
+                ].map((res, idx) => (
+                    <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50 print:bg-transparent">
+                        <span className={`text-4xl font-black ${isTipping ? 'text-amber-600 print:text-black' : 'text-indigo-600 print:text-black'}`}>{res.count}</span>
+                        <span className="text-xs font-bold uppercase text-slate-400 mt-0.5 print:text-black">{res.label}</span>
+                        <div className="flex flex-col items-center gap-0.5">
+                            <span className="text-[10px] text-slate-300 print:text-black">({res.factor}g)</span>
+                            <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'} print:text-black`}>
+                                {res.hasFit ? (
+                                    <span className="flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" /> Formschl.</span>
+                                ) : 'Kein Formschl.'}
+                            </span>
+                        </div>
                     </div>
                 ))}
               </div>
-               <div className="mt-4 p-3 bg-indigo-50 rounded-xl flex items-center justify-between print:border-t print:border-black print:bg-transparent">
-                 <span className="text-xs font-bold uppercase opacity-70">Empfohlenes Minimum:</span>
-                 <div className="text-3xl font-black">{Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span></div>
+
+               <div className={`mt-4 p-3 rounded-xl flex items-center justify-between print:bg-transparent print:border-t print:border-black print:rounded-none ${isTipping ? 'bg-amber-50 text-amber-900' : 'bg-indigo-50 text-indigo-900'}`}>
+                 <span className="text-xs font-bold uppercase tracking-wide opacity-70 print:text-black">Minimum:</span>
+                 <div className="text-3xl font-black print:text-black">
+                    {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60 print:text-black">Gurte</span>
+                 </div>
                </div>
+               
+               {/* FORMEL ANZEIGE MIT DETAIL-TABELLE */}
                <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} />
             </div>
+
+            
+            {fineGroups.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 print:bg-transparent print:border-none print:shadow-none">
+                <div className="flex items-center gap-2 mb-1 print:hidden">
+                   <Gavel className="w-5 h-5 text-slate-400" />
+                   <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
+                </div>
+                
+                {fineGroups.map((group, gIdx) => (
+                    <div key={gIdx} className="mt-4 first:mt-2 print:hidden">
+                        {group.title && (
+                            <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                        )}
+                        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                          <table className="w-full text-left text-sm">
+                            <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                              <tr>
+                                <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
+                                <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
+                                <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {group.items.map((fine, fIdx) => (
+                                <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="px-3 py-2.5">
+                                    <div className="flex items-start gap-2">
+                                       <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                       <div>
+                                            <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                            {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                       </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                    <div className="mt-0.5">{fine.code}</div>
+                                  </td>
+                                  <td className="px-3 py-2.5 text-right align-top">
+                                    <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                    {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                    </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
       <ExportButton />
+      <div className="hidden signature-section pt-8 border-t border-slate-300 print:hidden">
+          {/* Leeres Unterschriftenfeld für zukünftige Nutzung */}
+      </div>
       <AppVersionFooter />
     </div>
   );
