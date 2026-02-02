@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText } from 'lucide-react';
+import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText, X, Edit3 } from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -128,7 +128,7 @@ const GlobalPrintFooter = () => (
     <div className="hidden global-print-footer">
         <div className="flex items-center gap-1.5">
              <ShieldCheck className="w-3 h-3" />
-             <span className="font-mono">Demel App v1.1</span>
+             <span className="font-mono">Demel App v1.3</span>
         </div>
     </div>
 );
@@ -136,7 +136,7 @@ const GlobalPrintFooter = () => (
 // Footer Component (App Display)
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 no-print select-none">
-        Demel App v1.1
+        Demel App v1.3
     </div>
 );
 
@@ -226,6 +226,11 @@ const useDateTime = () => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('lashing');
+
+  // Scrollt automatisch nach oben, wenn der Tab gewechselt wird
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
@@ -685,7 +690,7 @@ function OverloadCalculator() {
         {/* FAHRZEUG 1 CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="flex items-center gap-2 mb-2 text-blue-700">
-              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center font-bold text-xs">1</div>
+              <Truck className="w-5 h-5" />
               <span className="text-sm font-black uppercase tracking-wide">Zugfahrzeug</span>
            </div>
            <div className="space-y-2">
@@ -697,7 +702,7 @@ function OverloadCalculator() {
         {/* FAHRZEUG 2 CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="flex items-center gap-2 mb-2 text-blue-700">
-              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center font-bold text-xs">2</div>
+              <Box className="w-5 h-5" />
               <span className="text-sm font-black uppercase tracking-wide">Anhänger / Auflieger</span>
            </div>
            <div className="space-y-2">
@@ -821,7 +826,41 @@ function LashingCalculator() {
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
-  const [friction, setFriction] = useState('0.3');
+  
+  // Reibbeiwert-State Management
+  // Wir speichern die ID der Auswahl separat vom tatsächlichen Rechenwert
+  const FRICTION_OPTIONS = [
+    { id: '0.2_dirty', val: 0.2, label: '0,20 μ - Nicht besenrein (verschmutzt) (DIN EN 12195-1)' },
+    { id: '0.2_metal', val: 0.2, label: '0,20 μ - Metall auf Metall (DIN EN 12195-1)' },
+    { id: '0.25_gitter', val: 0.25, label: '0,25 μ - Gitterbox auf Siebdruckboden (TUL-LOG)' },
+    { id: '0.25_kunststoff', val: 0.25, label: '0,25 μ - Kunststoffpalette auf Siebdruckboden (DGUV)' },
+    { id: '0.25_papier', val: 0.25, label: '0,25 μ - Papierrolle auf Siebdruckboden (VDI 2700)' },
+    { id: '0.3_holz', val: 0.3, label: '0,30 μ - Holzpalette Mehrweg auf Siebdruckboden (DEKRA)' },
+    { id: '0.35_papier', val: 0.35, label: '0,35 μ - Papierrolle auf Siebdruckboden mit Joloda (VDI 2700)' },
+    { id: '0.35_stroh', val: 0.35, label: '0,35 μ - Strohballen auf Siebdruckboden (DEKRA)' },
+    { id: '0.4_kantholz', val: 0.4, label: '0,40 μ - Kantholz auf Siebdruckboden (DIN EN 12195-1)' },
+    { id: '0.45_einweg', val: 0.45, label: '0,45 μ - Holzpalette Einweg auf Siebdruckboden (Fraunhofer)' },
+    { id: '0.45_stahl', val: 0.45, label: '0,45 μ - Stahlkiste auf Siebdruckboden (DIN EN 12195-1)' },
+    { id: '0.45_gummi', val: 0.45, label: '0,45 μ - Gummireifen auf Siebdruckboden (DEKRA)' },
+    { id: '0.55_beton', val: 0.55, label: '0,55 μ - Betonware auf Siebdruckboden (Fraunhofer)' },
+    { id: '0.6_antirutsch', val: 0.6, label: '0,60 μ - Antirutschmatte (DIN EN 12195-1)' },
+  ];
+
+  const [selectedFrictionId, setSelectedFrictionId] = useState('0.3_holz'); // Standardauswahl
+  const [customFrictionVal, setCustomFrictionVal] = useState(''); 
+  const [friction, setFriction] = useState(0.3); // Tatsächlicher Rechenwert
+
+  // Effekt: Aktualisiere den Rechenwert, wenn sich die Auswahl ändert
+  useEffect(() => {
+    if (selectedFrictionId === 'CUSTOM') {
+       const val = parseFloat(customFrictionVal);
+       setFriction(isNaN(val) ? 0 : val);
+    } else {
+       const option = FRICTION_OPTIONS.find(o => o.id === selectedFrictionId);
+       if (option) setFriction(option.val);
+    }
+  }, [selectedFrictionId, customFrictionVal]);
+
   const [stf, setStf] = useState('500');
   const [angle, setAngle] = useState('90');
   const [wallFront, setWallFront] = useState(''); 
@@ -1016,13 +1055,48 @@ function LashingCalculator() {
               <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
            </div>
           <div className="grid grid-cols-2 gap-2">
-            <div className="relative">
+            
+            {/* Reibbeiwert (Mit erweiterter Logik für Custom Input) */}
+            <div className="relative col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
-                <select value={friction} onChange={(e) => setFriction(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
-                {[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].map((val) => (<option key={val} value={val}>{val} μ</option>))}
-                </select>
+                {selectedFrictionId === 'CUSTOM' ? (
+                  <div className="flex gap-1">
+                    <div className="relative w-full">
+                       <input 
+                         type="number" 
+                         step="0.01" 
+                         value={customFrictionVal} 
+                         onChange={(e) => setCustomFrictionVal(e.target.value)}
+                         className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800"
+                         placeholder="z.B. 0.33"
+                         autoFocus
+                       />
+                       <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
+                    </div>
+                    <button 
+                      onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} 
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors"
+                      title="Zurück zur Liste"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                ) : (
+                  <select 
+                    value={selectedFrictionId} 
+                    onChange={(e) => setSelectedFrictionId(e.target.value)} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8"
+                  >
+                    {FRICTION_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                    <option disabled>──────────</option>
+                    <option value="CUSTOM">Eigener Wert...</option>
+                  </select>
+                )}
             </div>
-            <div className="relative">
+
+            <div className="relative col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
                 <select value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
                     {Array.from({ length: 19 }, (_, i) => i * 5).map((val) => (<option key={val} value={val}>{val}°</option>))}
