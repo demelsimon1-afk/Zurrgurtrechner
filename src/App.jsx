@@ -39,15 +39,15 @@ const PrintDocumentHeader = ({ title }) => {
     }, []);
 
     return (
-        <div className="hidden print:block mb-8 pb-4 border-b-2 border-slate-800">
+        <div className="hidden print:block mb-4 pb-2 border-b-2 border-slate-800">
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{title}</h1>
-                    <p className="text-sm text-slate-500 font-medium mt-1">Erstellt am {dateStr}</p>
+                    <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">{title}</h1>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">Erstellt am {dateStr}</p>
                 </div>
                 <div className="text-right">
-                    <div className="text-xl font-bold text-slate-300 italic">Demel App v1.6</div>
-                    <div className="text-xs text-slate-400 mt-1">Protokoll zur Dokumentation</div>
+                    <div className="text-lg font-bold text-slate-300 italic">Demel App v1.6</div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">Protokoll zur Dokumentation</div>
                 </div>
             </div>
         </div>
@@ -57,17 +57,25 @@ const PrintDocumentHeader = ({ title }) => {
 const PrintStyles = () => (
     <style dangerouslySetInnerHTML={{__html: `
       @media print {
-        @page { margin: 20mm; size: A4 portrait; }
-        body { background-color: white !important; color: black !important; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        @page { margin: 10mm; size: A4 portrait; }
+        html { height: 100%; }
+        body { 
+          background-color: white !important; 
+          color: black !important; 
+          font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important; 
+          -webkit-print-color-adjust: exact !important; 
+          print-color-adjust: exact !important;
+          zoom: 0.9; /* Scales content down to fit on one page */
+        }
         .no-print, nav, .fixed.bottom-0, .print-hide-button, .sticky.top-0, .print-hidden-icon { display: none !important; }
         .global-print-footer { display: flex !important; }
         .min-h-screen, .flex-1, .flex-col { display: block !important; width: 100% !important; height: auto !important; overflow: visible !important; padding-bottom: 0 !important; }
         .max-w-md { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
         .print-grid-container { display: block !important; gap: 0 !important; }
-        .bg-white, .bg-slate-50, .bg-slate-100 { background-color: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin-bottom: 1.5rem !important; border-radius: 0 !important; }
-        .print-grid-container > div { border-bottom: 1px solid #eee !important; padding-bottom: 1rem !important; margin-bottom: 1rem !important; break-inside: avoid; }
-        label { color: #64748b !important; font-size: 9pt !important; text-transform: uppercase; letter-spacing: 0.05em; }
-        input, select { border: none !important; border-bottom: 1px dotted #cbd5e1 !important; background: transparent !important; padding: 0 !important; padding-bottom: 2px !important; font-weight: bold !important; color: #000 !important; font-size: 11pt !important; width: 100% !important; appearance: none !important; text-align: left !important; border-radius: 0 !important; box-shadow: none !important; }
+        .bg-white, .bg-slate-50, .bg-slate-100 { background-color: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin-bottom: 1rem !important; border-radius: 0 !important; }
+        .print-grid-container > div { border-bottom: 1px solid #eee !important; padding-bottom: 0.5rem !important; margin-bottom: 0.5rem !important; break-inside: avoid; }
+        label { color: #64748b !important; font-size: 8pt !important; text-transform: uppercase; letter-spacing: 0.05em; }
+        input, select { border: none !important; border-bottom: 1px dotted #cbd5e1 !important; background: transparent !important; padding: 0 !important; padding-bottom: 1px !important; font-weight: bold !important; color: #000 !important; font-size: 10pt !important; width: 100% !important; appearance: none !important; text-align: left !important; border-radius: 0 !important; box-shadow: none !important; }
         .absolute.right-3 { display: none !important; }
         input { padding-left: 0 !important; }
         .relative > .absolute.inset-y-0.left-0 { display: none !important; }
@@ -76,12 +84,13 @@ const PrintStyles = () => (
         .text-white, .text-emerald-100, .text-indigo-100, .text-blue-100 { color: black !important; }
         .bg-slate-200 { border: 1px solid #ccc !important; background: white !important; }
         .bg-emerald-500, .bg-amber-500, .bg-red-500 { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        .mt-4.p-3 { border: 1px solid #94a3b8 !important; background: #f8fafc !important; break-inside: avoid; }
+        .mt-4.p-3 { border: 1px solid #94a3b8 !important; background: #f8fafc !important; break-inside: avoid; margin-top: 0.5rem !important; padding: 0.5rem !important; }
         table { width: 100% !important; border-collapse: collapse !important; }
-        th { text-align: left !important; font-size: 9pt !important; color: #64748b !important; border-bottom: 1px solid #cbd5e1 !important; padding-bottom: 4px !important; }
-        td { font-size: 10pt !important; color: #000 !important; padding: 4px 0 !important; border-bottom: 1px solid #f1f5f9 !important; }
+        th { text-align: left !important; font-size: 8pt !important; color: #64748b !important; border-bottom: 1px solid #cbd5e1 !important; padding-bottom: 2px !important; }
+        td { font-size: 9pt !important; color: #000 !important; padding: 2px 0 !important; border-bottom: 1px solid #f1f5f9 !important; }
         button { border: none !important; background: none !important; }
         .break-inside-avoid { break-inside: avoid; }
+        h1, h2, h3 { color: black !important; }
       }
     `}} />
 );
@@ -93,9 +102,9 @@ const AppVersionFooter = () => (
 );
 
 const GlobalPrintFooter = () => (
-    <div className="hidden global-print-footer fixed bottom-0 left-0 right-0 justify-center items-center border-t border-slate-300 pt-2 bg-white print:flex">
-         <div className="flex items-center gap-1.5 text-[9px] text-slate-500 font-mono uppercase tracking-wider">
-             <ShieldCheck className="w-3 h-3" />
+    <div className="hidden global-print-footer fixed bottom-0 left-0 right-0 justify-center items-center border-t border-slate-300 pt-1 bg-white print:flex">
+         <div className="flex items-center gap-1.5 text-[8px] text-slate-500 font-mono uppercase tracking-wider">
+             <ShieldCheck className="w-2.5 h-2.5" />
              <span>Demel App v1.6 – Generiertes Protokoll</span>
         </div>
     </div>
@@ -563,20 +572,20 @@ function InfoView() {
                         <div className="flex items-center gap-2 mb-3 text-slate-700 pb-2 border-b border-slate-50"><ShieldAlert className="w-5 h-5 text-amber-500" /><h3 className="font-black uppercase tracking-wide text-xs">Haftungsausschluss (Disclaimer)</h3></div>
                         
                         <p className="text-slate-600 text-sm leading-relaxed text-justify mb-4 font-normal">
-                            <strong>Keine Gewähr für Richtigkeit:</strong> Trotz sorgfältiger Programmierung und Prüfung übernehmen wir keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der berechneten Ergebnisse. Die Ergebnisse stellen <u>keinen</u> rechtsverbindlichen Beweis dar und ersetzen keine amtliche Verwiegung oder gutachterliche Berechnung.
+                            <strong>Keine Gewähr für Richtigkeit:</strong> Trotz sorgfältiger Programmierung und Prüfung wird keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der berechneten Ergebnisse übernommen. Die Ergebnisse stellen <u>keinen</u> rechtsverbindlichen Beweis dar und ersetzen keine amtliche Verwiegung oder gutachterliche Berechnung.
                         </p>
                          <p className="text-slate-600 text-sm leading-relaxed text-justify font-normal">
-                            Die Nutzung der App erfolgt auf eigene Gefahr. Für Schäden oder Rechtsfolgen, die aus der Nutzung der hier bereitgestellten Daten entstehen, wird keine Haftung übernommen.
+                            Die Nutzung der Applikation erfolgt auf eigene Gefahr. Für Schäden oder Rechtsfolgen, die aus der Nutzung der hier bereitgestellten Daten entstehen, wird keine Haftung übernommen.
                         </p>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-3 text-slate-700 pb-2 border-b border-slate-50"><Copyright className="w-5 h-5 text-indigo-500" /><h3 className="font-black uppercase tracking-wide text-xs">Geistiges Eigentum</h3></div>
                          <p className="text-slate-600 text-sm leading-relaxed text-justify font-normal">
-                            Alle Inhalte, das Design, der Quellcode sowie die in dieser App enthaltenen Grafiken und Berechnungslogiken sind urheberrechtlich geschützt.
+                            Alle Inhalte, das Design, der Quellcode sowie die in dieser Applikation enthaltenen Grafiken und Berechnungslogiken sind urheberrechtlich geschützt.
                         </p>
                          <p className="text-slate-600 text-sm leading-relaxed text-justify mt-2 font-normal">
-                            Eine Vervielfältigung, Bearbeitung, Verbreitung oder jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
+                            Eine Vervielfältigung, Bearbeitung, Verbreitung oder jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des Erstellers. Downloads und Kopien sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
                         </p>
                     </div>
                 </div>
@@ -611,20 +620,20 @@ function InfoView() {
                     <div>
                         <h4 className="font-bold text-slate-800 mb-2">1. Datenschutz auf einen Blick</h4>
                         <p className="text-justify leading-relaxed mb-2 font-normal">
-                            <strong>Allgemeine Hinweise:</strong> Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese App nutzen. Wir nehmen den Schutz Ihrer persönlichen Daten sehr ernst.
+                            <strong>Allgemeine Hinweise:</strong> Die folgenden Hinweise geben einen Überblick über die Verarbeitung personenbezogener Daten bei Nutzung dieser Applikation. Der Schutz persönlicher Daten wird sehr ernst genommen.
                         </p>
                         <p className="text-justify leading-relaxed font-normal">
-                            <strong>Datenerfassung:</strong> Diese App ist eine sogenannte "Client-Side Application". Das bedeutet, alle Eingaben, die Sie in die Rechner (Gewichte, Maße, Winkel) tätigen, werden <strong>ausschließlich lokal</strong> in Ihrem Browser verarbeitet (In-Memory). Es findet <strong>keine Übertragung</strong> Ihrer Eingabedaten an unsere Server oder Datenbanken statt. Sobald Sie den Tab schließen oder die Seite neu laden, sind die Daten gelöscht.
+                            <strong>Datenerfassung:</strong> Diese Applikation ist eine sogenannte "Client-Side Application". Das bedeutet, alle Eingaben (Gewichte, Maße, Winkel), werden <strong>ausschließlich lokal</strong> im Browser verarbeitet (In-Memory). Es findet <strong>keine Übertragung</strong> der Eingabedaten an externe Server oder Datenbanken statt. Sobald der Tab geschlossen oder die Seite neu geladen wird, werden die Daten gelöscht.
                         </p>
                     </div>
 
                     <div>
                         <h4 className="font-bold text-slate-800 mb-2">2. Hosting (Vercel)</h4>
                         <p className="text-justify leading-relaxed font-normal">
-                            Wir hosten diese Applikation bei dem externen Dienstleister Vercel Inc., 340 S Lemon Ave #4133 Walnut, CA 91789, USA (im Folgenden „Vercel“).
+                            Diese Applikation wird bei dem externen Dienstleister Vercel Inc., 340 S Lemon Ave #4133 Walnut, CA 91789, USA (im Folgenden „Vercel“) gehostet.
                         </p>
                         <p className="text-justify leading-relaxed mt-2 font-normal">
-                            Wenn Sie unsere App aufrufen, erfasst Vercel automatisch Daten und Informationen vom Computersystem des aufrufenden Rechners in sogenannten Server-Log-Dateien. Dies ist technisch notwendig, um die Website sicher und stabil auszuliefern. Erfasst werden können u.a.:
+                            Beim Aufruf der Applikation erfasst Vercel automatisch Daten und Informationen vom Computersystem des aufrufenden Rechners in sogenannten Server-Log-Dateien. Dies ist technisch notwendig, um die Website sicher und stabil auszuliefern. Erfasst werden können u.a.:
                         </p>
                         <ul className="list-disc pl-5 mt-2 space-y-1 text-xs text-slate-500 font-normal">
                             <li>Browsertyp und Browserversion</li>
