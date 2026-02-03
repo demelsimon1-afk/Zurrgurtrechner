@@ -985,6 +985,11 @@ function LashingCalculator() {
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
   const dateTime = useDateTime();
 
+  const handleBlur = (type, val, setter) => {
+    let num = parseFloat(val);
+    if (isNaN(num)) setter('0');
+  };
+
   const getStandardForces = () => {
     const total = parseFloat(allowedWeight) || 0;
     const empty = parseFloat(emptyWeight) || 0;
@@ -1102,7 +1107,7 @@ function LashingCalculator() {
       forward: nForward, side: nSide, rear: nRear,
       factorForward: accFwd, factorSide: accSide, factorRear: accRear,
       weightClassInfo: !maxWeight ? '< 2000 kg (Standard)' : maxWeight <= 1999 ? '< 2000 kg' : maxWeight <= 3500 ? '2000 - 3500 kg' : '> 3500 kg',
-      displayValues: { weightForceN: m * g, c: accFwd, formForceN: (parseFloat(fitFront ? wallFront : 0) * 10), mu, alphaRad, stfNewton },
+      displayValues: { weightForceN: m * g, c: accFwd, formForceN: (parseFloat(fitFront ? wallFront : 0) * 10), mu, alphaRad, stfNewton: stfInNewton },
       weightClass: maxWeight,
       detailRows: [
         { label: 'Vorne', mu: mu, c: accFwd, angle: angle, hasFit: fitFront, force: fitFront ? wallFront : 0, result: nForward },
