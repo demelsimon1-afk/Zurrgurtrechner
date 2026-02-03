@@ -1385,5 +1385,5 @@ function LashingCalculator() {
       </div>
       <AppVersionFooter />
     </div>
-  ;
+  );
 }
