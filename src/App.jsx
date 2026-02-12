@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Printer, Gavel, User, Briefcase, FileText, X, Edit3, Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Copyright, Caravan } from 'lucide-react';
+import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff } from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -13,111 +13,47 @@ const LashingStrapIcon = ({ className }) => (
   </svg>
 );
 
-const TapeMeasureIcon = ({ className }) => (
+const SpiritLevelIcon = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M2 12h20" />
-      <path d="M2 12l2 2" />
-      <path d="M22 12l-2 2" />
-      <rect x="2" y="6" width="20" height="12" rx="2" />
-      <path d="M6 6v12" />
-      <path d="M10 6v12" />
-      <path d="M14 6v12" />
-      <path d="M18 6v12" />
+      <rect x="2" y="8" width="20" height="8" rx="2" />
+      <line x1="7" y1="8" x2="7" y2="16" />
+      <line x1="17" y1="8" x2="17" y2="16" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" fillOpacity="0.5" />
     </svg>
 );
 
+// Custom Icon for Truck with Trailer
+const TruckTrailerIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* Truck Cabin & Body */}
+    <rect x="1" y="5" width="10" height="12" rx="1" />
+    <path d="M1 9h10" /> 
+    {/* Wheels Truck */}
+    <circle cx="3.5" cy="17" r="1.5" />
+    <circle cx="8.5" cy="17" r="1.5" />
+    
+    {/* Trailer Connection */}
+    <line x1="11" y1="14" x2="13" y2="14" strokeWidth="2" />
+    
+    {/* Trailer Body */}
+    <rect x="13" y="5" width="10" height="12" rx="1" />
+    <path d="M13 9h10" />
+    {/* Wheels Trailer */}
+    <circle cx="15.5" cy="17" r="1.5" />
+    <circle cx="20.5" cy="17" r="1.5" />
+  </svg>
+);
+
 const HeaderLogo = () => (
-  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm print:hidden">
+  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm">
     Demel
   </span>
 );
 
-const PrintDocumentHeader = ({ title }) => {
-    const [dateStr, setDateStr] = useState('');
-    useEffect(() => {
-        setDateStr(new Date().toLocaleString('de-DE', { dateStyle: 'full', timeStyle: 'short' }));
-    }, []);
-
-    return (
-        <div className="hidden print:block mb-4 pb-2 border-b-2 border-slate-800">
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">{title}</h1>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">Erstellt am {dateStr}</p>
-                </div>
-                <div className="text-right">
-                    <div className="text-lg font-bold text-slate-300 italic">Demel App v1.6</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">Protokoll zur Dokumentation</div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const PrintStyles = () => (
-    <style dangerouslySetInnerHTML={{__html: `
-      @media print {
-        @page { margin: 10mm; size: A4 portrait; }
-        html { height: 100%; }
-        body { 
-          background-color: white !important; 
-          color: black !important; 
-          font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important; 
-          -webkit-print-color-adjust: exact !important; 
-          print-color-adjust: exact !important;
-          zoom: 0.9; /* Scales content down to fit on one page */
-        }
-        .no-print, nav, .fixed.bottom-0, .print-hide-button, .sticky.top-0, .print-hidden-icon { display: none !important; }
-        .global-print-footer { display: flex !important; }
-        .min-h-screen, .flex-1, .flex-col { display: block !important; width: 100% !important; height: auto !important; overflow: visible !important; padding-bottom: 0 !important; }
-        .max-w-md { max-width: 100% !important; margin: 0 !important; width: 100% !important; }
-        .print-grid-container { display: block !important; gap: 0 !important; }
-        .bg-white, .bg-slate-50, .bg-slate-100 { background-color: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin-bottom: 1rem !important; border-radius: 0 !important; }
-        .print-grid-container > div { border-bottom: 1px solid #eee !important; padding-bottom: 0.5rem !important; margin-bottom: 0.5rem !important; break-inside: avoid; }
-        label { color: #64748b !important; font-size: 8pt !important; text-transform: uppercase; letter-spacing: 0.05em; }
-        input, select { border: none !important; border-bottom: 1px dotted #cbd5e1 !important; background: transparent !important; padding: 0 !important; padding-bottom: 1px !important; font-weight: bold !important; color: #000 !important; font-size: 10pt !important; width: 100% !important; appearance: none !important; text-align: left !important; border-radius: 0 !important; box-shadow: none !important; }
-        .absolute.right-3 { display: none !important; }
-        input { padding-left: 0 !important; }
-        .relative > .absolute.inset-y-0.left-0 { display: none !important; }
-        .pl-10 { padding-left: 0 !important; } 
-        .bg-gradient-to-br, .border-2 { background: white !important; border: 2px solid #000 !important; color: black !important; box-shadow: none !important; border-radius: 8px !important; }
-        .text-white, .text-emerald-100, .text-indigo-100, .text-blue-100 { color: black !important; }
-        .bg-slate-200 { border: 1px solid #ccc !important; background: white !important; }
-        .bg-emerald-500, .bg-amber-500, .bg-red-500 { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        .mt-4.p-3 { border: 1px solid #94a3b8 !important; background: #f8fafc !important; break-inside: avoid; margin-top: 0.5rem !important; padding: 0.5rem !important; }
-        table { width: 100% !important; border-collapse: collapse !important; }
-        th { text-align: left !important; font-size: 8pt !important; color: #64748b !important; border-bottom: 1px solid #cbd5e1 !important; padding-bottom: 2px !important; }
-        td { font-size: 9pt !important; color: #000 !important; padding: 2px 0 !important; border-bottom: 1px solid #f1f5f9 !important; }
-        button { border: none !important; background: none !important; }
-        .break-inside-avoid { break-inside: avoid; }
-        h1, h2, h3 { color: black !important; }
-      }
-    `}} />
-);
-
 const AppVersionFooter = () => (
-    <div className="text-center text-[10px] text-slate-300 font-mono py-2 no-print select-none">
-        Demel App v1.6
+    <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none">
+        Demel App v2.0
     </div>
-);
-
-const GlobalPrintFooter = () => (
-    <div className="hidden global-print-footer fixed bottom-0 left-0 right-0 justify-center items-center border-t border-slate-300 pt-1 bg-white print:flex">
-         <div className="flex items-center gap-1.5 text-[8px] text-slate-500 font-mono uppercase tracking-wider">
-             <ShieldCheck className="w-2.5 h-2.5" />
-             <span>Demel App v1.6 – Generiertes Protokoll</span>
-        </div>
-    </div>
-);
-
-const ExportButton = () => (
-  <button 
-    onClick={() => { try { window.focus(); } catch(e){} window.print(); }}
-    className="print-hide-button mt-6 w-full py-4 bg-slate-800 text-white rounded-xl flex items-center justify-center gap-2.5 font-bold shadow-lg hover:bg-slate-700 transition-all active:scale-95 mb-4 text-base"
-  >
-    <Printer className="w-5 h-5" />
-    Ergebnis als PDF exportieren
-  </button>
 );
 
 const ProgressBar = ({ current, max, isOverloaded }) => {
@@ -127,7 +63,7 @@ const ProgressBar = ({ current, max, isOverloaded }) => {
   if (percentage > 90) colorClass = 'bg-amber-500';
   if (percentage >= 100 || isOverloaded) colorClass = 'bg-red-500';
   return (
-    <div className="w-full h-3 bg-slate-200 rounded-full mt-2.5 overflow-hidden shadow-inner print:border print:border-slate-300">
+    <div className="w-full h-3 bg-slate-200 rounded-full mt-2.5 overflow-hidden shadow-inner">
       <div className={`h-full transition-all duration-500 ease-out ${colorClass}`} style={{ width: `${percentage}%` }} />
     </div>
   );
@@ -151,9 +87,9 @@ const LashingDetailTable = ({ data }) => (
       <thead>
         <tr className="text-slate-400 border-b border-slate-100">
           <th className="pb-1 font-bold">Richtung</th>
-          <th className="pb-1 font-bold hidden sm:table-cell print:table-cell">Gleit-Reib. μ</th>
+          <th className="pb-1 font-bold hidden sm:table-cell">Gleit-Reib. μ</th>
           <th className="pb-1 font-bold">Beschl. c</th>
-          <th className="pb-1 font-bold hidden sm:table-cell print:table-cell">Winkel α</th>
+          <th className="pb-1 font-bold hidden sm:table-cell">Winkel α</th>
           <th className="pb-1 font-bold">Formschluss</th>
           <th className="pb-1 font-bold">F<sub>Form</sub> (daN)</th>
           <th className="pb-1 text-right font-black">Ergebnis</th>
@@ -163,9 +99,9 @@ const LashingDetailTable = ({ data }) => (
         {data.map((row, i) => (
             <tr key={i} className="text-slate-700">
                 <td className="py-1.5 font-bold">{row.label}</td>
-                <td className="py-1.5 hidden sm:table-cell print:table-cell">{row.mu.toFixed(2).replace('.', ',')}</td>
+                <td className="py-1.5 hidden sm:table-cell">{row.mu.toFixed(2).replace('.', ',')}</td>
                 <td className="py-1.5">{row.c} g</td>
-                <td className="py-1.5 hidden sm:table-cell print:table-cell">{row.angle}°</td>
+                <td className="py-1.5 hidden sm:table-cell">{row.angle}°</td>
                 <td className="py-1.5">{row.hasFit ? <span className="text-emerald-600 font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Ja</span> : <span className="text-slate-400 text-[10px]">Nein</span>}</td>
                 <td className="py-1.5">{row.force}</td>
                 <td className="py-1.5 text-right font-black">{row.result} Gurte</td>
@@ -176,53 +112,78 @@ const LashingDetailTable = ({ data }) => (
   </div>
 );
 
+const CalculationToggle = ({ children, label = "Rechenweg anzeigen" }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="mt-4">
+            <button 
+                onClick={() => setIsOpen(!isOpen)} 
+                className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 hover:text-indigo-600 transition-colors mx-auto"
+            >
+                {isOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {label}
+            </button>
+            {isOpen && <div className="animate-in fade-in slide-in-from-top-2 duration-300">{children}</div>}
+        </div>
+    );
+};
+
 const LashingFormulaDisplay = ({ values, details, weightClass }) => {
   if (!values) return null;
   const { weightForceN, c, formForceN, mu, alphaRad, stfNewton } = values;
-  // Use 1.8 for classes <= 3.5t, else 2.0 (but standard here for display purposes we show what was used)
   const factor = (!weightClass || weightClass <= 3500) ? "1,8" : "2";
 
   return (
-    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300">
-        <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]"><Calculator className="w-3 h-3" /><span>Berechnungsformel (Niederzurren)</span></div>
-        <div className="mb-2 pb-3">
-             <div className="text-[10px] text-slate-400 font-bold mb-1 text-center uppercase">
-                {(!weightClass || weightClass <= 3500) ? 'Berechnung nach Spezialformel (< 3,5t)' : 'Berechnung nach VDI 2700 / DIN EN 12195-1'}
-             </div>
-             <FormulaFraction label={<span className="italic">n</span>} equals="≥" numerator={<span>(F<sub>G</sub> · c) - F<sub>Form</sub> - (F<sub>G</sub> · μ)</span>} denominator={<span>{factor} · μ · sin(α) · STF</span>} />
+    <CalculationToggle>
+        <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
+            <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]"><Calculator className="w-3 h-3" /><span>Berechnungsformel (Niederzurren)</span></div>
+            <div className="mb-2 pb-3">
+                <div className="text-[10px] text-slate-400 font-bold mb-1 text-center uppercase">
+                    {(!weightClass || weightClass <= 3500) ? 'Berechnung nach Spezialformel (< 3,5t)' : 'Berechnung nach VDI 2700 / DIN EN 12195-1'}
+                </div>
+                <FormulaFraction label={<span className="italic">n</span>} equals="≥" numerator={<span>(F<sub>G</sub> · c) - F<sub>Form</sub> - (F<sub>G</sub> · μ)</span>} denominator={<span>{factor} · μ · sin(α) · STF</span>} />
+            </div>
+            {details && <LashingDetailTable data={details} />}
         </div>
-        {details && <LashingDetailTable data={details} />}
-    </div>
+    </CalculationToggle>
   );
 };
 
 const WoodFormulaDisplay = ({ values }) => {
     if (!values) return null;
-    const { l, w, h, vol, factor, solidVol, density, weight } = values;
+    const { totalVol, factor, solidVol, density, weight } = values;
     return (
-    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300">
-        <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]"><Calculator className="w-3 h-3" /><span>Berechnungsformel (Holzgewicht)</span></div>
-        <div className="grid grid-cols-1 gap-3">
-             <div><div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>1. Raummaß</span><span>L · B · H</span></div><div className="font-mono bg-white border border-slate-100 p-1.5 rounded mt-0.5 text-center text-emerald-800">{l} m · {w} m · {h} m = <strong>{vol} m³</strong></div></div>
-             <div><div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>2. Festmeter</span><span>Raummaß · Faktor</span></div><div className="font-mono bg-white border border-slate-100 p-1.5 rounded mt-0.5 text-center text-emerald-800">{vol} m³ · {factor} = <strong>{solidVol} m³</strong></div></div>
-             <div><div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>3. Gewicht</span><span>Festmeter · Dichte</span></div><div className="font-mono bg-white border border-slate-100 p-1.5 rounded mt-0.5 text-center font-bold text-emerald-700 text-sm">{solidVol} m³ · {density} kg/m³ ≈ {weight.toLocaleString()} kg</div></div>
+    <CalculationToggle>
+        <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
+            <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]"><Calculator className="w-3 h-3" /><span>Berechnungsformel (Holzgewicht)</span></div>
+            <div className="grid grid-cols-1 gap-3">
+                <div><div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>1. Raummaß (Gesamt)</span><span>V1 + V2</span></div><div className="font-mono bg-white border border-slate-100 p-1.5 rounded mt-0.5 text-center text-emerald-800">Summe = <strong>{totalVol} m³</strong></div></div>
+                <div><div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>2. Festmeter</span><span>Raummaß · Faktor</span></div><div className="font-mono bg-white border border-slate-100 p-1.5 rounded mt-0.5 text-center text-emerald-800">{totalVol} m³ · {factor} = <strong>{solidVol} m³</strong></div></div>
+                <div><div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>3. Gewicht</span><span>Festmeter · Dichte</span></div><div className="font-mono bg-white border border-slate-100 p-1.5 rounded mt-0.5 text-center font-bold text-emerald-700 text-sm">{solidVol} m³ · {density} kg/m³ ≈ {weight.toLocaleString()} kg</div></div>
+            </div>
         </div>
-    </div>
+    </CalculationToggle>
     );
 };
 
-const OverloadFormulaDisplay = ({ values }) => {
+const OverloadFormulaDisplay = ({ values, isTotal = false }) => {
     if (!values) return null;
     const { actual, tolerance, net, allowed, diff, percent } = values;
     return (
-    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 print:bg-white print:border-slate-300 break-inside-avoid">
-        <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]"><Calculator className="w-3 h-3" /><span>Berechnungsformel (Überladung)</span></div>
-        <div className="space-y-3 font-mono text-[11px]">
-             <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">1. Nettogewicht (Vorwerfbar)</div><div className="pl-2 border-l-2 border-blue-200">{actual.toLocaleString()} - {tolerance} = {net.toLocaleString()} kg</div></div>
-             <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">2. Differenz zum zGM</div><div className="pl-2 border-l-2 border-blue-200">{net.toLocaleString()} - {allowed.toLocaleString()} = {diff.toLocaleString()} kg</div></div>
-             <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">3. Prozentuale Überladung</div><div className="pl-2 border-l-2 border-blue-200">({diff.toLocaleString()} / {allowed.toLocaleString()}) · 100 = {percent.toFixed(2)} %</div></div>
+    <CalculationToggle>
+        <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 break-inside-avoid">
+            <div className="flex items-center gap-2 mb-2 font-bold text-slate-500 uppercase text-[10px]"><Calculator className="w-3 h-3" /><span>Berechnungsformel ({isTotal ? 'Gesamtzug' : 'Fahrzeug'})</span></div>
+            <div className="space-y-3 font-mono text-[11px]">
+                {isTotal ? (
+                    <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">1. Nettogewicht (Summe der Einzel-Nettos)</div><div className="pl-2 border-l-2 border-blue-200">Netto1 + Netto2 = {net.toLocaleString()} kg</div></div>
+                ) : (
+                    <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">1. Nettogewicht (Vorwerfbar)</div><div className="pl-2 border-l-2 border-blue-200">{actual.toLocaleString()} - {tolerance} = {net.toLocaleString()} kg</div></div>
+                )}
+                <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">2. Differenz zum zGM</div><div className="pl-2 border-l-2 border-blue-200">{net.toLocaleString()} - {allowed.toLocaleString()} = {diff.toLocaleString()} kg</div></div>
+                <div><div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">3. Prozentuale Überladung</div><div className="pl-2 border-l-2 border-blue-200">({diff.toLocaleString()} / {allowed.toLocaleString()}) · 100 = {percent.toFixed(2)} %</div></div>
+            </div>
         </div>
-    </div>
+    </CalculationToggle>
     );
 };
 
@@ -296,14 +257,14 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl">
                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                     <h3 className="font-black text-slate-800 flex items-center gap-2"><Ruler className="w-5 h-5 text-indigo-600" />Winkelmesser</h3>
+                     <h3 className="font-black text-slate-800 flex items-center gap-2"><SpiritLevelIcon className="w-5 h-5 text-indigo-600" />Winkelmesser</h3>
                      <button onClick={handleClose} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors"><X className="w-4 h-4 text-slate-500" /></button>
                 </div>
                 {errorMsg && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold mb-4 flex items-start gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{errorMsg}</div>}
                 <div className="min-h-[200px] flex flex-col justify-center">
                     {step === 1 && (
                         <div className="text-center space-y-4">
-                            <div className="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600"><Ruler className="w-8 h-8" /></div>
+                            <div className="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600"><SpiritLevelIcon className="w-8 h-8" /></div>
                             <div><h4 className="font-bold text-slate-700 text-lg">Kalibrierung starten</h4><p className="text-slate-500 text-sm mt-1">Nutzung der Smartphone-Sensoren zur Messung.</p></div>
                             <button onClick={requestAccess} className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 active:scale-95 transition-all">Messung starten</button>
                         </div>
@@ -344,21 +305,21 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
-      <PrintStyles />
-      <div className="flex-1 pb-24 z-10 relative print-scale-wrapper">
+      <div className="flex-1 pb-24 z-10 relative">
         {activeTab === 'overload' ? <OverloadCalculator /> : 
          activeTab === 'wood' ? <WoodCalculator /> : 
          activeTab === 'speed' ? <SpeedCalculator /> : 
+         activeTab === 'age' ? <AgeCalculator /> :
          activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
       </div>
-      <GlobalPrintFooter />
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50">
         <div className="max-w-md mx-auto flex justify-around p-2">
           {[
             { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
             { id: 'overload', icon: Scale, label: 'Gewicht', color: 'text-blue-600' },
             { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' },
             { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
+            { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
             { id: 'info', icon: FileText, label: 'Infos', color: 'text-slate-600' }
           ].map((tab) => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 px-1 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
@@ -370,6 +331,83 @@ export default function App() {
       </div>
     </div>
   );
+}
+
+// --- AGE CALCULATOR ---
+function AgeCalculator() {
+    const [birthDate, setBirthDate] = useState('');
+    const [ageInfo, setAgeInfo] = useState(null);
+    const dateTime = useDateTime();
+
+    useEffect(() => {
+        if (!birthDate) {
+            setAgeInfo(null);
+            return;
+        }
+
+        const today = new Date();
+        const birth = new Date(birthDate);
+        
+        if (isNaN(birth.getTime())) return;
+
+        let years = today.getFullYear() - birth.getFullYear();
+        let months = today.getMonth() - birth.getMonth();
+        let days = today.getDate() - birth.getDate();
+
+        // Adjust for months/days
+        if (days < 0) {
+            months--;
+            // Get days in previous month
+            const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            days += prevMonth.getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        setAgeInfo({ years, months, days, birthDate: birth });
+    }, [birthDate]);
+
+    return (
+        <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+             <div className="bg-purple-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-purple-900/10">
+                <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Calendar className="w-6 h-6 shrink-0" />Altersrechner</h1><p className="text-purple-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
+                <HeaderLogo />
+            </div>
+
+            <div className="p-2 space-y-2 mt-4">
+                 <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+                     <div className="flex items-center gap-2 mb-2 text-purple-700">
+                        <UserPlus className="w-5 h-5" />
+                        <span className="text-sm font-black uppercase tracking-wide">Personendaten</span>
+                     </div>
+                     <InputWithIcon 
+                        icon={Calendar} 
+                        label="Geburtsdatum" 
+                        type="date"
+                        value={birthDate} 
+                        onChange={(e) => setBirthDate(e.target.value)} 
+                     />
+                 </div>
+
+                 {ageInfo && (
+                     <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500">
+                         <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-4 text-center text-white shadow-xl">
+                             <p className="text-sm font-bold opacity-70 uppercase tracking-wider mb-1">Berechnetes Alter</p>
+                             <div className="text-6xl font-black tracking-tighter">{ageInfo.years} <span className="text-2xl font-medium opacity-80">Jahre</span></div>
+                         </div>
+                         
+                         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center text-sm font-mono text-slate-600">
+                             <span>Detailgenau:</span>
+                             <span className="font-bold text-purple-700">{ageInfo.years} Jahre, {ageInfo.months} Monate, {ageInfo.days} Tage</span>
+                         </div>
+                     </div>
+                 )}
+            </div>
+            <AppVersionFooter />
+        </div>
+    );
 }
 
 // --- SPEED CALCULATOR ---
@@ -510,11 +548,13 @@ function SpeedCalculator() {
                                 <span className="text-3xl font-black text-amber-600">{result.netSpeed} <span className="text-sm text-slate-400">km/h</span></span>
                             </div>
                             
-                            <div className="bg-slate-50 rounded-lg p-2 mb-3 text-xs font-mono text-center text-slate-500">
-                                {result.formula}
-                            </div>
+                            <CalculationToggle>
+                                <div className="bg-slate-50 rounded-lg p-2 mb-3 text-xs font-mono text-center text-slate-500 border border-slate-100">
+                                    {result.formula}
+                                </div>
+                            </CalculationToggle>
 
-                            <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-100">
+                            <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-100 mt-2">
                                 <span className="text-xs font-bold text-red-400 uppercase">Überschreitung</span>
                                 <span className="text-xl font-black text-red-600">+{result.exceedance} km/h</span>
                             </div>
@@ -541,7 +581,6 @@ function SpeedCalculator() {
                     </div>
                 )}
             </div>
-            <ExportButton />
             <AppVersionFooter />
         </div>
     );
@@ -655,13 +694,20 @@ function InfoView() {
 
 // --- WOOD CALCULATOR ---
 function WoodCalculator() {
+  const [vehicleType, setVehicleType] = useState('semi'); // 'semi' (Sattel) or 'train' (Gliederzug)
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [tractorWeight, setTractorWeight] = useState('');
   const [trailerWeight, setTrailerWeight] = useState('');
+  // Dimensions 1 (Sattel or LKW)
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
+  // Dimensions 2 (Only for Train/Anhänger)
+  const [length2, setLength2] = useState('');
+  const [width2, setWidth2] = useState('');
+  const [height2, setHeight2] = useState('');
+
   const [woodType, setWoodType] = useState('Akazie ganz frisch'); 
   const dateTime = useDateTime();
 
@@ -797,9 +843,11 @@ function WoodCalculator() {
     { name: 'Weißerle Darr-Gewicht', density: 500 }
   ];
 
-  const volume = (parseFloat(length) || 0) * (parseFloat(width) || 0) * (parseFloat(height) || 0);
+  const vol1 = (parseFloat(length) || 0) * (parseFloat(width) || 0) * (parseFloat(height) || 0);
+  const vol2 = vehicleType === 'train' ? (parseFloat(length2) || 0) * (parseFloat(width2) || 0) * (parseFloat(height2) || 0) : 0;
+  const totalVol = vol1 + vol2;
   const solidFactor = 0.70;
-  const solidVolume = volume * solidFactor;
+  const solidVolume = totalVol * solidFactor;
   const selectedWood = woodTypes.find(w => w.name === woodType);
   const currentDensity = selectedWood ? selectedWood.density : 800;
   const rawWeight = solidVolume * currentDensity;
@@ -816,21 +864,48 @@ function WoodCalculator() {
         <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Trees className="w-6 h-6 shrink-0" />Holzgewichtsrechner</h1><p className="text-emerald-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
         <HeaderLogo />
       </div>
-      <PrintDocumentHeader title="Protokoll: Holzgewichtsrechnung" />
       <div className="p-2 space-y-2 print-grid-container">
+        
+        {/* FAHRZEUGTYP WAHL */}
+        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 break-inside-avoid">
+            <button onClick={() => setVehicleType('semi')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${vehicleType === 'semi' ? 'bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <Truck className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase">Sattelzug</span>
+            </button>
+            <button onClick={() => setVehicleType('train')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${vehicleType === 'train' ? 'bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <TruckTrailerIcon className="w-8 h-8" />
+                <span className="text-[10px] font-bold uppercase">LKW + Anhänger</span>
+            </button>
+        </div>
+
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-           <div className="grid grid-cols-2 gap-2 mb-2"><InputWithIcon icon={Truck} label="Leergewicht Zugm. (kg)" value={tractorWeight} onChange={(e) => setTractorWeight(e.target.value)} placeholder="0" /><InputWithIcon icon={Box} label="Leergewicht Aufl. (kg)" value={trailerWeight} onChange={(e) => setTrailerWeight(e.target.value)} placeholder="0" /></div>
+           <div className="grid grid-cols-2 gap-2 mb-2">
+               <InputWithIcon icon={Truck} label={vehicleType === 'semi' ? "Leergewicht Zugm. (kg)" : "Leergewicht LKW (kg)"} value={tractorWeight} onChange={(e) => setTractorWeight(e.target.value)} placeholder="0" />
+               <InputWithIcon icon={Box} label={vehicleType === 'semi' ? "Leergewicht Aufl. (kg)" : "Leergewicht Anhänger (kg)"} value={trailerWeight} onChange={(e) => setTrailerWeight(e.target.value)} placeholder="0" />
+           </div>
            <InputWithIcon icon={Scale} label="zGM (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
            <div className="flex gap-2 mt-2">
                <button onClick={() => setAllowedWeight('40000')} className="flex-1 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-transparent transition-all">Standard 40t</button>
                <button onClick={() => setAllowedWeight('44000')} className="flex-1 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-transparent transition-all">Ausnahme 44t</button>
            </div>
         </div>
+        
+        {/* DIMENSIONS 1 */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+           <div className="text-xs font-bold text-slate-400 uppercase mb-2 pl-1 flex items-center gap-2"><Ruler className="w-4 h-4" />{vehicleType === 'train' ? 'Maße Ladung LKW' : 'Maße Ladung'}</div>
            <div className="grid grid-cols-3 gap-2"><InputWithIcon icon={Ruler} label="L (m)" value={length} onChange={(e) => setLength(e.target.value)} /><InputWithIcon icon={Ruler} label="B (m)" value={width} onChange={(e) => setWidth(e.target.value)} /><InputWithIcon icon={Ruler} label="H (m)" value={height} onChange={(e) => setHeight(e.target.value)} /></div>
         </div>
+
+        {/* DIMENSIONS 2 (Only for Train) */}
+        {vehicleType === 'train' && (
+             <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid animate-in slide-in-from-top-2">
+                <div className="text-xs font-bold text-slate-400 uppercase mb-2 pl-1 flex items-center gap-2"><Ruler className="w-4 h-4" />Maße Ladung Anhänger</div>
+                <div className="grid grid-cols-3 gap-2"><InputWithIcon icon={Ruler} label="L (m)" value={length2} onChange={(e) => setLength2(e.target.value)} /><InputWithIcon icon={Ruler} label="B (m)" value={width2} onChange={(e) => setWidth2(e.target.value)} /><InputWithIcon icon={Ruler} label="H (m)" value={height2} onChange={(e) => setHeight2(e.target.value)} /></div>
+             </div>
+        )}
+
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-            <label className="flex items-center gap-1.5 text-sm font-black text-emerald-700 uppercase tracking-wide mb-2 print:text-black"><Trees className="w-5 h-5 print:hidden" />Art des Holzes</label>
+            <label className="flex items-center gap-1.5 text-sm font-black text-emerald-700 uppercase tracking-wide mb-2"><Trees className="w-5 h-5" />Art des Holzes</label>
             <select value={woodType} onChange={(e) => setWoodType(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none font-medium text-slate-700 shadow-sm">{woodTypes.map((wood) => (<option key={wood.name} value={wood.name}>{wood.name} ({wood.density} kg/m³)</option>))}</select>
             <div className="mt-3 bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5 text-xs text-slate-600">
                 <div className="flex items-center gap-1.5 mb-1.5 font-bold text-emerald-700"><Droplets className="w-4 h-4"/> Feuchtigkeitsinfos:</div>
@@ -842,8 +917,7 @@ function WoodCalculator() {
                 </div>
             </div>
         </div>
-        {calculatedLoadWeight > 0 && <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500 break-inside-avoid print-full-width"><div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl print:text-black print:bg-none print:border-2 print:border-black"><p className="text-sm font-bold opacity-70 uppercase tracking-wider mb-1">Ladungsgewicht</p><div className="text-5xl font-black tracking-tighter">{calculatedLoadWeight.toLocaleString('de-DE')} kg</div></div><WoodFormulaDisplay values={{ l: length, w: width, h: height, vol: volume.toFixed(2), factor: solidFactor, solidVol: solidVolume.toFixed(2), density: currentDensity, weight: calculatedLoadWeight }} /></div>}
-        <ExportButton />
+        {calculatedLoadWeight > 0 && <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500 break-inside-avoid"><div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl"><p className="text-sm font-bold opacity-70 uppercase tracking-wider mb-1">Ladungsgewicht (Gesamt)</p><div className="text-5xl font-black tracking-tighter">{calculatedLoadWeight.toLocaleString('de-DE')} kg</div></div><WoodFormulaDisplay values={{ totalVol: totalVol.toFixed(2), factor: solidFactor, solidVol: solidVolume.toFixed(2), density: currentDensity, weight: calculatedLoadWeight }} /></div>}
       </div>
       <AppVersionFooter />
     </div>
@@ -852,17 +926,32 @@ function WoodCalculator() {
 
 // --- OVERLOAD CALCULATOR ---
 function OverloadCalculator() {
+  const [mode, setMode] = useState('single'); // 'single' (LKW) or 'combination' (LKW + Anhänger)
+  
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
   const [allowedWeight2, setAllowedWeight2] = useState('');
   const [actualWeight2, setActualWeight2] = useState('');
+  // New: Total Train Allowed Weight
+  const [totalAllowed, setTotalAllowed] = useState('');
+  
   const [result, setResult] = useState(null);
   const dateTime = useDateTime();
 
+  // Reset when switching modes
   useEffect(() => {
-    if (!actualWeight1 && !actualWeight2) {
-        setResult(null);
-        return;
+     setResult(null);
+     setAllowedWeight2('');
+     setActualWeight2('');
+     setTotalAllowed('');
+  }, [mode]);
+
+  useEffect(() => {
+    // If single mode, only need 1. If combo, need 1 and 2.
+    if (mode === 'single') {
+        if (!actualWeight1) { setResult(null); return; }
+    } else {
+        if (!actualWeight1 || !actualWeight2) { setResult(null); return; }
     }
 
     const calculateForVehicle = (allowedStr, actualStr) => {
@@ -876,9 +965,12 @@ function OverloadCalculator() {
         else tolerance = 60;
 
         let netWeightRaw = actual - tolerance;
-        let netWeight = (allowed <= 3500) ? Math.floor(netWeightRaw) : Math.ceil(netWeightRaw);
+        // Logic: <= 3500 floor, else ceil
+        let netWeight = (allowed > 0 && allowed <= 3500) ? Math.floor(netWeightRaw) : Math.ceil(netWeightRaw);
+        // Fallback if no allowed provided (assume > 3.5t logic usually for trucks)
+        if (isNaN(allowed) || allowed === 0) netWeight = Math.ceil(netWeightRaw);
         
-        let difference = isNaN(allowed) ? 0 : netWeight - allowed;
+        let difference = isNaN(allowed) || allowed === 0 ? 0 : netWeight - allowed;
         let percentage = (difference > 0 && allowed > 0) ? (difference / allowed) * 100 : 0;
         
         let confiscationPossible = false;
@@ -891,13 +983,45 @@ function OverloadCalculator() {
             }
         }
 
-        return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(allowed) && !isNaN(actual), confiscationPossible };
+        return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(actual), confiscationPossible };
     };
 
-    setResult({ vehicle1: calculateForVehicle(allowedWeight1, actualWeight1), vehicle2: calculateForVehicle(allowedWeight2, actualWeight2) });
-  }, [allowedWeight1, actualWeight1, allowedWeight2, actualWeight2]);
+    const res1 = calculateForVehicle(allowedWeight1, actualWeight1);
+    let res2 = null;
+    let resTotal = null;
 
-  const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setResult(null); };
+    if (mode === 'combination') {
+        res2 = calculateForVehicle(allowedWeight2, actualWeight2);
+        
+        if (res1 && res2) {
+            // CORRECTED LOGIC: Total Net Weight is sum of individual Net Weights (Tolerances applied individually)
+            const sumNet = res1.netWeight + res2.netWeight;
+            const limit = parseFloat(totalAllowed);
+
+            let diff = (!isNaN(limit) && limit > 0) ? sumNet - limit : 0;
+            let perc = (diff > 0 && limit > 0) ? (diff / limit) * 100 : 0;
+            // Confiscation rule for entire train generally same as heavy trucks (> 15% usually trigger)
+            let confiscation = (limit > 0 && diff > 0 && perc >= 15);
+
+            resTotal = {
+                actual: res1.actual + res2.actual, // Just for display if needed
+                allowed: limit,
+                tolerance: res1.tolerance + res2.tolerance, // Just for display
+                netWeight: sumNet,
+                difference: diff,
+                percentage: perc,
+                isOverloaded: limit > 0 && diff > 0,
+                isValidInput: !isNaN(limit) && limit > 0,
+                confiscationPossible: confiscation
+            };
+        }
+    }
+
+    setResult({ vehicle1: res1, vehicle2: res2, total: resTotal });
+
+  }, [allowedWeight1, actualWeight1, allowedWeight2, actualWeight2, totalAllowed, mode]);
+
+  const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setResult(null); };
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
@@ -905,38 +1029,186 @@ function OverloadCalculator() {
         <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Scale className="w-6 h-6 shrink-0" />Überladungsrechner</h1><p className="text-blue-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
         <HeaderLogo />
       </div>
-      <PrintDocumentHeader title="Protokoll: Überladung" />
+      
       <div className="p-2 space-y-2 print-grid-container">
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid"><div className="flex items-center gap-2 mb-2 text-blue-700 print:text-black"><Truck className="w-5 h-5 print:hidden" /><span className="text-sm font-black uppercase tracking-wide">Zugfahrzeug</span></div><div className="space-y-2"><InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} /><InputWithIcon icon={Scale} label="Ist-Gewicht (Brutto)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} /></div></div>
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid"><div className="flex items-center gap-2 mb-2 text-blue-700 print:text-black"><Box className="w-5 h-5 print:hidden" /><span className="text-sm font-black uppercase tracking-wide">Anhänger / Auflieger</span></div><div className="space-y-2"><InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} /><InputWithIcon icon={Scale} label="Ist-Gewicht (Brutto)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} /></div></div>
-        {!result && <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width print:bg-transparent print:border-none print:text-black"><Info className="w-5 h-5 shrink-0 print:hidden" /><p>Bitte geben Sie die Gewichte für mindestens ein Fahrzeug ein.</p></div>}
+        
+        {/* MODE SELECTION */}
+        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 break-inside-avoid">
+            <button onClick={() => setMode('single')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'single' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <Truck className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase">Einzelfahrzeug</span>
+            </button>
+            <button onClick={() => setMode('combination')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'combination' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <TruckTrailerIcon className="w-8 h-8" />
+                <span className="text-[10px] font-bold uppercase">Fahrzeugkombination</span>
+            </button>
+        </div>
+
+        {/* INPUTS */}
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+            <div className="flex items-center gap-2 mb-2 text-blue-700">
+                <Truck className="w-5 h-5" />
+                <span className="text-sm font-black uppercase tracking-wide">
+                    {mode === 'single' ? "Fahrzeug / LKW" : "Zugmaschine / LKW"}
+                </span>
+            </div>
+            <div className="space-y-2">
+                <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} />
+                <InputWithIcon icon={Scale} label="Ist-Gewicht (Brutto)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} />
+            </div>
+        </div>
+
+        {mode === 'combination' && (
+            <>
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid animate-in slide-in-from-top-2">
+                <div className="flex items-center gap-2 mb-2 text-blue-700">
+                    <Box className="w-5 h-5" />
+                    <span className="text-sm font-black uppercase tracking-wide">Anhänger / Auflieger</span>
+                </div>
+                <div className="space-y-2">
+                    <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} />
+                    <InputWithIcon icon={Scale} label="Ist-Gewicht (Brutto)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} />
+                </div>
+            </div>
+
+             <div className="bg-slate-50 p-3 rounded-2xl shadow-inner border border-slate-200 break-inside-avoid animate-in slide-in-from-top-2">
+                <div className="flex items-center gap-2 mb-2 text-slate-600">
+                    <Weight className="w-5 h-5" />
+                    <span className="text-sm font-black uppercase tracking-wide">Gesamter Zug</span>
+                </div>
+                <div className="space-y-2">
+                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} placeholder="Oft weniger als Summe!" />
+                </div>
+            </div>
+            </>
+        )}
+
+        {!result && <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width"><Info className="w-5 h-5 shrink-0" /><p>Bitte füllen Sie die Felder für eine Berechnung aus.</p></div>}
       </div>
+
       {result && (
-        <div className="bg-slate-100 border-t border-slate-200 p-4 animate-in slide-in-from-bottom-4 duration-500 pb-20 print-full-width print:bg-transparent print:border-t-0 print:p-0">
-          <div className="space-y-3">
+        <div className="bg-slate-100 border-t border-slate-200 p-4 animate-in slide-in-from-bottom-4 duration-500 pb-20 print-full-width">
+          <div className="space-y-4">
+             {/* RESULT 1 */}
              {result.vehicle1 && result.vehicle1.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid print:rounded-lg print:border-black ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm print:text-black"><Truck className="w-4 h-4 text-slate-400 print:hidden"/> Zugfahrzeug</span><span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase print:border print:border-black print:bg-transparent print:text-black ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span></div>
-                    <div className="flex justify-between items-end mb-1"><span className="text-xs text-slate-500 print:text-black print:font-bold">Vorwerfbar:</span><span className="text-xl font-black text-slate-800 print:text-black">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
-                    <ProgressBar current={result.vehicle1.netWeight} max={result.vehicle1.allowed} isOverloaded={result.vehicle1.isOverloaded} />
-                     {result.vehicle1.isOverloaded && (<div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 print:text-black print:border-t-black"><div className="flex justify-between mb-1"><span>Überschuss:</span><span>+ {result.vehicle1.difference.toLocaleString()} kg ({result.vehicle1.percentage.toFixed(2)}%)</span></div>{result.vehicle1.confiscationPossible && <div className="mt-2 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2 print:bg-transparent print:border print:border-black print:text-black"><AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 print:hidden" /><span>! Bei gewerblichem Transport: Einziehung möglich!</span></div>}</div>)}
+                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm">
+                            <Truck className="w-4 h-4 text-slate-400"/> {mode === 'single' ? 'Fahrzeug' : 'Zugmaschine'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
+                    </div>
+                     
+                     {/* OVERLOAD DISPLAY BLOCK - Percentage Focused */}
+                     {result.vehicle1.isOverloaded ? (
+                        <div className="text-center py-2">
+                            <div className="text-3xl font-black text-red-600 tracking-tighter">
+                                {result.vehicle1.percentage.toFixed(2)} <span className="text-xl">%</span>
+                            </div>
+                            <div className="text-xs font-bold uppercase text-red-400 mb-1">Überladung</div>
+                            <div className="inline-block bg-red-50 text-red-700 px-2 py-0.5 rounded text-sm font-bold border border-red-100">
+                                + {result.vehicle1.difference.toLocaleString()} kg
+                            </div>
+                            {result.vehicle1.confiscationPossible && (
+                                <div className="mt-3 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center justify-center gap-2">
+                                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                            )}
+                        </div>
+                     ) : (
+                        <div className="flex justify-between items-end mb-1"><span className="text-xs text-slate-500">Vorwerfbar:</span><span className="text-xl font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
+                     )}
+
+                     {!result.vehicle1.isOverloaded && <ProgressBar current={result.vehicle1.netWeight} max={result.vehicle1.allowed} isOverloaded={result.vehicle1.isOverloaded} />}
+                     
                      <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />
                  </div>
              )}
+             
+             {/* RESULT 2 */}
              {result.vehicle2 && result.vehicle2.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid print:rounded-lg print:border-black ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm print:text-black"><Box className="w-4 h-4 text-slate-400 print:hidden"/> Anhänger</span><span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase print:border print:border-black print:bg-transparent print:text-black ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
-                    <div className="flex justify-between items-end mb-1"><span className="text-xs text-slate-500 print:text-black print:font-bold">Vorwerfbar:</span><span className="text-xl font-black text-slate-800 print:text-black">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
-                    <ProgressBar current={result.vehicle2.netWeight} max={result.vehicle2.allowed} isOverloaded={result.vehicle2.isOverloaded} />
-                     {result.vehicle2.isOverloaded && (<div className="mt-2 pt-1.5 border-t border-red-100 text-sm font-bold text-red-600 print:text-black print:border-t-black"><div className="flex justify-between mb-1"><span>Überschuss:</span><span>+ {result.vehicle2.difference.toLocaleString()} kg ({result.vehicle2.percentage.toFixed(2)}%)</span></div>{result.vehicle2.confiscationPossible && <div className="mt-2 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2 print:bg-transparent print:border print:border-black print:text-black"><AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 print:hidden" /><span>! Bei gewerblichem Transport: Einziehung möglich!</span></div>}</div>)}
+                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+                    <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm"><Box className="w-4 h-4 text-slate-400"/> Anhänger</span><span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
+                    
+                    {/* OVERLOAD DISPLAY BLOCK - Percentage Focused */}
+                     {result.vehicle2.isOverloaded ? (
+                        <div className="text-center py-2">
+                            <div className="text-3xl font-black text-red-600 tracking-tighter">
+                                {result.vehicle2.percentage.toFixed(2)} <span className="text-xl">%</span>
+                            </div>
+                            <div className="text-xs font-bold uppercase text-red-400 mb-1">Überladung</div>
+                            <div className="inline-block bg-red-50 text-red-700 px-2 py-0.5 rounded text-sm font-bold border border-red-100">
+                                + {result.vehicle2.difference.toLocaleString()} kg
+                            </div>
+                            {result.vehicle2.confiscationPossible && (
+                                <div className="mt-3 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center justify-center gap-2">
+                                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                            )}
+                        </div>
+                     ) : (
+                        <div className="flex justify-between items-end mb-1"><span className="text-xs text-slate-500">Vorwerfbar:</span><span className="text-xl font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
+                     )}
+
+                     {!result.vehicle2.isOverloaded && <ProgressBar current={result.vehicle2.netWeight} max={result.vehicle2.allowed} isOverloaded={result.vehicle2.isOverloaded} />}
+
                      <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />
                  </div>
              )}
+
+             {/* RESULT TOTAL TRAIN */}
+             {result.total && result.total.isValidInput && (
+                 <div className={`p-3 rounded-2xl border-4 shadow-xl transition-all break-inside-avoid ${result.total.isOverloaded ? 'bg-red-50 border-red-600' : 'bg-slate-50 border-slate-400'}`}>
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="font-black text-slate-800 flex items-center gap-1.5 text-base uppercase tracking-wider">
+                            <TruckTrailerIcon className="w-6 h-6"/> Gesamter Zug
+                        </span>
+                        <span className={`px-3 py-1 rounded-lg text-sm font-black uppercase ${result.total.isOverloaded ? 'bg-red-600 text-white' : 'bg-slate-600 text-white'}`}>{result.total.isOverloaded ? 'ZUG ÜBERLADEN' : 'ZUG OK'}</span>
+                    </div>
+                    
+                    {/* OVERLOAD DISPLAY BLOCK - Percentage Focused */}
+                     {result.total.isOverloaded ? (
+                        <div className="text-center py-4">
+                            <div className="text-5xl font-black text-red-600 tracking-tighter drop-shadow-sm">
+                                {result.total.percentage.toFixed(2)} <span className="text-2xl">%</span>
+                            </div>
+                            <div className="text-sm font-bold uppercase text-red-400 mb-2">Gesamt-Überladung</div>
+                            <div className="inline-block bg-white text-red-700 px-3 py-1 rounded-lg text-base font-black border border-red-100 shadow-sm">
+                                + {result.total.difference.toLocaleString()} kg
+                            </div>
+                            {result.total.confiscationPossible && (
+                                <div className="mt-4 bg-red-100 rounded-lg p-3 border border-red-300 text-red-900 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
+                                </div>
+                            )}
+                        </div>
+                     ) : (
+                         <>
+                            <div className="flex justify-between items-end mb-2 mt-2">
+                                <span className="text-xs font-bold text-slate-500 uppercase">Gewicht (Vorwerfbar):</span>
+                                <span className="text-2xl font-black text-slate-900">{result.total.netWeight.toLocaleString()} kg</span>
+                            </div>
+
+                            <div className="relative h-4 bg-white rounded-full overflow-hidden border border-slate-300">
+                                <div className={`h-full transition-all duration-500 ${result.total.isOverloaded ? 'bg-red-600' : 'bg-slate-600'}`} style={{ width: `${Math.min(100, (result.total.netWeight / result.total.allowed) * 100)}%` }}></div>
+                            </div>
+                            <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1 uppercase">
+                                <span>0 kg</span>
+                                <span>Max: {parseFloat(result.total.allowed).toLocaleString()} kg</span>
+                            </div>
+                         </>
+                     )}
+                     
+                     <OverloadFormulaDisplay values={{ actual: result.total.actual, tolerance: result.total.tolerance, net: result.total.netWeight, allowed: result.total.allowed, diff: result.total.difference, percent: result.total.percentage }} isTotal={true} />
+                 </div>
+             )}
           </div>
-          <button onClick={resetForm} className="print-hide-button mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">Alle Eingaben löschen</button>
+          <button onClick={resetForm} className="mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">Alle Eingaben löschen</button>
         </div>
       )}
-      <ExportButton />
       <AppVersionFooter />
     </div>
   );
@@ -1142,25 +1414,23 @@ function LashingCalculator() {
         <HeaderLogo />
       </div>
 
-      <PrintDocumentHeader title="Protokoll: Ladungssicherung" />
-
       <AngleMeasureModal isOpen={isMeasureModalOpen} onClose={() => setIsMeasureModalOpen(false)} onApply={(a) => setAngle(a)} />
 
       <div className="p-2 space-y-2 print-grid-container">
         
         {/* AUFBAU CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-            <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5 print:text-black">
-                <ShieldCheck className="w-3.5 h-3.5 print:hidden" /> Fahrzeugaufbau wählen
+            <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" /> Fahrzeugaufbau wählen
             </div>
-            <div className="grid grid-cols-2 gap-2 print:block">
-                 <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all print:border-none print:justify-start print:pl-0 ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02] print:text-black print:bg-transparent print:shadow-none' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 print:hidden'}`}>
+            <div className="grid grid-cols-2 gap-2">
+                 <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
                     <span>Kein geprüfter Aufbau</span>
                 </button>
-                <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all print:border-none print:justify-start print:pl-0 ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02] print:text-black print:bg-transparent print:shadow-none' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 print:hidden'}`}>
+                <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
                     <span>Code L</span>
                 </button>
-                 <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all print:border-none print:justify-start print:pl-0 ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02] print:text-black print:bg-transparent print:shadow-none' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 print:hidden'}`}>
+                 <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
                     <span>Code XL</span>
                 </button>
             </div>
@@ -1168,9 +1438,9 @@ function LashingCalculator() {
 
         {/* GEWICHTE CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-           <div className="flex items-center gap-1.5 mb-2 text-indigo-700 print:text-black">
-              <Scale className="w-5 h-5 print:hidden" />
-              <span className="text-sm font-black uppercase tracking-wide">Massen & Gewicht</span>
+           <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+              <Scale className="w-5 h-5" />
+              <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
            </div>
            <div className="grid grid-cols-2 gap-2 mb-2">
              <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
@@ -1181,8 +1451,8 @@ function LashingCalculator() {
 
         {/* SETTINGS CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-          <div className="flex items-center gap-1.5 mb-2 text-indigo-700 print:text-black">
-              <Settings className="w-5 h-5 print:hidden" />
+          <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+              <Settings className="w-5 h-5" />
               <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
            </div>
           <div className="grid grid-cols-2 gap-2">
@@ -1192,13 +1462,13 @@ function LashingCalculator() {
                 {selectedFrictionId === 'CUSTOM' ? (
                   <div className="flex gap-1">
                     <div className="relative w-full">
-                       <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800 print:border-none print:pl-0" placeholder="z.B. 0.33" autoFocus />
-                       <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none print:hidden">μ</span>
+                       <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
+                       <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
                     </div>
-                    <button onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors print:hidden" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
+                    <button onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
                   </div>
                 ) : (
-                  <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8 print:border-b print:border-slate-300 print:rounded-none print:pl-0">
+                  <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
                     {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
                     <option disabled>──────────</option>
                     <option value="CUSTOM">Eigener Wert...</option>
@@ -1210,16 +1480,16 @@ function LashingCalculator() {
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
                 <div className="flex gap-1.5">
                     <div className="relative w-full">
-                         <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0" placeholder="90" />
-                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none print:hidden">°</span>
+                         <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
+                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
                     </div>
-                    <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 print:hidden" title="Winkel messen"><TapeMeasureIcon className="w-5 h-5" /></button>
+                    <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
                 </div>
             </div>
 
             <div className="col-span-2 relative">
                  <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
-                 <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium print:border-b print:border-slate-300 print:rounded-none print:pl-0">
+                 <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
                     {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600].map((val) => (<option key={val} value={val}>{val} daN</option>))}
                 </select>
             </div>
@@ -1228,8 +1498,8 @@ function LashingCalculator() {
 
         {/* FORMSCHLUSS CARD */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-           <div className="flex items-center gap-1.5 mb-2 text-indigo-700 print:text-black">
-              <Box className="w-5 h-5 print:hidden" />
+           <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+              <Box className="w-5 h-5" />
               <span className="text-sm font-black uppercase tracking-wide">Aufbau Belastbarkeit (daN)</span>
            </div>
            
@@ -1237,47 +1507,47 @@ function LashingCalculator() {
              {/* Stirnwand */}
              <div className="flex flex-col">
                <div className="flex items-center gap-1 mb-1">
-                 <input type="checkbox" checked={fitFront} onChange={(e) => setFitFront(e.target.checked)} id="cb_front" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer print:hidden" />
-                 <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none print:text-black">Formschluss</label>
+                 <input type="checkbox" checked={fitFront} onChange={(e) => setFitFront(e.target.checked)} id="cb_front" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                 <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
                </div>
-               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 print:hidden">Stirnwand</label>
-               <input type="number" inputMode="numeric" disabled={!fitFront} value={wallFront} onChange={(e) => setWallFront(e.target.value)} onBlur={(e) => handleBlur('front', e.target.value, setWallFront)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all print:text-left print:pl-0 print:border-b print:border-slate-300 print:rounded-none ${fitFront ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400 print:bg-transparent'}`} />
+               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Stirnwand</label>
+               <input type="number" inputMode="numeric" disabled={!fitFront} value={wallFront} onChange={(e) => setWallFront(e.target.value)} onBlur={(e) => handleBlur('front', e.target.value, setWallFront)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitFront ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
              </div>
 
              {/* Seite */}
              <div className="flex flex-col">
                <div className="flex items-center gap-1 mb-1">
-                 <input type="checkbox" checked={fitSide} onChange={(e) => setFitSide(e.target.checked)} id="cb_side" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer print:hidden" />
-                 <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none print:text-black">Formschluss</label>
+                 <input type="checkbox" checked={fitSide} onChange={(e) => setFitSide(e.target.checked)} id="cb_side" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                 <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
                </div>
-               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 print:hidden">Seite</label>
-               <input type="number" inputMode="numeric" disabled={!fitSide} value={wallSide} onChange={(e) => setWallSide(e.target.value)} onBlur={(e) => handleBlur('side', e.target.value, setWallSide)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all print:text-left print:pl-0 print:border-b print:border-slate-300 print:rounded-none ${fitSide ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400 print:bg-transparent'}`} />
+               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Seite</label>
+               <input type="number" inputMode="numeric" disabled={!fitSide} value={wallSide} onChange={(e) => setWallSide(e.target.value)} onBlur={(e) => handleBlur('side', e.target.value, setWallSide)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitSide ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
              </div>
 
              {/* Heck */}
              <div className="flex flex-col">
                <div className="flex items-center gap-1 mb-1">
-                 <input type="checkbox" checked={fitRear} onChange={(e) => setFitRear(e.target.checked)} id="cb_rear" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer print:hidden" />
-                 <label htmlFor="cb_rear" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none print:text-black">Formschluss</label>
+                 <input type="checkbox" checked={fitRear} onChange={(e) => setFitRear(e.target.checked)} id="cb_rear" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                 <label htmlFor="cb_rear" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
                </div>
-               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 print:hidden">Heck</label>
-               <input type="number" inputMode="numeric" disabled={!fitRear} value={wallRear} onChange={(e) => setWallRear(e.target.value)} onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all print:text-left print:pl-0 print:border-b print:border-slate-300 print:rounded-none ${fitRear ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400 print:bg-transparent'}`} />
+               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Heck</label>
+               <input type="number" inputMode="numeric" disabled={!fitRear} value={wallRear} onChange={(e) => setWallRear(e.target.value)} onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitRear ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
              </div>
            </div>
            
-           <div className="mt-2 flex gap-2 items-start text-xs text-slate-500 bg-slate-50 p-2 rounded-xl print:bg-transparent print:p-0 print:text-black">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400 print:hidden" />
+           <div className="mt-2 flex gap-2 items-start text-xs text-slate-500 bg-slate-50 p-2 rounded-xl">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400" />
               <p>Formschluss gilt bis 5 cm Abstand (hinten max. 30 cm).</p>
            </div>
         </div>
 
         {/* KIPPGEFAHR */}
-        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width print:border-none print:pl-0 ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm print:bg-transparent' : 'bg-white border-slate-100 print:bg-transparent'}`}>
-          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center print:hidden ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
+        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
             {isTipping && <CheckSquare className="w-4 h-4" />}
           </div>
           <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
-          <span className={`font-bold text-sm ${isTipping ? 'text-amber-800 print:text-black' : 'text-slate-500 print:text-black'}`}>
+          <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
              Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
           </span>
         </label>
@@ -1285,11 +1555,11 @@ function LashingCalculator() {
         {/* RESULTAT */}
         {lashingResult !== null && (
           <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
-            <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl print:shadow-none print:border-2 print:border-black print:rounded-lg ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
+            <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
               
-              <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 print:border-slate-300">
-                <h3 className="text-sm font-black uppercase tracking-wider text-slate-400 print:text-black">Erforderliche Gurte</h3>
-                <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500 print:bg-transparent print:text-black print:border print:border-black">
+              <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Gurte</h3>
+                <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
                   {lashingResult.weightClassInfo}
                 </span>
               </div>
@@ -1300,12 +1570,12 @@ function LashingCalculator() {
                     { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
                     { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
                 ].map((res, idx) => (
-                    <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50 print:bg-transparent">
-                        <span className={`text-4xl font-black ${isTipping ? 'text-amber-600 print:text-black' : 'text-indigo-600 print:text-black'}`}>{res.count}</span>
-                        <span className="text-xs font-bold uppercase text-slate-400 mt-0.5 print:text-black">{res.label}</span>
+                    <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50">
+                        <span className={`text-4xl font-black ${isTipping ? 'text-amber-600' : 'text-indigo-600'}`}>{res.count}</span>
+                        <span className="text-xs font-bold uppercase text-slate-400 mt-0.5">{res.label}</span>
                         <div className="flex flex-col items-center gap-0.5">
-                            <span className="text-[10px] text-slate-300 print:text-black">({res.factor}g)</span>
-                            <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'} print:text-black`}>
+                            <span className="text-[10px] text-slate-300">({res.factor}g)</span>
+                            <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'}`}>
                                 {res.hasFit ? (
                                     <span className="flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" /> Formschl.</span>
                                 ) : 'Kein Formschl.'}
@@ -1315,10 +1585,10 @@ function LashingCalculator() {
                 ))}
               </div>
 
-               <div className={`mt-4 p-3 rounded-xl flex items-center justify-between print:bg-transparent print:border-t print:border-black print:rounded-none ${isTipping ? 'bg-amber-50 text-amber-900' : 'bg-indigo-50 text-indigo-900'}`}>
-                 <span className="text-xs font-bold uppercase tracking-wide opacity-70 print:text-black">Minimum:</span>
-                 <div className="text-3xl font-black print:text-black">
-                    {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60 print:text-black">Gurte</span>
+               <div className={`mt-4 p-3 rounded-xl flex items-center justify-between ${isTipping ? 'bg-amber-50 text-amber-900' : 'bg-indigo-50 text-indigo-900'}`}>
+                 <span className="text-xs font-bold uppercase tracking-wide opacity-70">Minimum:</span>
+                 <div className="text-3xl font-black">
+                    {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
                  </div>
                </div>
                
@@ -1328,14 +1598,14 @@ function LashingCalculator() {
 
             
             {fineGroups.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 print:bg-transparent print:border-none print:shadow-none">
-                <div className="flex items-center gap-2 mb-1 print:hidden">
+              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
+                <div className="flex items-center gap-2 mb-1">
                    <Gavel className="w-5 h-5 text-slate-400" />
                    <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
                 </div>
                 
                 {fineGroups.map((group, gIdx) => (
-                    <div key={gIdx} className="mt-4 first:mt-2 print:hidden">
+                    <div key={gIdx} className="mt-4 first:mt-2">
                         {group.title && (
                             <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
                         )}
@@ -1378,10 +1648,6 @@ function LashingCalculator() {
             )}
           </div>
         )}
-      </div>
-      <ExportButton />
-      <div className="hidden signature-section pt-8 border-t border-slate-300 print:hidden">
-          {/* Leeres Unterschriftenfeld für zukünftige Nutzung */}
       </div>
       <AppVersionFooter />
     </div>
