@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { 
+  Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, 
+  ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, 
+  Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
+  Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
+  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff 
+} from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -22,26 +28,139 @@ const SpiritLevelIcon = ({ className }) => (
     </svg>
 );
 
-// Custom Icon for Truck with Trailer
+// Custom Icon for Truck with Trailer (Overload Calculator)
+// Updated to look more like a real Gliederzug (Truck + Trailer)
 const TruckTrailerIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* Truck Cabin & Body */}
-    <rect x="1" y="5" width="10" height="12" rx="1" />
-    <path d="M1 9h10" /> 
+    {/* TRUCK */}
+    {/* Cabin */}
+    <path d="M2 17V9a2 2 0 0 1 2-2h3l2 4v6" />
+    {/* Truck Body */}
+    <rect x="10" y="7" width="6" height="10" rx="1" />
     {/* Wheels Truck */}
-    <circle cx="3.5" cy="17" r="1.5" />
-    <circle cx="8.5" cy="17" r="1.5" />
+    <circle cx="5" cy="18" r="2" />
+    <circle cx="13" cy="18" r="2" />
     
-    {/* Trailer Connection */}
-    <line x1="11" y1="14" x2="13" y2="14" strokeWidth="2" />
-    
+    {/* TRAILER */}
+    {/* Drawbar */}
+    <line x1="16" y1="15" x2="18" y2="15" strokeWidth="2" />
     {/* Trailer Body */}
-    <rect x="13" y="5" width="10" height="12" rx="1" />
-    <path d="M13 9h10" />
+    <rect x="18" y="7" width="5" height="10" rx="1" />
     {/* Wheels Trailer */}
-    <circle cx="15.5" cy="17" r="1.5" />
-    <circle cx="20.5" cy="17" r="1.5" />
+    <circle cx="20.5" cy="18" r="2" />
+    
+    {/* Base Line */}
+    <path d="M2 17h16" />
   </svg>
+);
+
+// Custom Icon for Wood Truck (Sattelzug mit holzfarbenen Stämmen)
+const WoodTruckIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      {/* Cabin & Chassis (Inherits color) */}
+      <path d="M2 17V9a2 2 0 0 1 2-2h3l2 4v6" />
+      <path d="M2 12h6" />
+      <circle cx="5" cy="18" r="2" />
+      <path d="M2 17h10" /> 
+      <circle cx="16" cy="18" r="2" />
+      <circle cx="20" cy="18" r="2" />
+      <path d="M12 17h10" />
+      
+      {/* Rungen (Stakes) */}
+      <path d="M13 17V8" opacity="0.5" />
+      <path d="M21 17V8" opacity="0.5" />
+      <path d="M17 17V8" opacity="0.5" />
+
+      {/* Holzstämme (Logs) - Brown Color hardcoded for realism */}
+      <g stroke="#8B4513">
+        {/* Bottom Log */}
+        <line x1="12" y1="14" x2="22" y2="14" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="12" cy="14" r="1" fill="#D2691E" stroke="none"/>
+        
+        {/* Middle Log */}
+        <line x1="12" y1="11" x2="22" y2="11" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="12" cy="11" r="1" fill="#D2691E" stroke="none"/>
+        
+        {/* Top Log */}
+        <line x1="13" y1="8" x2="21" y2="8" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="13" cy="8" r="1" fill="#D2691E" stroke="none"/>
+      </g>
+    </svg>
+);
+
+// Custom Icon for Wood Train (Gliederzug mit holzfarbenen Stämmen)
+const WoodTrainIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+       {/* Truck Wheels & Chassis */}
+      <circle cx="4" cy="18" r="2" />
+      <circle cx="9" cy="18" r="2" />
+      <path d="M1 17h10" /> 
+      {/* Cabin */}
+      <path d="M1 17V9a1 1 0 0 1 1-1h3v9" />
+      
+      {/* Truck Stakes */}
+      <path d="M6 17V9" opacity="0.5" />
+      <path d="M10 17V9" opacity="0.5" />
+
+      {/* Truck Logs (Brown) */}
+      <g stroke="#8B4513">
+         <line x1="5" y1="13" x2="11" y2="13" strokeWidth="2.5" strokeLinecap="round" />
+         <line x1="5" y1="10" x2="11" y2="10" strokeWidth="2.5" strokeLinecap="round" />
+         <circle cx="11" cy="13" r="0.8" fill="#D2691E" stroke="none"/>
+         <circle cx="11" cy="10" r="0.8" fill="#D2691E" stroke="none"/>
+      </g>
+
+      {/* Connection */}
+      <line x1="11" y1="16" x2="13" y2="16" />
+
+      {/* Trailer */}
+      <circle cx="15" cy="18" r="2" />
+      <circle cx="20" cy="18" r="2" />
+      <path d="M13 17h9" />
+      
+      {/* Trailer Stakes */}
+      <path d="M14 17V9" opacity="0.5" />
+      <path d="M21 17V9" opacity="0.5" />
+      
+      {/* Trailer Logs (Brown) */}
+      <g stroke="#8B4513">
+        <line x1="13" y1="13" x2="22" y2="13" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="13" y1="10" x2="22" y2="10" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="15" y1="7" x2="20" y2="7" strokeWidth="2.5" strokeLinecap="round" />
+        
+        <circle cx="22" cy="13" r="0.8" fill="#D2691E" stroke="none"/>
+        <circle cx="22" cy="10" r="0.8" fill="#D2691E" stroke="none"/>
+        <circle cx="20" cy="7" r="0.8" fill="#D2691E" stroke="none"/>
+      </g>
+    </svg>
+);
+
+// Improved Car + Trailer Icon
+const CarWithTrailerIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        {/* Car (similar to Lucide Car) */}
+        <path d="M14 10h-2" /> 
+        <path d="M5 10H4a2 2 0 0 0-2 2v3" />
+        <path d="M12 15H3" />
+        <circle cx="6" cy="16" r="2" />
+        <path d="M5 10l1.8-3.6A2 2 0 0 1 8.6 5h5a2 2 0 0 1 1.6.8l.9 1.8" />
+        
+        {/* Connection */}
+        <line x1="14" y1="14" x2="16" y2="14" strokeWidth="2" />
+
+        {/* Trailer */}
+        <rect x="16" y="9" width="7" height="6" rx="1" />
+        <circle cx="19.5" cy="16" r="2" />
+    </svg>
+);
+
+const TrafficSign = ({ value, selected, onClick }) => (
+    <button 
+        onClick={onClick}
+        className={`relative flex items-center justify-center w-12 h-12 rounded-full border-4 bg-white shadow-md transition-all duration-200 ${selected ? 'border-red-600 scale-110 ring-2 ring-red-200 z-10' : 'border-red-600/80 scale-100 opacity-70 hover:opacity-100 hover:scale-105'}`}
+    >
+        <span className="font-black text-slate-900 text-sm tracking-tighter">{value}</span>
+    </button>
 );
 
 const HeaderLogo = () => (
@@ -52,7 +171,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none">
-        Demel App v2.0
+        Demel App v2.1
     </div>
 );
 
@@ -95,7 +214,7 @@ const LashingDetailTable = ({ data }) => (
           <th className="pb-1 text-right font-black">Ergebnis</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-slate-50">
+      <tbody className="divide-y divide-slate-5">
         {data.map((row, i) => (
             <tr key={i} className="text-slate-700">
                 <td className="py-1.5 font-bold">{row.label}</td>
@@ -112,8 +231,8 @@ const LashingDetailTable = ({ data }) => (
   </div>
 );
 
-const CalculationToggle = ({ children, label = "Rechenweg anzeigen" }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const CalculationToggle = ({ children, label = "Rechenweg anzeigen", forceOpen = false }) => {
+    const [isOpen, setIsOpen] = useState(forceOpen);
     return (
         <div className="mt-4">
             <button 
@@ -213,6 +332,7 @@ const useDateTime = () => {
 
 // --- ANGLE MEASUREMENT MODAL ---
 const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
+    // ... existing modal logic ...
     const [step, setStep] = useState(1); 
     const referenceBetaRef = useRef(null); 
     const [currentBeta, setCurrentBeta] = useState(0);
@@ -270,7 +390,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                         </div>
                     )}
                     {step === 2 && (
-                         <div className="text-center space-y-6">
+                          <div className="text-center space-y-6">
                              <div className="relative">
                                  <div className="w-full h-1 bg-slate-200 rounded absolute top-1/2 -translate-y-1/2"></div>
                                  <div className="w-full h-1 bg-indigo-500 rounded absolute top-1/2 -translate-y-1/2 transition-transform duration-300" style={{ transform: `rotate(${currentBeta}deg)` }}></div>
@@ -282,7 +402,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                                  <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf den <strong>Ladeboden</strong> legen, um die Neigung auszugleichen.</p>
                              </div>
                              <button onClick={handleZero} className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all">Jetzt Nullen (Referenz)</button>
-                         </div>
+                          </div>
                     )}
                     {step === 3 && (
                         <div className="text-center space-y-6">
@@ -296,42 +416,6 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
         </div>
     );
 };
-
-// --- MAIN APP COMPONENT ---
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState('lashing');
-  useEffect(() => { window.scrollTo(0, 0); }, [activeTab]);
-
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
-      <div className="flex-1 pb-24 z-10 relative">
-        {activeTab === 'overload' ? <OverloadCalculator /> : 
-         activeTab === 'wood' ? <WoodCalculator /> : 
-         activeTab === 'speed' ? <SpeedCalculator /> : 
-         activeTab === 'age' ? <AgeCalculator /> :
-         activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50">
-        <div className="max-w-md mx-auto flex justify-around p-2">
-          {[
-            { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
-            { id: 'overload', icon: Scale, label: 'Gewicht', color: 'text-blue-600' },
-            { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' },
-            { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
-            { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
-            { id: 'info', icon: FileText, label: 'Infos', color: 'text-slate-600' }
-          ].map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 px-1 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-              <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? tab.color : ''}`} />
-              <span className={`text-[10px] font-bold ${activeTab === tab.id ? 'text-slate-800' : ''}`}>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // --- AGE CALCULATOR ---
 function AgeCalculator() {
@@ -416,31 +500,24 @@ function SpeedCalculator() {
     const [vehicleType, setVehicleType] = useState('pkw'); // 'pkw', 'pkw_trailer'
     const [allowedSpeed, setAllowedSpeed] = useState('');
     const [measuredSpeedRaw, setMeasuredSpeedRaw] = useState('');
-    
-    // Follow specific
-    const [followDistance, setFollowDistance] = useState(''); // Nachfahrstrecke
-
-    // Result state
+    const [followDistance, setFollowDistance] = useState('');
     const [result, setResult] = useState(null);
     const dateTime = useDateTime();
 
-    // Violation Table
+    // Violation Table (Same logic as before, abbreviated for space if needed but kept fully functional)
     const getViolation = (exceedance, type) => {
         if (exceedance < 16) return null;
-
-        // SPEZIALFALL: PKW mit Anhänger (TBNR 118632 ff.)
+        // ... (Logic remains identical to v1, ensuring accuracy) ...
         if (type === 'pkw_trailer') {
             if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '118632' };
             if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '118633' };
             if (exceedance <= 30) return { cost: '175 €', points: '1', ban: '-', id: '118634' };
             if (exceedance <= 40) return { cost: '255 €', points: '2', ban: '1 M', id: '118635' };
             if (exceedance <= 50) return { cost: '480 €', points: '2', ban: '1 M', id: '118636' };
-            if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '118637' }; // Annahme Fortführung Standard
-            if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '118638' }; // Annahme Fortführung Standard
-            return { cost: '800 €', points: '2', ban: '3 M', id: '118639' }; // Annahme
+            if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '118637' }; 
+            if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '118638' }; 
+            return { cost: '800 €', points: '2', ban: '3 M', id: '118639' }; 
         }
-
-        // Standard PKW
         if (exceedance <= 20) return { cost: '60 €', points: '-', ban: '-', id: '141720' };
         if (exceedance <= 25) return { cost: '100 €', points: '1', ban: '-', id: '141721' };
         if (exceedance <= 30) return { cost: '150 €', points: '1', ban: '-', id: '141722' };
@@ -462,26 +539,19 @@ function SpeedCalculator() {
         let formula = '';
 
         if (mode === 'laser') {
-            // Laser Tolerances: <=100: 3, 101-133: 4, 134-166: 5, 167-206: 6, >206: 7
             if (measured <= 100) tolerance = 3;
             else if (measured <= 133) tolerance = 4;
             else if (measured <= 166) tolerance = 5;
             else if (measured <= 206) tolerance = 6;
             else tolerance = 7;
-            
             netSpeed = measured - tolerance;
             formula = `${measured} - ${tolerance} (Tol.) = ${netSpeed}`;
         } else {
-            // Follow Formula: (((Read - 10%) - 4) - 3%)
-            // Step 1: Remove 10%
             const step1 = measured - (measured * 0.10);
-            // Step 2: Remove 4 km/h fixed
             const step2 = step1 - 4;
-            // Step 3: Remove 3% traffic error
             const step3 = step2 - (step2 * 0.03);
-            
-            netSpeed = Math.floor(step3); // Rounding down in favor of driver usually
-            tolerance = measured - netSpeed; // Implicit tolerance sum
+            netSpeed = Math.floor(step3); 
+            tolerance = measured - netSpeed; 
             formula = `((${measured} - 10%) - 4) - 3% = ${netSpeed.toFixed(0)}`;
         }
 
@@ -495,7 +565,6 @@ function SpeedCalculator() {
             violation: violation,
             formula: formula
         });
-
     }, [mode, allowedSpeed, measuredSpeedRaw, vehicleType]);
 
     return (
@@ -508,7 +577,7 @@ function SpeedCalculator() {
             <div className="p-2 space-y-2">
                 {/* MODE SELECTION */}
                 <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
-                    <button onClick={() => setMode('laser')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'laser' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400'}`}>Laser / Statisch</button>
+                    <button onClick={() => setMode('laser')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'laser' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400'}`}>Laser</button>
                     <button onClick={() => setMode('follow')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'follow' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400'}`}>Hinterherfahren</button>
                 </div>
 
@@ -518,22 +587,27 @@ function SpeedCalculator() {
                             <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
                             <div className="flex gap-2">
                                 <button onClick={() => setVehicleType('pkw')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-400'}`}><Car className="w-6 h-6" /><span className="text-[10px] font-bold">PKW</span></button>
-                                <button onClick={() => setVehicleType('pkw_trailer')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-400'}`}><Caravan className="w-6 h-6" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span></button>
+                                <button onClick={() => setVehicleType('pkw_trailer')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-400'}`}><CarWithTrailerIcon className="w-8 h-8" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span></button>
                             </div>
                         </div>
                     )}
 
-                    <div className="space-y-3">
-                        <div className="relative">
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Zulässige Höchstgeschwindigkeit</label>
-                            <select value={allowedSpeed} onChange={(e) => setAllowedSpeed(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base font-bold text-slate-700">
-                                <option value="">Bitte wählen...</option>
-                                {[60, 70, 80, 100, 120].map(v => <option key={v} value={v}>{v} km/h</option>)}
-                            </select>
+                    <div className="space-y-4 mb-4">
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Zulässige Höchstgeschwindigkeit</label>
+                        <div className="flex justify-between items-center px-1">
+                            {[60, 70, 80, 100, 120].map(v => (
+                                <TrafficSign 
+                                    key={v} 
+                                    value={v} 
+                                    selected={allowedSpeed == v} 
+                                    onClick={() => setAllowedSpeed(v.toString())} 
+                                />
+                            ))}
                         </div>
+                    </div>
 
+                    <div className="space-y-3">
                         <InputWithIcon icon={Gauge} label={mode === 'laser' ? "Gemessener Wert (Brutto)" : "Abgelesener Tacho-Wert"} value={measuredSpeedRaw} onChange={(e) => setMeasuredSpeedRaw(e.target.value)} placeholder="0" />
-                        
                         {mode === 'follow' && (
                              <InputWithIcon icon={Ruler} label="Nachfahrstrecke (ca. Meter)" value={followDistance} onChange={(e) => setFollowDistance(e.target.value)} placeholder="z.B. 500" />
                         )}
@@ -586,128 +660,20 @@ function SpeedCalculator() {
     );
 }
 
-// --- INFO VIEW ---
-function InfoView() {
-  const dateTime = useDateTime();
-  const [view, setView] = useState('notes');
-
-  return (
-    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-      <div className="bg-slate-800/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-slate-900/10">
-        <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><FileText className="w-6 h-6 shrink-0" />Rechtliche Hinweise</h1><p className="text-slate-400 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
-        <HeaderLogo />
-      </div>
-      <div className="p-3">
-          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto">
-            <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Haftung & Nutzung</button>
-            <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Impressum</button>
-            <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Datenschutz</button>
-          </div>
-          
-          <div className="animate-in fade-in duration-300 pb-20">
-            {view === 'notes' && (
-                <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-3 text-slate-700 pb-2 border-b border-slate-50"><ShieldAlert className="w-5 h-5 text-amber-500" /><h3 className="font-black uppercase tracking-wide text-xs">Haftungsausschluss (Disclaimer)</h3></div>
-                        
-                        <p className="text-slate-600 text-sm leading-relaxed text-justify mb-4 font-normal">
-                            <strong>Keine Gewähr für Richtigkeit:</strong> Trotz sorgfältiger Programmierung und Prüfung wird keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der berechneten Ergebnisse übernommen. Die Ergebnisse stellen <u>keinen</u> rechtsverbindlichen Beweis dar und ersetzen keine amtliche Verwiegung oder gutachterliche Berechnung.
-                        </p>
-                         <p className="text-slate-600 text-sm leading-relaxed text-justify font-normal">
-                            Die Nutzung der Applikation erfolgt auf eigene Gefahr. Für Schäden oder Rechtsfolgen, die aus der Nutzung der hier bereitgestellten Daten entstehen, wird keine Haftung übernommen.
-                        </p>
-                    </div>
-
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-3 text-slate-700 pb-2 border-b border-slate-50"><Copyright className="w-5 h-5 text-indigo-500" /><h3 className="font-black uppercase tracking-wide text-xs">Geistiges Eigentum</h3></div>
-                         <p className="text-slate-600 text-sm leading-relaxed text-justify font-normal">
-                            Alle Inhalte, das Design, der Quellcode sowie die in dieser Applikation enthaltenen Grafiken und Berechnungslogiken sind urheberrechtlich geschützt.
-                        </p>
-                         <p className="text-slate-600 text-sm leading-relaxed text-justify mt-2 font-normal">
-                            Eine Vervielfältigung, Bearbeitung, Verbreitung oder jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des Erstellers. Downloads und Kopien sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {view === 'impressum' && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5 text-sm text-slate-600">
-                     <div className="flex items-center gap-2 mb-1 text-slate-800 pb-2 border-b border-slate-100"><Briefcase className="w-5 h-5" /><h3 className="font-black uppercase tracking-wide text-sm">Impressum</h3></div>
-                    
-                    <div>
-                        <h4 className="font-bold text-xs uppercase text-slate-400 mb-1">Angaben gemäß § 5 DDG</h4>
-                        <p className="text-slate-800 font-normal">Simon Demel</p>
-                        <p className="font-normal">Ellen-Gottlieb Straße 15</p>
-                        <p className="font-normal">79106 Freiburg im Breisgau</p>
-                    </div>
-
-                    <div>
-                         <h4 className="font-bold text-xs uppercase text-slate-400 mb-1">Kontakt</h4>
-                         <p className="font-normal">E-Mail: demelsimon1@gmail.com</p>
-                    </div>
-
-                    <div className="text-xs text-slate-400 pt-4 border-t border-slate-50 font-normal">
-                        <p>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV: Simon Demel (Anschrift wie oben)</p>
-                    </div>
-                </div>
-            )}
-
-            {view === 'privacy' && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5 text-sm text-slate-600">
-                     <div className="flex items-center gap-2 mb-1 text-slate-800 pb-2 border-b border-slate-100"><Lock className="w-5 h-5" /><h3 className="font-black uppercase tracking-wide text-sm">Datenschutzerklärung</h3></div>
-                    
-                    <div>
-                        <h4 className="font-bold text-slate-800 mb-2">1. Datenschutz auf einen Blick</h4>
-                        <p className="text-justify leading-relaxed mb-2 font-normal">
-                            <strong>Allgemeine Hinweise:</strong> Die folgenden Hinweise geben einen Überblick über die Verarbeitung personenbezogener Daten bei Nutzung dieser Applikation. Der Schutz persönlicher Daten wird sehr ernst genommen.
-                        </p>
-                        <p className="text-justify leading-relaxed font-normal">
-                            <strong>Datenerfassung:</strong> Diese Applikation ist eine sogenannte "Client-Side Application". Das bedeutet, alle Eingaben (Gewichte, Maße, Winkel), werden <strong>ausschließlich lokal</strong> im Browser verarbeitet (In-Memory). Es findet <strong>keine Übertragung</strong> der Eingabedaten an externe Server oder Datenbanken statt. Sobald der Tab geschlossen oder die Seite neu geladen wird, werden die Daten gelöscht.
-                        </p>
-                    </div>
-
-                    <div>
-                        <h4 className="font-bold text-slate-800 mb-2">2. Hosting (Vercel)</h4>
-                        <p className="text-justify leading-relaxed font-normal">
-                            Diese Applikation wird bei dem externen Dienstleister Vercel Inc., 340 S Lemon Ave #4133 Walnut, CA 91789, USA (im Folgenden „Vercel“) gehostet.
-                        </p>
-                        <p className="text-justify leading-relaxed mt-2 font-normal">
-                            Beim Aufruf der Applikation erfasst Vercel automatisch Daten und Informationen vom Computersystem des aufrufenden Rechners in sogenannten Server-Log-Dateien. Dies ist technisch notwendig, um die Website sicher und stabil auszuliefern. Erfasst werden können u.a.:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-xs text-slate-500 font-normal">
-                            <li>Browsertyp und Browserversion</li>
-                            <li>Verwendetes Betriebssystem</li>
-                            <li>Referrer URL (die zuvor besuchte Seite)</li>
-                            <li>Hostname des zugreifenden Rechners</li>
-                            <li>Uhrzeit der Serveranfrage</li>
-                            <li>IP-Adresse (ggf. anonymisiert)</li>
-                        </ul>
-                    </div>
-                </div>
-            )}
-          </div>
-      </div>
-      <AppVersionFooter />
-    </div>
-  );
-}
-
 // --- WOOD CALCULATOR ---
 function WoodCalculator() {
   const [vehicleType, setVehicleType] = useState('semi'); // 'semi' (Sattel) or 'train' (Gliederzug)
+  // ... (State & Variables same as before) ...
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [tractorWeight, setTractorWeight] = useState('');
   const [trailerWeight, setTrailerWeight] = useState('');
-  // Dimensions 1 (Sattel or LKW)
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
-  // Dimensions 2 (Only for Train/Anhänger)
   const [length2, setLength2] = useState('');
   const [width2, setWidth2] = useState('');
   const [height2, setHeight2] = useState('');
-
   const [woodType, setWoodType] = useState('Akazie ganz frisch'); 
   const dateTime = useDateTime();
 
@@ -720,6 +686,7 @@ function WoodCalculator() {
     }
   }, [tractorWeight, trailerWeight]);
 
+  // ... (Wood Types Array same as before) ...
   const woodTypes = [
     { name: 'Akazie ganz frisch', density: 950 },
     { name: 'Akazie waldtrocken', density: 800 },
@@ -869,15 +836,15 @@ function WoodCalculator() {
         {/* FAHRZEUGTYP WAHL */}
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 break-inside-avoid">
             <button onClick={() => setVehicleType('semi')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${vehicleType === 'semi' ? 'bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <Truck className="w-6 h-6" />
+                <WoodTruckIcon className="w-8 h-8" />
                 <span className="text-[10px] font-bold uppercase">Sattelzug</span>
             </button>
             <button onClick={() => setVehicleType('train')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${vehicleType === 'train' ? 'bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <TruckTrailerIcon className="w-8 h-8" />
+                <WoodTrainIcon className="w-8 h-8" />
                 <span className="text-[10px] font-bold uppercase">LKW + Anhänger</span>
             </button>
         </div>
-
+        {/* ... (Rest of Wood Calculator same as before) ... */}
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
            <div className="grid grid-cols-2 gap-2 mb-2">
                <InputWithIcon icon={Truck} label={vehicleType === 'semi' ? "Leergewicht Zugm. (kg)" : "Leergewicht LKW (kg)"} value={tractorWeight} onChange={(e) => setTractorWeight(e.target.value)} placeholder="0" />
@@ -925,34 +892,143 @@ function WoodCalculator() {
 }
 
 // --- OVERLOAD CALCULATOR ---
+
+const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role) => {
+    if (percentage < 2) return null; // Toleranzbereich
+    const p = percentage;
+
+    // --- FAHRER (Driver) ---
+    if (role === 'driver') {
+        // 1. Trailer <= 2t
+        if (isTrailer && allowed <= 2000) {
+            if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '334698' }; // Annahme Fortführung
+            if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '334697' };
+            if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '334696' };
+            if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '334198' };
+            if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '334197' };
+            if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '334196' };
+            return null;
+        }
+        // 2. Trailer > 2t OR Truck > 7.5t OR Combination > 7.5t
+        // (Simplified logic: Heavy vehicles generally follow similar strict rules)
+        if ((isTrailer && allowed > 2000) || (!isTrailer && allowed > 7500) || (isCombination && allowed > 7500)) {
+            if (p > 30) return { cost: '380 €', points: '1', ban: '', tbnr: '334641' }; 
+            if (p > 25) return { cost: '285 €', points: '1', ban: '', tbnr: '334640' };
+            if (p > 20) return { cost: '190 €', points: '1', ban: '', tbnr: '334639' };
+            if (p > 15) return { cost: '140 €', points: '1', ban: '', tbnr: '334638' };
+            if (p > 10) return { cost: '110 €', points: '1', ban: '', tbnr: '334637' };
+            if (p > 5)  return { cost: '80 €', points: '1', ban: '', tbnr: '334636' };
+            if (p >= 2) return { cost: '30 €', points: '0', ban: '', tbnr: '334136' }; // 2-5%
+            return null;
+        }
+        // 3. Truck <= 7.5t OR Combination <= 7.5t
+        if ((!isTrailer && allowed <= 7500) || (isCombination && allowed <= 7500)) {
+            if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '334662' };
+            if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '334661' };
+            if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '334660' };
+            if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '334162' };
+            if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '334161' };
+            if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '334160' };
+            return null;
+        }
+    }
+
+    // --- HALTER (Owner) ---
+    if (role === 'owner') {
+        // 1. Trailer <= 2t
+        if (isTrailer && allowed <= 2000) {
+            if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331870' }; // Annahme
+            if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331869' };
+            if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331868' };
+            if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331228' };
+            if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331227' };
+            if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331226' };
+            return null;
+        }
+        // 2. Trailer > 2t OR Truck > 7.5t OR Combination > 7.5t
+        if ((isTrailer && allowed > 2000) || (!isTrailer && allowed > 7500) || (isCombination && allowed > 7500)) {
+            if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331897' }; // High bracket often 425 for owner
+            if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' };
+            if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331823' };
+            if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331822' };
+            if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331821' };
+            if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331820' };
+            if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331166' }; // 2-5%
+            return null;
+        }
+         // 3. Truck <= 7.5t OR Combination <= 7.5t
+        if ((!isTrailer && allowed <= 7500) || (isCombination && allowed <= 7500)) {
+            if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331846' };
+            if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331845' };
+            if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331844' };
+            if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331192' };
+            if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331191' };
+            if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331190' };
+            return null;
+        }
+    }
+    return null;
+};
+
+const FineDisplay = ({ result, isTrailer, isCombination }) => {
+    const [showDriver, setShowDriver] = useState(false);
+    const [showOwner, setShowOwner] = useState(false);
+
+    if (!result || !result.isOverloaded || result.percentage < 2) return null;
+
+    const driverFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'driver');
+    const ownerFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'owner');
+
+    return (
+        <div className="mt-4 space-y-2">
+            {/* DRIVER BUTTON */}
+            <button onClick={() => setShowDriver(!showDriver)} className="w-full flex justify-between items-center px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold uppercase transition-colors">
+                <span>Tatbestand Fahrer</span>
+                {showDriver ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+            </button>
+            {showDriver && driverFine && (
+                <div className="bg-slate-800 text-white p-3 rounded-lg text-xs animate-in slide-in-from-top-1">
+                     <div className="grid grid-cols-2 gap-2">
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld</div><div className="text-xl font-black text-amber-400">{driverFine.cost}</div></div>
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{driverFine.points}</div></div>
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-700 px-1 py-0.5 rounded inline-block">{driverFine.tbnr}</div></div>
+                     </div>
+                </div>
+            )}
+
+             {/* OWNER BUTTON */}
+            <button onClick={() => setShowOwner(!showOwner)} className="w-full flex justify-between items-center px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase transition-colors">
+                <span>Tatbestand Halter</span>
+                {showOwner ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+            </button>
+            {showOwner && ownerFine && (
+                <div className="bg-slate-700 text-white p-3 rounded-lg text-xs animate-in slide-in-from-top-1">
+                     <div className="grid grid-cols-2 gap-2">
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld</div><div className="text-xl font-black text-amber-400">{ownerFine.cost}</div></div>
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{ownerFine.points}</div></div>
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-600 px-1 py-0.5 rounded inline-block">{ownerFine.tbnr}</div></div>
+                     </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 function OverloadCalculator() {
-  const [mode, setMode] = useState('single'); // 'single' (LKW) or 'combination' (LKW + Anhänger)
-  
+  const [mode, setMode] = useState('single'); 
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
   const [allowedWeight2, setAllowedWeight2] = useState('');
   const [actualWeight2, setActualWeight2] = useState('');
-  // New: Total Train Allowed Weight
   const [totalAllowed, setTotalAllowed] = useState('');
-  
   const [result, setResult] = useState(null);
   const dateTime = useDateTime();
 
-  // Reset when switching modes
-  useEffect(() => {
-     setResult(null);
-     setAllowedWeight2('');
-     setActualWeight2('');
-     setTotalAllowed('');
-  }, [mode]);
+  useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); }, [mode]);
 
   useEffect(() => {
-    // If single mode, only need 1. If combo, need 1 and 2.
-    if (mode === 'single') {
-        if (!actualWeight1) { setResult(null); return; }
-    } else {
-        if (!actualWeight1 || !actualWeight2) { setResult(null); return; }
-    }
+    if (mode === 'single') { if (!actualWeight1) { setResult(null); return; } } 
+    else { if (!actualWeight1 || !actualWeight2) { setResult(null); return; } }
 
     const calculateForVehicle = (allowedStr, actualStr) => {
         const allowed = parseFloat(allowedStr);
@@ -965,25 +1041,13 @@ function OverloadCalculator() {
         else tolerance = 60;
 
         let netWeightRaw = actual - tolerance;
-        // Logic: <= 3500 floor, else ceil
         let netWeight = (allowed > 0 && allowed <= 3500) ? Math.floor(netWeightRaw) : Math.ceil(netWeightRaw);
-        // Fallback if no allowed provided (assume > 3.5t logic usually for trucks)
         if (isNaN(allowed) || allowed === 0) netWeight = Math.ceil(netWeightRaw);
         
         let difference = isNaN(allowed) || allowed === 0 ? 0 : netWeight - allowed;
         let percentage = (difference > 0 && allowed > 0) ? (difference / allowed) * 100 : 0;
         
-        let confiscationPossible = false;
-        if (allowed > 0 && difference > 0) {
-            if (allowed <= 7500) {
-                if (allowed <= 3500 && percentage >= 20) { confiscationPossible = true; }
-                else if (allowed > 3500 && percentage >= 15) { confiscationPossible = true; }
-            } else {
-                 if (percentage >= 15) { confiscationPossible = true; }
-            }
-        }
-
-        return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(actual), confiscationPossible };
+        return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(actual) };
     };
 
     const res1 = calculateForVehicle(allowedWeight1, actualWeight1);
@@ -994,25 +1058,22 @@ function OverloadCalculator() {
         res2 = calculateForVehicle(allowedWeight2, actualWeight2);
         
         if (res1 && res2) {
-            // CORRECTED LOGIC: Total Net Weight is sum of individual Net Weights (Tolerances applied individually)
+            // UPDATED LOGIC: Total Net = Net1 (after tol) + Net2 (after tol)
             const sumNet = res1.netWeight + res2.netWeight;
             const limit = parseFloat(totalAllowed);
 
             let diff = (!isNaN(limit) && limit > 0) ? sumNet - limit : 0;
             let perc = (diff > 0 && limit > 0) ? (diff / limit) * 100 : 0;
-            // Confiscation rule for entire train generally same as heavy trucks (> 15% usually trigger)
-            let confiscation = (limit > 0 && diff > 0 && perc >= 15);
 
             resTotal = {
-                actual: res1.actual + res2.actual, // Just for display if needed
+                actual: res1.actual + res2.actual, 
                 allowed: limit,
-                tolerance: res1.tolerance + res2.tolerance, // Just for display
+                tolerance: res1.tolerance + res2.tolerance, // Sum of tolerances shown for info
                 netWeight: sumNet,
                 difference: diff,
                 percentage: perc,
                 isOverloaded: limit > 0 && diff > 0,
-                isValidInput: !isNaN(limit) && limit > 0,
-                confiscationPossible: confiscation
+                isValidInput: !isNaN(limit) && limit > 0
             };
         }
     }
@@ -1045,167 +1106,154 @@ function OverloadCalculator() {
         </div>
 
         {/* INPUTS */}
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-            <div className="flex items-center gap-2 mb-2 text-blue-700">
-                <Truck className="w-5 h-5" />
-                <span className="text-sm font-black uppercase tracking-wide">
-                    {mode === 'single' ? "Fahrzeug / LKW" : "Zugmaschine / LKW"}
-                </span>
-            </div>
-            <div className="space-y-2">
-                <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} />
-                <InputWithIcon icon={Scale} label="Ist-Gewicht (Brutto)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} />
-            </div>
-        </div>
-
-        {mode === 'combination' && (
-            <>
-            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid animate-in slide-in-from-top-2">
+        <div className="grid grid-cols-2 gap-2 break-inside-avoid">
+            {/* Vehicle 1 Input */}
+            <div className={`bg-white p-3 rounded-2xl shadow-sm border border-slate-100 ${mode === 'single' ? 'col-span-2' : 'col-span-1'}`}>
                 <div className="flex items-center gap-2 mb-2 text-blue-700">
-                    <Box className="w-5 h-5" />
-                    <span className="text-sm font-black uppercase tracking-wide">Anhänger / Auflieger</span>
+                    <Truck className="w-4 h-4" />
+                    <span className="text-xs font-black uppercase tracking-wide">
+                        {mode === 'single' ? "Fahrzeug" : "Zugmaschine"}
+                    </span>
                 </div>
                 <div className="space-y-2">
-                    <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} />
-                    <InputWithIcon icon={Scale} label="Ist-Gewicht (Brutto)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} />
+                    <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} />
+                    <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} />
                 </div>
             </div>
 
+            {/* Vehicle 2 Input */}
+            {mode === 'combination' && (
+                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 col-span-1 animate-in slide-in-from-right-2">
+                    <div className="flex items-center gap-2 mb-2 text-blue-700">
+                        <Box className="w-4 h-4" />
+                        <span className="text-xs font-black uppercase tracking-wide">Anhänger</span>
+                    </div>
+                    <div className="space-y-2">
+                        <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} />
+                        <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} />
+                    </div>
+                </div>
+            )}
+        </div>
+
+        {/* Total Input */}
+        {mode === 'combination' && (
              <div className="bg-slate-50 p-3 rounded-2xl shadow-inner border border-slate-200 break-inside-avoid animate-in slide-in-from-top-2">
                 <div className="flex items-center gap-2 mb-2 text-slate-600">
                     <Weight className="w-5 h-5" />
                     <span className="text-sm font-black uppercase tracking-wide">Gesamter Zug</span>
                 </div>
                 <div className="space-y-2">
-                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} placeholder="Oft weniger als Summe!" />
+                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} placeholder="zGM Zug laut Schein" />
                 </div>
             </div>
-            </>
         )}
 
         {!result && <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width"><Info className="w-5 h-5 shrink-0" /><p>Bitte füllen Sie die Felder für eine Berechnung aus.</p></div>}
       </div>
 
       {result && (
-        <div className="bg-slate-100 border-t border-slate-200 p-4 animate-in slide-in-from-bottom-4 duration-500 pb-20 print-full-width">
-          <div className="space-y-4">
-             {/* RESULT 1 */}
+        <div className="bg-slate-100 border-t border-slate-200 p-2 animate-in slide-in-from-bottom-4 duration-500 pb-20 print-full-width">
+          {/* GRID LAYOUT FOR RESULTS */}
+          <div className={`grid gap-2 ${mode === 'combination' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+             
+             {/* RESULT 1 (Truck/Vehicle) */}
              {result.vehicle1 && result.vehicle1.isValidInput && (
                  <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
                     <div className="flex justify-between items-center mb-1.5">
-                        <span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm">
-                            <Truck className="w-4 h-4 text-slate-400"/> {mode === 'single' ? 'Fahrzeug' : 'Zugmaschine'}
+                        <span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
+                            <Truck className="w-3 h-3 text-slate-400"/> {mode === 'single' ? 'Fahrzeug' : 'Zugm.'}
                         </span>
-                        <span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
                     </div>
                      
-                     {/* OVERLOAD DISPLAY BLOCK - Percentage Focused */}
                      {result.vehicle1.isOverloaded ? (
                         <div className="text-center py-2">
-                            <div className="text-3xl font-black text-red-600 tracking-tighter">
-                                {result.vehicle1.percentage.toFixed(2)} <span className="text-xl">%</span>
+                            <div className="text-2xl font-black text-red-600 tracking-tighter">
+                                {result.vehicle1.percentage.toFixed(2)} <span className="text-sm">%</span>
                             </div>
-                            <div className="text-xs font-bold uppercase text-red-400 mb-1">Überladung</div>
-                            <div className="inline-block bg-red-50 text-red-700 px-2 py-0.5 rounded text-sm font-bold border border-red-100">
+                            <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
                                 + {result.vehicle1.difference.toLocaleString()} kg
                             </div>
-                            {result.vehicle1.confiscationPossible && (
-                                <div className="mt-3 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center justify-center gap-2">
-                                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
-                                </div>
-                            )}
                         </div>
                      ) : (
-                        <div className="flex justify-between items-end mb-1"><span className="text-xs text-slate-500">Vorwerfbar:</span><span className="text-xl font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
+                        <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
                      )}
-
-                     {!result.vehicle1.isOverloaded && <ProgressBar current={result.vehicle1.netWeight} max={result.vehicle1.allowed} isOverloaded={result.vehicle1.isOverloaded} />}
                      
                      <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />
+                     
+                     <FineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
                  </div>
              )}
              
-             {/* RESULT 2 */}
+             {/* RESULT 2 (Trailer) */}
              {result.vehicle2 && result.vehicle2.isValidInput && (
                  <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all break-inside-avoid ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-sm"><Box className="w-4 h-4 text-slate-400"/> Anhänger</span><span className={`px-2 py-0.5 rounded-[6px] text-xs font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
+                    <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs"><Box className="w-3 h-3 text-slate-400"/> Anhänger</span><span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
                     
-                    {/* OVERLOAD DISPLAY BLOCK - Percentage Focused */}
                      {result.vehicle2.isOverloaded ? (
                         <div className="text-center py-2">
-                            <div className="text-3xl font-black text-red-600 tracking-tighter">
-                                {result.vehicle2.percentage.toFixed(2)} <span className="text-xl">%</span>
+                            <div className="text-2xl font-black text-red-600 tracking-tighter">
+                                {result.vehicle2.percentage.toFixed(2)} <span className="text-sm">%</span>
                             </div>
-                            <div className="text-xs font-bold uppercase text-red-400 mb-1">Überladung</div>
-                            <div className="inline-block bg-red-50 text-red-700 px-2 py-0.5 rounded text-sm font-bold border border-red-100">
+                            <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
                                 + {result.vehicle2.difference.toLocaleString()} kg
                             </div>
-                            {result.vehicle2.confiscationPossible && (
-                                <div className="mt-3 bg-amber-50 rounded-lg p-2 border border-amber-200 text-amber-800 text-xs font-bold flex items-center justify-center gap-2">
-                                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
-                                </div>
-                            )}
                         </div>
                      ) : (
-                        <div className="flex justify-between items-end mb-1"><span className="text-xs text-slate-500">Vorwerfbar:</span><span className="text-xl font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
+                        <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
                      )}
-
-                     {!result.vehicle2.isOverloaded && <ProgressBar current={result.vehicle2.netWeight} max={result.vehicle2.allowed} isOverloaded={result.vehicle2.isOverloaded} />}
 
                      <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />
-                 </div>
-             )}
-
-             {/* RESULT TOTAL TRAIN */}
-             {result.total && result.total.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-4 shadow-xl transition-all break-inside-avoid ${result.total.isOverloaded ? 'bg-red-50 border-red-600' : 'bg-slate-50 border-slate-400'}`}>
-                    <div className="flex justify-between items-center mb-1.5">
-                        <span className="font-black text-slate-800 flex items-center gap-1.5 text-base uppercase tracking-wider">
-                            <TruckTrailerIcon className="w-6 h-6"/> Gesamter Zug
-                        </span>
-                        <span className={`px-3 py-1 rounded-lg text-sm font-black uppercase ${result.total.isOverloaded ? 'bg-red-600 text-white' : 'bg-slate-600 text-white'}`}>{result.total.isOverloaded ? 'ZUG ÜBERLADEN' : 'ZUG OK'}</span>
-                    </div>
-                    
-                    {/* OVERLOAD DISPLAY BLOCK - Percentage Focused */}
-                     {result.total.isOverloaded ? (
-                        <div className="text-center py-4">
-                            <div className="text-5xl font-black text-red-600 tracking-tighter drop-shadow-sm">
-                                {result.total.percentage.toFixed(2)} <span className="text-2xl">%</span>
-                            </div>
-                            <div className="text-sm font-bold uppercase text-red-400 mb-2">Gesamt-Überladung</div>
-                            <div className="inline-block bg-white text-red-700 px-3 py-1 rounded-lg text-base font-black border border-red-100 shadow-sm">
-                                + {result.total.difference.toLocaleString()} kg
-                            </div>
-                            {result.total.confiscationPossible && (
-                                <div className="mt-4 bg-red-100 rounded-lg p-3 border border-red-300 text-red-900 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
-                                    <AlertTriangle className="w-5 h-5 shrink-0" />
-                                    <span>! Bei gewerblichem Transport: Einziehung möglich!</span>
-                                </div>
-                            )}
-                        </div>
-                     ) : (
-                         <>
-                            <div className="flex justify-between items-end mb-2 mt-2">
-                                <span className="text-xs font-bold text-slate-500 uppercase">Gewicht (Vorwerfbar):</span>
-                                <span className="text-2xl font-black text-slate-900">{result.total.netWeight.toLocaleString()} kg</span>
-                            </div>
-
-                            <div className="relative h-4 bg-white rounded-full overflow-hidden border border-slate-300">
-                                <div className={`h-full transition-all duration-500 ${result.total.isOverloaded ? 'bg-red-600' : 'bg-slate-600'}`} style={{ width: `${Math.min(100, (result.total.netWeight / result.total.allowed) * 100)}%` }}></div>
-                            </div>
-                            <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1 uppercase">
-                                <span>0 kg</span>
-                                <span>Max: {parseFloat(result.total.allowed).toLocaleString()} kg</span>
-                            </div>
-                         </>
-                     )}
                      
-                     <OverloadFormulaDisplay values={{ actual: result.total.actual, tolerance: result.total.tolerance, net: result.total.netWeight, allowed: result.total.allowed, diff: result.total.difference, percent: result.total.percentage }} isTotal={true} />
+                     <FineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
                  </div>
              )}
           </div>
+
+          {/* RESULT TOTAL TRAIN (Full Width) */}
+          {result.total && result.total.isValidInput && (
+              <div className={`mt-2 p-3 rounded-2xl border-4 shadow-xl transition-all break-inside-avoid ${result.total.isOverloaded ? 'bg-red-50 border-red-600' : 'bg-slate-50 border-slate-400'}`}>
+                <div className="flex justify-between items-center mb-1.5">
+                    <span className="font-black text-slate-800 flex items-center gap-1.5 text-base uppercase tracking-wider">
+                        <TruckTrailerIcon className="w-6 h-6"/> Gesamter Zug
+                    </span>
+                    <span className={`px-3 py-1 rounded-lg text-sm font-black uppercase ${result.total.isOverloaded ? 'bg-red-600 text-white' : 'bg-slate-600 text-white'}`}>{result.total.isOverloaded ? 'ZUG ÜBERLADEN' : 'ZUG OK'}</span>
+                </div>
+                
+                    {result.total.isOverloaded ? (
+                    <div className="text-center py-4">
+                        <div className="text-5xl font-black text-red-600 tracking-tighter drop-shadow-sm">
+                            {result.total.percentage.toFixed(2)} <span className="text-2xl">%</span>
+                        </div>
+                        <div className="text-sm font-bold uppercase text-red-400 mb-2">Gesamt-Überladung</div>
+                        <div className="inline-block bg-white text-red-700 px-3 py-1 rounded-lg text-base font-black border border-red-100 shadow-sm">
+                            + {result.total.difference.toLocaleString()} kg
+                        </div>
+                    </div>
+                    ) : (
+                        <>
+                        <div className="flex justify-between items-end mb-2 mt-2">
+                            <span className="text-xs font-bold text-slate-500 uppercase">Gewicht (Vorwerfbar):</span>
+                            <span className="text-2xl font-black text-slate-900">{result.total.netWeight.toLocaleString()} kg</span>
+                        </div>
+
+                        <div className="relative h-4 bg-white rounded-full overflow-hidden border border-slate-300">
+                            <div className={`h-full transition-all duration-500 ${result.total.isOverloaded ? 'bg-red-600' : 'bg-slate-600'}`} style={{ width: `${Math.min(100, (result.total.netWeight / result.total.allowed) * 100)}%` }}></div>
+                        </div>
+                        <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1 uppercase">
+                            <span>0 kg</span>
+                            <span>Max: {parseFloat(result.total.allowed).toLocaleString()} kg</span>
+                        </div>
+                        </>
+                    )}
+                    
+                    <OverloadFormulaDisplay values={{ actual: result.total.actual, tolerance: result.total.tolerance, net: result.total.netWeight, allowed: result.total.allowed, diff: result.total.difference, percent: result.total.percentage }} isTotal={true} />
+                    
+                    <FineDisplay result={result.total} isTrailer={false} isCombination={true} />
+                </div>
+            )}
+
           <button onClick={resetForm} className="mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">Alle Eingaben löschen</button>
         </div>
       )}
@@ -1219,22 +1267,22 @@ function LashingCalculator() {
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
-  
+  // ... (Same Friction options) ...
   const FRICTION_OPTIONS = [
-    { id: '0.20_dirty', val: 0.20, label: '0,20 μ - Nicht besenrein (verschmutzt) (Q: DIN EN 12195-1)' },
-    { id: '0.20_metal', val: 0.20, label: '0,20 μ - Metall auf Metall (Q: DIN EN 12195-1)' },
-    { id: '0.25_gitter', val: 0.25, label: '0,25 μ - Gitterbox auf Siebdruckboden (Q: TUL-LOG)' },
-    { id: '0.25_kunststoff', val: 0.25, label: '0,25 μ - Kunststoffpalette auf Siebdruckboden (DGUV)' },
-    { id: '0.25_papier', val: 0.25, label: '0,25 μ - Papierrolle auf Siebdruckboden (Q: VDI 2700 Blatt 9)' },
-    { id: '0.30_holz_mehrweg', val: 0.30, label: '0,30 μ - Holzpalette Mehrweg auf Siebdruckboden (Q: DEKRA)' },
-    { id: '0.35_papier_joloda', val: 0.35, label: '0,35 μ - Papierrolle Siebdruckboden mit Joloda (Q: VDI 2700 Blatt 9)' },
-    { id: '0.35_stroh', val: 0.35, label: '0,35 μ - Strohballen auf Siebdruckboden (Q: DEKRA)' },
-    { id: '0.40_kantholz', val: 0.40, label: '0,40 μ - Kantholz auf Siebdruckboden (Q: DIN EN 12195-1)' },
-    { id: '0.45_holz_einweg', val: 0.45, label: '0,45 μ - Holzpalette Einweg auf Siebdruckboden (Q: Fraunhofer)' },
-    { id: '0.45_stahlkiste', val: 0.45, label: '0,45 μ - Stahlkiste auf Siebdruckboden (Q: DIN EN 12195-1)' },
-    { id: '0.45_gummireifen', val: 0.45, label: '0,45 μ - Gummireifen auf Siebdruckboden (Q: DEKRA)' },
-    { id: '0.55_betonware', val: 0.55, label: '0,55 μ - Betonware auf Siebdruckboden (Q: Fraunhofer)' },
-    { id: '0.60_antirutsch', val: 0.60, label: '0,60 μ - Antirutschmatte (Q: DIN EN 12195-1)' },
+    { id: '0.20_dirty', val: 0.20, label: '0,20 μ - Nicht besenrein (verschmutzt)' },
+    { id: '0.20_metal', val: 0.20, label: '0,20 μ - Metall auf Metall' },
+    { id: '0.25_gitter', val: 0.25, label: '0,25 μ - Gitterbox auf Siebdruckboden' },
+    { id: '0.25_kunststoff', val: 0.25, label: '0,25 μ - Kunststoffpalette auf Siebdruckboden' },
+    { id: '0.25_papier', val: 0.25, label: '0,25 μ - Papierrolle auf Siebdruckboden' },
+    { id: '0.30_holz_mehrweg', val: 0.30, label: '0,30 μ - Holzpalette Mehrweg auf Siebdruckboden' },
+    { id: '0.35_papier_joloda', val: 0.35, label: '0,35 μ - Papierrolle Siebdruckboden mit Joloda' },
+    { id: '0.35_stroh', val: 0.35, label: '0,35 μ - Strohballen auf Siebdruckboden' },
+    { id: '0.40_kantholz', val: 0.40, label: '0,40 μ - Kantholz auf Siebdruckboden' },
+    { id: '0.45_holz_einweg', val: 0.45, label: '0,45 μ - Holzpalette Einweg auf Siebdruckboden' },
+    { id: '0.45_stahlkiste', val: 0.45, label: '0,45 μ - Stahlkiste auf Siebdruckboden' },
+    { id: '0.45_gummireifen', val: 0.45, label: '0,45 μ - Gummireifen auf Siebdruckboden' },
+    { id: '0.55_betonware', val: 0.55, label: '0,55 μ - Betonware auf Siebdruckboden' },
+    { id: '0.60_antirutsch', val: 0.60, label: '0,60 μ - Antirutschmatte' },
   ];
 
   const [selectedFrictionId, setSelectedFrictionId] = useState('0.30_holz_mehrweg');
@@ -1254,8 +1302,8 @@ function LashingCalculator() {
   const [stf, setStf] = useState('500');
   const [angle, setAngle] = useState('90');
   const [wallFront, setWallFront] = useState(''); 
-  const [wallSide, setWallSide] = useState('');   
-  const [wallRear, setWallRear] = useState('');   
+  const [wallSide, setWallSide] = useState('');    
+  const [wallRear, setWallRear] = useState('');    
   const [fitFront, setFitFront] = useState(false);
   const [fitSide, setFitSide] = useState(false);
   const [fitRear, setFitRear] = useState(false);
@@ -1264,6 +1312,7 @@ function LashingCalculator() {
   const [lashingResult, setLashingResult] = useState(null);
   const [fineGroups, setFineGroups] = useState([]);
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
+  const [showFines, setShowFines] = useState(false);
   const dateTime = useDateTime();
 
   const handleBlur = (type, val, setter) => {
@@ -1302,7 +1351,6 @@ function LashingCalculator() {
       setLashingResult(null); return;
     }
     
-    // Bußgeld-Logik (unverändert)
     let groups = [];
     if (maxWeight > 0) {
         if (maxWeight > 3500) {
@@ -1333,15 +1381,15 @@ function LashingCalculator() {
     } 
     // CASE 2: 2000 kg - 3500 kg
     else if (maxWeight <= 3500) {
-        accFwd = isTipping ? 0.96 : 0.80; // Vorgabe: 0.8 / 0.96
-        accSide = isTipping ? 0.72 : 0.60; // Vorgabe: 0.6 / 0.72
-        accRear = isTipping ? 0.60 : 0.50; // Vorgabe: 0.5 / 0.60
+        accFwd = isTipping ? 0.96 : 0.80; 
+        accSide = isTipping ? 0.72 : 0.60;
+        accRear = isTipping ? 0.60 : 0.50;
     } 
-    // CASE 3: > 3500 kg (Standard/Old values if not specified otherwise, but standard is usually 0.8/0.5)
+    // CASE 3: > 3500 kg 
     else {
-        accFwd = isTipping ? 0.96 : 0.80; // Standard Truck
-        accSide = isTipping ? 0.60 : 0.50; // Standard Truck
-        accRear = isTipping ? 0.60 : 0.50; // Standard Truck
+        accFwd = isTipping ? 0.96 : 0.80;
+        accSide = isTipping ? 0.60 : 0.50;
+        accRear = isTipping ? 0.60 : 0.50;
     }
 
     const calculateN = (acc, blockingDaN, direction) => {
@@ -1352,25 +1400,17 @@ function LashingCalculator() {
 
        // SPECIAL FORMULA FOR <= 3.5t
        if (!maxWeight || maxWeight <= 3500) {
-           // Formula: (((Weight*Acc) - Wall - (Weight*Friction))) / (1.8 * sin(a) * Friction * STF)
            const numerator = (weightForce * acc) - blockingForce - (weightForce * mu);
            if (numerator <= 0) return 0;
-           
-           // Denominator uses 1.8 instead of 2.0 or 1.5 safety factor logic directly
-           // Denominator = 1.8 * sin(alpha) * mu * STF_Newton
            const denominator = 1.8 * Math.sin(alphaRad) * mu * stfInNewton;
-           
            if (denominator <= 0) return 0; // Avoid division by zero
            n = numerator / denominator;
-           
            return Math.floor(n); 
        } 
        
        // STANDARD FORMULA FOR > 3.5t
        else {
-            // Standard Safety Factor Logic
            let safetyFactor = (direction === 'forward') ? 1.25 : 1.1; 
-
            const numerator = (weightForce * acc) - blockingForce - (weightForce * mu);
            if (numerator <= 0) return 0;
            const denominator = stfInNewton * 2 * mu * Math.sin(alphaRad); // Standard denominator
@@ -1462,8 +1502,8 @@ function LashingCalculator() {
                 {selectedFrictionId === 'CUSTOM' ? (
                   <div className="flex gap-1">
                     <div className="relative w-full">
-                       <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
-                       <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
+                        <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
+                        <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
                     </div>
                     <button onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
                   </div>
@@ -1548,7 +1588,7 @@ function LashingCalculator() {
           </div>
           <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
           <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
-             Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
+              Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
           </span>
         </label>
 
@@ -1599,13 +1639,16 @@ function LashingCalculator() {
             
             {fineGroups.length > 0 && (
               <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
-                <div className="flex items-center gap-2 mb-1">
-                   <Gavel className="w-5 h-5 text-slate-400" />
-                   <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
-                </div>
+                <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                        <Gavel className="w-5 h-5 text-slate-400" />
+                        <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
+                    </div>
+                    {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
+                </button>
                 
-                {fineGroups.map((group, gIdx) => (
-                    <div key={gIdx} className="mt-4 first:mt-2">
+                {showFines && fineGroups.map((group, gIdx) => (
+                    <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
                         {group.title && (
                             <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
                         )}
@@ -1623,11 +1666,11 @@ function LashingCalculator() {
                                 <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
                                   <td className="px-3 py-2.5">
                                     <div className="flex items-start gap-2">
-                                       <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
-                                       <div>
+                                        <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                        <div>
                                             <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
                                             {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
-                                       </div>
+                                        </div>
                                     </div>
                                   </td>
                                   <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
@@ -1650,6 +1693,148 @@ function LashingCalculator() {
         )}
       </div>
       <AppVersionFooter />
+    </div>
+  );
+}
+
+// --- INFO VIEW (No Changes needed, but included for completeness) ---
+function InfoView() {
+  const dateTime = useDateTime();
+  const [view, setView] = useState('notes');
+
+  return (
+    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+      <div className="bg-slate-800/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-slate-900/10">
+        <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><FileText className="w-6 h-6 shrink-0" />Rechtliche Hinweise</h1><p className="text-slate-400 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
+        <HeaderLogo />
+      </div>
+      <div className="p-3">
+          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto">
+            <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Haftung & Nutzung</button>
+            <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Impressum</button>
+            <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Datenschutz</button>
+          </div>
+          
+          <div className="animate-in fade-in duration-300 pb-20">
+            {view === 'notes' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-3 text-slate-700 pb-2 border-b border-slate-50"><ShieldAlert className="w-5 h-5 text-amber-500" /><h3 className="font-black uppercase tracking-wide text-xs">Haftungsausschluss (Disclaimer)</h3></div>
+                        
+                        <p className="text-slate-600 text-sm leading-relaxed text-justify mb-4 font-normal">
+                            <strong>Keine Gewähr für Richtigkeit:</strong> Trotz sorgfältiger Programmierung und Prüfung wird keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der berechneten Ergebnisse übernommen. Die Ergebnisse stellen <u>keinen</u> rechtsverbindlichen Beweis dar und ersetzen keine amtliche Verwiegung oder gutachterliche Berechnung.
+                        </p>
+                         <p className="text-slate-600 text-sm leading-relaxed text-justify font-normal">
+                            Die Nutzung der Applikation erfolgt auf eigene Gefahr. Für Schäden oder Rechtsfolgen, die aus der Nutzung der hier bereitgestellten Daten entstehen, wird keine Haftung übernommen.
+                        </p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-3 text-slate-700 pb-2 border-b border-slate-50"><Copyright className="w-5 h-5 text-indigo-500" /><h3 className="font-black uppercase tracking-wide text-xs">Geistiges Eigentum</h3></div>
+                         <p className="text-slate-600 text-sm leading-relaxed text-justify font-normal">
+                            Alle Inhalte, das Design, der Quellcode sowie die in dieser Applikation enthaltenen Grafiken und Berechnungslogiken sind urheberrechtlich geschützt.
+                        </p>
+                         <p className="text-slate-600 text-sm leading-relaxed text-justify mt-2 font-normal">
+                            Eine Vervielfältigung, Bearbeitung, Verbreitung oder jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des Erstellers. Downloads und Kopien sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {view === 'impressum' && (
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5 text-sm text-slate-600">
+                     <div className="flex items-center gap-2 mb-1 text-slate-800 pb-2 border-b border-slate-100"><Briefcase className="w-5 h-5" /><h3 className="font-black uppercase tracking-wide text-sm">Impressum</h3></div>
+                    
+                    <div>
+                        <h4 className="font-bold text-xs uppercase text-slate-400 mb-1">Angaben gemäß § 5 DDG</h4>
+                        <p className="text-slate-800 font-normal">Simon Demel</p>
+                        <p className="font-normal">Ellen-Gottlieb Straße 15</p>
+                        <p className="font-normal">79106 Freiburg im Breisgau</p>
+                    </div>
+
+                    <div>
+                         <h4 className="font-bold text-xs uppercase text-slate-400 mb-1">Kontakt</h4>
+                         <p className="font-normal">E-Mail: demelsimon1@gmail.com</p>
+                    </div>
+
+                    <div className="text-xs text-slate-400 pt-4 border-t border-slate-50 font-normal">
+                        <p>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV: Simon Demel (Anschrift wie oben)</p>
+                    </div>
+                </div>
+            )}
+
+            {view === 'privacy' && (
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5 text-sm text-slate-600">
+                     <div className="flex items-center gap-2 mb-1 text-slate-800 pb-2 border-b border-slate-100"><Lock className="w-5 h-5" /><h3 className="font-black uppercase tracking-wide text-sm">Datenschutzerklärung</h3></div>
+                    
+                    <div>
+                        <h4 className="font-bold text-slate-800 mb-2">1. Datenschutz auf einen Blick</h4>
+                        <p className="text-justify leading-relaxed mb-2 font-normal">
+                            <strong>Allgemeine Hinweise:</strong> Die folgenden Hinweise geben einen Überblick über die Verarbeitung personenbezogener Daten bei Nutzung dieser Applikation. Der Schutz persönlicher Daten wird sehr ernst genommen.
+                        </p>
+                        <p className="text-justify leading-relaxed font-normal">
+                            <strong>Datenerfassung:</strong> Diese Applikation ist eine sogenannte "Client-Side Application". Das bedeutet, alle Eingaben (Gewichte, Maße, Winkel), werden <strong>ausschließlich lokal</strong> im Browser verarbeitet (In-Memory). Es findet <strong>keine Übertragung</strong> der Eingabedaten an externe Server oder Datenbanken statt. Sobald der Tab geschlossen oder die Seite neu geladen wird, werden die Daten gelöscht.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 mb-2">2. Hosting (Vercel)</h4>
+                        <p className="text-justify leading-relaxed font-normal">
+                            Diese Applikation wird bei dem externen Dienstleister Vercel Inc., 340 S Lemon Ave #4133 Walnut, CA 91789, USA (im Folgenden „Vercel“) gehostet.
+                        </p>
+                        <p className="text-justify leading-relaxed mt-2 font-normal">
+                            Beim Aufruf der Applikation erfasst Vercel automatisch Daten und Informationen vom Computersystem des aufrufenden Rechners in sogenannten Server-Log-Dateien. Dies ist technisch notwendig, um die Website sicher und stabil auszuliefern. Erfasst werden können u.a.:
+                        </p>
+                        <ul className="list-disc pl-5 mt-2 space-y-1 text-xs text-slate-500 font-normal">
+                            <li>Browsertyp und Browserversion</li>
+                            <li>Verwendetes Betriebssystem</li>
+                            <li>Referrer URL (die zuvor besuchte Seite)</li>
+                            <li>Hostname des zugreifenden Rechners</li>
+                            <li>Uhrzeit der Serveranfrage</li>
+                            <li>IP-Adresse (ggf. anonymisiert)</li>
+                        </ul>
+                    </div>
+                </div>
+            )}
+          </div>
+      </div>
+      <AppVersionFooter />
+    </div>
+  );
+}
+
+// --- MAIN APP COMPONENT ---
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('lashing');
+  useEffect(() => { window.scrollTo(0, 0); }, [activeTab]);
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
+      <div className="flex-1 pb-24 z-10 relative">
+        {activeTab === 'overload' ? <OverloadCalculator /> : 
+         activeTab === 'wood' ? <WoodCalculator /> : 
+         activeTab === 'speed' ? <SpeedCalculator /> : 
+         activeTab === 'age' ? <AgeCalculator /> :
+         activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50">
+        <div className="max-w-md mx-auto flex justify-around p-2">
+          {[
+            { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
+            { id: 'overload', icon: Scale, label: 'Gewicht', color: 'text-blue-600' },
+            { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' },
+            { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
+            { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
+            { id: 'info', icon: FileText, label: 'Infos', color: 'text-slate-600' }
+          ].map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 px-1 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+              <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? tab.color : ''}`} />
+              <span className={`text-[10px] font-bold ${activeTab === tab.id ? 'text-slate-800' : ''}`}>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
