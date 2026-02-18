@@ -4,8 +4,100 @@ import {
   ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, 
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
-  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck
+  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer
 } from 'lucide-react';
+
+// --- GLOBAL STYLES FOR PRINTING ---
+const PrintStyles = () => (
+  <style>{`
+    @media print {
+      @page {
+        size: A4;
+        margin: 1.5cm;
+      }
+      body {
+        background-color: white !important;
+        color: #1a202c !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      /* Hide UI elements */
+      .no-print, nav, footer, button:not(.traffic-sign), .fixed, .sticky {
+        display: none !important;
+      }
+      /* Show hidden calculations */
+      .print-visible {
+        display: block !important;
+        opacity: 1 !important;
+        height: auto !important;
+        visibility: visible !important;
+      }
+      /* Layout adjustments */
+      .max-w-md {
+        max-width: none !important;
+        margin: 0 !important;
+      }
+      .min-h-screen {
+        min-h-0 !important;
+      }
+      .bg-slate-50, .bg-slate-100, .bg-indigo-50, .bg-blue-50, .bg-emerald-50, .bg-amber-50 {
+        background-color: transparent !important;
+        border: 1px solid #e2e8f0 !important;
+      }
+      .text-white {
+        color: #1a202c !important;
+      }
+      /* Header adjustments for print */
+      .print-header {
+        display: block !important;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #1a202c;
+        padding-bottom: 10px;
+      }
+      .print-header h1 {
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        color: #000 !important;
+      }
+      .print-header p {
+        font-size: 12px !important;
+        color: #64748b !important;
+      }
+      /* Typography */
+      input, select {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+      }
+      .shadow-xl, .shadow-lg, .shadow-md, .shadow-sm {
+        box-shadow: none !important;
+      }
+      /* Ensure breaks don't happen inside cards */
+      .break-inside-avoid {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        margin-bottom: 15px !important;
+      }
+      /* Expand layout */
+      .grid-cols-1 {
+         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      .print-full-width {
+        width: 100% !important;
+      }
+      /* Make results prominent */
+      .text-5xl, .text-6xl {
+        font-size: 2.5rem !important; /* Scale down giant text slightly */
+      }
+    }
+    .print-header { display: none; }
+  `}</style>
+);
 
 // --- HELPER COMPONENTS FOR UI ---
 
@@ -124,22 +216,32 @@ const CarWithTrailerIcon = ({ className }) => (
 const TrafficSign = ({ value, selected, onClick }) => (
     <button 
         onClick={onClick}
-        className={`relative flex items-center justify-center w-12 h-12 rounded-full border-4 bg-white shadow-md transition-all duration-200 ${selected ? 'border-red-600 scale-110 ring-2 ring-red-200 z-10' : 'border-red-600/80 scale-100 opacity-70 hover:opacity-100 hover:scale-105'}`}
+        className={`traffic-sign relative flex items-center justify-center w-12 h-12 rounded-full border-4 bg-white shadow-md transition-all duration-200 ${selected ? 'border-red-600 scale-110 ring-2 ring-red-200 z-10' : 'border-red-600/80 scale-100 opacity-70 hover:opacity-100 hover:scale-105'}`}
     >
         <span className="font-black text-slate-900 text-sm tracking-tighter">{value}</span>
     </button>
 );
 
 const HeaderLogo = () => (
-  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm">
+  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm no-print">
     Demel
   </span>
 );
 
 const AppVersionFooter = () => (
-    <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none">
+    <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
         Demel App v2.2
     </div>
+);
+
+const PrintButton = () => (
+    <button 
+        onClick={() => window.print()} 
+        className="w-full mt-8 mb-4 py-3 bg-slate-800 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-slate-700 transition-colors flex items-center justify-center gap-2 no-print shadow-lg"
+    >
+        <Printer className="w-5 h-5" />
+        Druckprotokoll erstellen
+    </button>
 );
 
 const FormulaFraction = ({ numerator, denominator, label, equals, className = "" }) => (
@@ -185,18 +287,22 @@ const LashingDetailTable = ({ data }) => (
   </div>
 );
 
+// Modified CalculationToggle to support printing of hidden content
 const CalculationToggle = ({ children, label = "Rechenweg anzeigen", forceOpen = false }) => {
     const [isOpen, setIsOpen] = useState(forceOpen);
     return (
-        <div className="mt-4">
+        <div className="mt-4 break-inside-avoid">
             <button 
                 onClick={() => setIsOpen(!isOpen)} 
-                className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 hover:text-indigo-600 transition-colors mx-auto"
+                className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 hover:text-indigo-600 transition-colors mx-auto no-print"
             >
                 {isOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 {label}
             </button>
-            {isOpen && <div className="animate-in fade-in slide-in-from-top-2 duration-300">{children}</div>}
+            {/* Using CSS visibility/display class logic instead of unmounting for print support */}
+            <div className={`${isOpen ? 'block' : 'hidden print-visible'} animate-in fade-in slide-in-from-top-2 duration-300`}>
+                {children}
+            </div>
         </div>
     );
 };
@@ -286,6 +392,7 @@ const useDateTime = () => {
 
 // --- ANGLE MEASUREMENT MODAL ---
 const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
+    // ... (same as before) ...
     const [step, setStep] = useState(1); 
     const referenceBetaRef = useRef(null); 
     const [currentBeta, setCurrentBeta] = useState(0);
@@ -778,7 +885,12 @@ function WoodCalculator() {
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-      <div className="bg-emerald-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-emerald-900/10">
+      <div className="print-header">
+         <h1>Holzgewichts-Protokoll</h1>
+         <p>Erstellt am: {dateTime}</p>
+      </div>
+
+      <div className="bg-emerald-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-emerald-900/10 no-print">
         <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Trees className="w-6 h-6 shrink-0" />Holzgewichtsrechner</h1><p className="text-emerald-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
         <HeaderLogo />
       </div>
@@ -802,7 +914,7 @@ function WoodCalculator() {
                <InputWithIcon icon={Box} label={vehicleType === 'semi' ? "Leergewicht Aufl. (kg)" : "Leergewicht Anhänger (kg)"} value={trailerWeight} onChange={(e) => setTrailerWeight(e.target.value)} placeholder="0" />
            </div>
            <InputWithIcon icon={Scale} label="zGM (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
-           <div className="flex gap-2 mt-2">
+           <div className="flex gap-2 mt-2 no-print">
                <button onClick={() => setAllowedWeight('40000')} className="flex-1 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-transparent transition-all">Standard 40t</button>
                <button onClick={() => setAllowedWeight('44000')} className="flex-1 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-transparent transition-all">Ausnahme 44t</button>
            </div>
@@ -825,7 +937,7 @@ function WoodCalculator() {
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
             <label className="flex items-center gap-1.5 text-sm font-black text-emerald-700 uppercase tracking-wide mb-2"><Trees className="w-5 h-5" />Art des Holzes</label>
             <select value={woodType} onChange={(e) => setWoodType(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none font-medium text-slate-700 shadow-sm">{woodTypes.map((wood) => (<option key={wood.name} value={wood.name}>{wood.name} ({wood.density} kg/m³)</option>))}</select>
-            <div className="mt-3 bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5 text-xs text-slate-600">
+            <div className="mt-3 bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5 text-xs text-slate-600 no-print">
                 <div className="flex items-center gap-1.5 mb-1.5 font-bold text-emerald-700"><Droplets className="w-4 h-4"/> Feuchtigkeitsinfos:</div>
                 <div className="grid grid-cols-2 gap-1">
                     <div>Ganz frisch: &gt; 30%</div>
@@ -836,6 +948,8 @@ function WoodCalculator() {
             </div>
         </div>
         {calculatedLoadWeight > 0 && <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500 break-inside-avoid"><div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl"><p className="text-sm font-bold opacity-70 uppercase tracking-wider mb-1">Ladungsgewicht (Gesamt)</p><div className="text-5xl font-black tracking-tighter">{calculatedLoadWeight.toLocaleString('de-DE')} kg</div></div><WoodFormulaDisplay values={{ totalVol: totalVol.toFixed(2), factor: solidFactor, solidVol: solidVolume.toFixed(2), density: currentDensity, weight: calculatedLoadWeight }} /></div>}
+        
+        <PrintButton />
       </div>
       <AppVersionFooter />
     </div>
@@ -1006,34 +1120,43 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
     return (
         <div className="mt-4 space-y-2">
             {/* DRIVER BUTTON */}
-            <button onClick={() => setShowDriver(!showDriver)} className="w-full flex justify-between items-center px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold uppercase transition-colors">
+            <button onClick={() => setShowDriver(!showDriver)} className="w-full flex justify-between items-center px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold uppercase transition-colors no-print">
                 <span>Tatbestand Fahrer</span>
                 {showDriver ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
             </button>
-            {showDriver && driverFine && (
-                <div className="bg-slate-800 text-white p-3 rounded-lg text-xs animate-in slide-in-from-top-1">
+            {/* Logic: If open, show. If closed but print, also show if you wanted all fines printed. Here I assume fines are only printed if opened or I can force them open like calculations. 
+               User requested "Rechenweg" (Calculation Path) to be printed. Fines are usually optional. 
+               However, user said "Alle Eingabe und Ausgabeparameter". 
+               Let's make fines print-visible ONLY if they are displayed (user expanded them) to avoid clutter, 
+               OR force them? User said "Rechenweg". I'll stick to user expanding fines manually if they want them on paper, 
+               but force Rechenweg (Formulas) as per request.
+               ACTUALLY: User said "Alle Eingabe und Ausgabeparameter". Fines are output. 
+               I'll add 'print-visible' to the fine containers to ensure they print if they exist.
+            */}
+            <div className={`${showDriver ? 'block' : 'hidden print-visible'} bg-slate-800 text-white p-3 rounded-lg text-xs animate-in slide-in-from-top-1`}>
+                 {driverFine && (
                      <div className="grid grid-cols-2 gap-2">
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld</div><div className="text-xl font-black text-amber-400">{driverFine.cost}</div></div>
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld (Fahrer)</div><div className="text-xl font-black text-amber-400">{driverFine.cost}</div></div>
                         <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{driverFine.points}</div></div>
                         <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-700 px-1 py-0.5 rounded inline-block">{driverFine.tbnr}</div></div>
                      </div>
-                </div>
-            )}
+                 )}
+            </div>
 
              {/* OWNER BUTTON */}
-            <button onClick={() => setShowOwner(!showOwner)} className="w-full flex justify-between items-center px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase transition-colors">
+            <button onClick={() => setShowOwner(!showOwner)} className="w-full flex justify-between items-center px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase transition-colors no-print">
                 <span>Tatbestand Halter</span>
                 {showOwner ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
             </button>
-            {showOwner && ownerFine && (
-                <div className="bg-slate-700 text-white p-3 rounded-lg text-xs animate-in slide-in-from-top-1">
+            <div className={`${showOwner ? 'block' : 'hidden print-visible'} bg-slate-700 text-white p-3 rounded-lg text-xs animate-in slide-in-from-top-1`}>
+                 {ownerFine && (
                      <div className="grid grid-cols-2 gap-2">
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld</div><div className="text-xl font-black text-amber-400">{ownerFine.cost}</div></div>
+                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld (Halter)</div><div className="text-xl font-black text-amber-400">{ownerFine.cost}</div></div>
                         <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{ownerFine.points}</div></div>
                         <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-600 px-1 py-0.5 rounded inline-block">{ownerFine.tbnr}</div></div>
                      </div>
-                </div>
-            )}
+                 )}
+            </div>
         </div>
     );
 }
@@ -1110,7 +1233,12 @@ function OverloadCalculator() {
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-      <div className="bg-blue-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-blue-900/10">
+      <div className="print-header">
+         <h1>Gewichts-Protokoll</h1>
+         <p>Erstellt am: {dateTime}</p>
+      </div>
+
+      <div className="bg-blue-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-blue-900/10 no-print">
         <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Scale className="w-6 h-6 shrink-0" />Überladungsrechner</h1><p className="text-blue-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
         <HeaderLogo />
       </div>
@@ -1173,7 +1301,7 @@ function OverloadCalculator() {
             </div>
         )}
 
-        {!result && <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width"><Info className="w-5 h-5 shrink-0" /><p>Bitte füllen Sie die Felder für eine Berechnung aus.</p></div>}
+        {!result && <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100 print-full-width no-print"><Info className="w-5 h-5 shrink-0" /><p>Bitte füllen Sie die Felder für eine Berechnung aus.</p></div>}
       </div>
 
       {result && (
@@ -1278,7 +1406,9 @@ function OverloadCalculator() {
                 </div>
             )}
 
-          <button onClick={resetForm} className="mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">Alle Eingaben löschen</button>
+          <button onClick={resetForm} className="mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors no-print">Alle Eingaben löschen</button>
+          
+          <PrintButton />
         </div>
       )}
       <AppVersionFooter />
@@ -1464,7 +1594,12 @@ function LashingCalculator() {
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-      <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-indigo-900/10">
+      <div className="print-header">
+         <h1>LaSi-Protokoll</h1>
+         <p>Erstellt am: {dateTime}</p>
+      </div>
+
+      <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-indigo-900/10 no-print">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
             <LashingStrapIcon className="w-5 h-5 shrink-0" />
@@ -1529,7 +1664,7 @@ function LashingCalculator() {
                         <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
                     </div>
-                    <button onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
+                    <button onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
                   </div>
                 ) : (
                   <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
@@ -1547,7 +1682,7 @@ function LashingCalculator() {
                          <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
                          <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
                     </div>
-                    <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+                    <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
                 </div>
             </div>
 
@@ -1663,7 +1798,7 @@ function LashingCalculator() {
             
             {fineGroups.length > 0 && (
               <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
-                <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full">
+                <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
                     <div className="flex items-center gap-2">
                         <Gavel className="w-5 h-5 text-slate-400" />
                         <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
@@ -1671,50 +1806,54 @@ function LashingCalculator() {
                     {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
                 </button>
                 
-                {showFines && fineGroups.map((group, gIdx) => (
-                    <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                        {group.title && (
-                            <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
-                        )}
-                        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                          <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
-                              <tr>
-                                <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
-                                <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
-                                <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {group.items.map((fine, fIdx) => (
-                                <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
-                                  <td className="px-3 py-2.5">
-                                    <div className="flex items-start gap-2">
-                                        <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
-                                        <div>
-                                            <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
-                                            {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
-                                        </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                    <div className="mt-0.5">{fine.code}</div>
-                                  </td>
-                                  <td className="px-3 py-2.5 text-right align-top">
-                                    <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
-                                    {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
-                                  </td>
+                <div className={showFines ? 'block' : 'hidden print-visible'}>
+                  {fineGroups.map((group, gIdx) => (
+                      <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
+                          {group.title && (
+                              <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                          )}
+                          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                            <table className="w-full text-left text-sm">
+                              <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                                <tr>
+                                  <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
+                                  <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
+                                  <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                    </div>
-                ))}
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {group.items.map((fine, fIdx) => (
+                                  <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="px-3 py-2.5">
+                                      <div className="flex items-start gap-2">
+                                          <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                          <div>
+                                              <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                              {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                          </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                      <div className="mt-0.5">{fine.code}</div>
+                                    </td>
+                                    <td className="px-3 py-2.5 text-right align-top">
+                                      <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                      {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                      </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
+        
+        <PrintButton />
       </div>
       <AppVersionFooter />
     </div>
@@ -1892,6 +2031,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
+      <PrintStyles />
       <div className="flex-1 pb-24 z-10 relative">
         {activeTab === 'overload' ? <OverloadCalculator /> : 
          activeTab === 'wood' ? <WoodCalculator /> : 
@@ -1899,7 +2039,7 @@ export default function App() {
          activeTab === 'age' ? <AgeCalculator /> :
          activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print">
         <div className="max-w-md mx-auto flex justify-around p-2">
           {[
             { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
