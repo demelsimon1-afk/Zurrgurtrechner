@@ -4,7 +4,7 @@ import {
   ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, 
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
-  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff 
+  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck
 } from 'lucide-react';
 
 // --- HELPER COMPONENTS FOR UI ---
@@ -29,108 +29,74 @@ const SpiritLevelIcon = ({ className }) => (
 );
 
 // Custom Icon for Truck with Trailer (Overload Calculator)
-// Updated to look more like a real Gliederzug (Truck + Trailer)
 const TruckTrailerIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* TRUCK */}
-    {/* Cabin */}
-    <path d="M2 17V9a2 2 0 0 1 2-2h3l2 4v6" />
-    {/* Truck Body */}
-    <rect x="10" y="7" width="6" height="10" rx="1" />
-    {/* Wheels Truck */}
-    <circle cx="5" cy="18" r="2" />
-    <circle cx="13" cy="18" r="2" />
+    {/* TRUCK (Left side) */}
+    <path d="M1 17V9a1 1 0 0 1 1-1h2l2 3v6" /> {/* Cabin */}
+    <rect x="6.5" y="8" width="4.5" height="9" rx="1" /> {/* Truck Body */}
+    <circle cx="3.5" cy="18" r="1.5" /> {/* Wheel Front */}
+    <circle cx="9" cy="18" r="1.5" /> {/* Wheel Rear */}
     
-    {/* TRAILER */}
-    {/* Drawbar */}
-    <line x1="16" y1="15" x2="18" y2="15" strokeWidth="2" />
-    {/* Trailer Body */}
-    <rect x="18" y="7" width="5" height="10" rx="1" />
-    {/* Wheels Trailer */}
-    <circle cx="20.5" cy="18" r="2" />
+    {/* CONNECTION (Drawbar) - Extended Length */}
+    <line x1="11" y1="16" x2="15.5" y2="16" strokeWidth="1.5" />
+    <circle cx="15.5" cy="16" r="0.5" fill="currentColor" /> {/* Hitch point */}
     
-    {/* Base Line */}
-    <path d="M2 17h16" />
+    {/* TRAILER (Right side) */}
+    <rect x="16" y="8" width="7" height="9" rx="1" /> {/* Trailer Body */}
+    <circle cx="18" cy="18" r="1.5" /> {/* Trailer Wheel 1 */}
+    <circle cx="21" cy="18" r="1.5" /> {/* Trailer Wheel 2 */}
+    
+    {/* Ground */}
+    <path d="M1 18h10" strokeOpacity="0.2" />
+    <path d="M16 18h7" strokeOpacity="0.2" />
   </svg>
 );
 
-// Custom Icon for Wood Truck (Sattelzug mit holzfarbenen Stämmen)
+// Custom Icon for Wood Truck (Sattelzug)
 const WoodTruckIcon = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      {/* Cabin & Chassis (Inherits color) */}
       <path d="M2 17V9a2 2 0 0 1 2-2h3l2 4v6" />
-      <path d="M2 12h6" />
       <circle cx="5" cy="18" r="2" />
-      <path d="M2 17h10" /> 
       <circle cx="16" cy="18" r="2" />
       <circle cx="20" cy="18" r="2" />
+      <path d="M2 17h10" />
       <path d="M12 17h10" />
-      
-      {/* Rungen (Stakes) */}
-      <path d="M13 17V8" opacity="0.5" />
-      <path d="M21 17V8" opacity="0.5" />
-      <path d="M17 17V8" opacity="0.5" />
-
-      {/* Holzstämme (Logs) - Brown Color hardcoded for realism */}
-      <g stroke="#8B4513">
-        {/* Bottom Log */}
-        <line x1="12" y1="14" x2="22" y2="14" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="12" cy="14" r="1" fill="#D2691E" stroke="none"/>
-        
-        {/* Middle Log */}
-        <line x1="12" y1="11" x2="22" y2="11" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="12" cy="11" r="1" fill="#D2691E" stroke="none"/>
-        
-        {/* Top Log */}
-        <line x1="13" y1="8" x2="21" y2="8" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="13" cy="8" r="1" fill="#D2691E" stroke="none"/>
+      <g stroke="#8B4513" opacity="0.9">
+        <line x1="12" y1="14" x2="22" y2="14" strokeWidth="2.5" />
+        <line x1="12" y1="11" x2="22" y2="11" strokeWidth="2.5" />
+        <line x1="13" y1="8" x2="21" y2="8" strokeWidth="2.5" />
       </g>
     </svg>
 );
 
-// Custom Icon for Wood Train (Gliederzug mit holzfarbenen Stämmen)
+// Custom Icon for Wood Train (Gliederzug)
 const WoodTrainIcon = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-       {/* Truck Wheels & Chassis */}
-      <circle cx="4" cy="18" r="2" />
-      <circle cx="9" cy="18" r="2" />
-      <path d="M1 17h10" /> 
-      {/* Cabin */}
-      <path d="M1 17V9a1 1 0 0 1 1-1h3v9" />
+      {/* Truck (Left) */}
+      <path d="M1 17V9a1 1 0 0 1 1-1h2v9" /> {/* Cabin */}
+      <path d="M4 17h6" /> {/* Chassis */}
+      <circle cx="3" cy="18" r="1.5" />
+      <circle cx="8" cy="18" r="1.5" />
       
-      {/* Truck Stakes */}
-      <path d="M6 17V9" opacity="0.5" />
-      <path d="M10 17V9" opacity="0.5" />
-
-      {/* Truck Logs (Brown) */}
+      {/* Truck Logs */}
       <g stroke="#8B4513">
-         <line x1="5" y1="13" x2="11" y2="13" strokeWidth="2.5" strokeLinecap="round" />
-         <line x1="5" y1="10" x2="11" y2="10" strokeWidth="2.5" strokeLinecap="round" />
-         <circle cx="11" cy="13" r="0.8" fill="#D2691E" stroke="none"/>
-         <circle cx="11" cy="10" r="0.8" fill="#D2691E" stroke="none"/>
+         <line x1="4.5" y1="13" x2="9.5" y2="13" strokeWidth="2.5" />
+         <line x1="4.5" y1="10" x2="9.5" y2="10" strokeWidth="2.5" />
       </g>
 
-      {/* Connection */}
-      <line x1="11" y1="16" x2="13" y2="16" />
+      {/* Connection (Long Drawbar) */}
+      <line x1="10" y1="16" x2="15" y2="16" strokeWidth="1.5" />
+      <circle cx="15" cy="16" r="0.5" fill="currentColor" />
 
-      {/* Trailer */}
-      <circle cx="15" cy="18" r="2" />
-      <circle cx="20" cy="18" r="2" />
-      <path d="M13 17h9" />
+      {/* Trailer (Right) */}
+      <path d="M15 17h8" /> {/* Chassis */}
+      <circle cx="17" cy="18" r="1.5" />
+      <circle cx="21" cy="18" r="1.5" />
       
-      {/* Trailer Stakes */}
-      <path d="M14 17V9" opacity="0.5" />
-      <path d="M21 17V9" opacity="0.5" />
-      
-      {/* Trailer Logs (Brown) */}
+      {/* Trailer Logs */}
       <g stroke="#8B4513">
-        <line x1="13" y1="13" x2="22" y2="13" strokeWidth="2.5" strokeLinecap="round" />
-        <line x1="13" y1="10" x2="22" y2="10" strokeWidth="2.5" strokeLinecap="round" />
-        <line x1="15" y1="7" x2="20" y2="7" strokeWidth="2.5" strokeLinecap="round" />
-        
-        <circle cx="22" cy="13" r="0.8" fill="#D2691E" stroke="none"/>
-        <circle cx="22" cy="10" r="0.8" fill="#D2691E" stroke="none"/>
-        <circle cx="20" cy="7" r="0.8" fill="#D2691E" stroke="none"/>
+        <line x1="15.5" y1="13" x2="22" y2="13" strokeWidth="2.5" />
+        <line x1="15.5" y1="10" x2="22" y2="10" strokeWidth="2.5" />
       </g>
     </svg>
 );
@@ -138,19 +104,20 @@ const WoodTrainIcon = ({ className }) => (
 // Improved Car + Trailer Icon
 const CarWithTrailerIcon = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        {/* Car (similar to Lucide Car) */}
-        <path d="M14 10h-2" /> 
-        <path d="M5 10H4a2 2 0 0 0-2 2v3" />
-        <path d="M12 15H3" />
-        <circle cx="6" cy="16" r="2" />
-        <path d="M5 10l1.8-3.6A2 2 0 0 1 8.6 5h5a2 2 0 0 1 1.6.8l.9 1.8" />
+        {/* Car (Left) */}
+        <path d="M9 10H8" /> 
+        <path d="M2 10H1a1 1 0 0 0-1 1v3" />
+        <path d="M8 15H1" />
+        <circle cx="3.5" cy="16" r="1.5" />
+        <path d="M2 10l1.2-2.4A1 1 0 0 1 4 7h3a1 1 0 0 1 .9.6l.7 1.4" />
         
-        {/* Connection */}
-        <line x1="14" y1="14" x2="16" y2="14" strokeWidth="2" />
+        {/* Connection (Extended) */}
+        <line x1="9" y1="14" x2="15" y2="14" strokeWidth="1.5" />
+        <circle cx="15" cy="14" r="0.5" fill="currentColor" />
 
-        {/* Trailer */}
-        <rect x="16" y="9" width="7" height="6" rx="1" />
-        <circle cx="19.5" cy="16" r="2" />
+        {/* Trailer (Right) */}
+        <rect x="15" y="9" width="8" height="6" rx="1" />
+        <circle cx="19" cy="16" r="1.5" />
     </svg>
 );
 
@@ -171,22 +138,9 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none">
-        Demel App v2.1
+        Demel App v2.2
     </div>
 );
-
-const ProgressBar = ({ current, max, isOverloaded }) => {
-  if (!max || max <= 0) return null;
-  const percentage = Math.min(100, Math.max(0, (current / max) * 100));
-  let colorClass = 'bg-emerald-500';
-  if (percentage > 90) colorClass = 'bg-amber-500';
-  if (percentage >= 100 || isOverloaded) colorClass = 'bg-red-500';
-  return (
-    <div className="w-full h-3 bg-slate-200 rounded-full mt-2.5 overflow-hidden shadow-inner">
-      <div className={`h-full transition-all duration-500 ease-out ${colorClass}`} style={{ width: `${percentage}%` }} />
-    </div>
-  );
-};
 
 const FormulaFraction = ({ numerator, denominator, label, equals, className = "" }) => (
   <div className={`flex items-center justify-center gap-2 font-mono text-sm ${className}`}>
@@ -332,7 +286,6 @@ const useDateTime = () => {
 
 // --- ANGLE MEASUREMENT MODAL ---
 const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
-    // ... existing modal logic ...
     const [step, setStep] = useState(1); 
     const referenceBetaRef = useRef(null); 
     const [currentBeta, setCurrentBeta] = useState(0);
@@ -504,10 +457,8 @@ function SpeedCalculator() {
     const [result, setResult] = useState(null);
     const dateTime = useDateTime();
 
-    // Violation Table (Same logic as before, abbreviated for space if needed but kept fully functional)
     const getViolation = (exceedance, type) => {
         if (exceedance < 16) return null;
-        // ... (Logic remains identical to v1, ensuring accuracy) ...
         if (type === 'pkw_trailer') {
             if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '118632' };
             if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '118633' };
@@ -897,9 +848,60 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
     if (percentage < 2) return null; // Toleranzbereich
     const p = percentage;
 
-    // --- FAHRER (Driver) ---
+    // --- 1. GESAMTZUG (COMBINATION) - Special Handling ---
+    if (isCombination) {
+        if (role === 'driver') {
+            // A. > 7.5t
+            if (allowed > 7500) {
+                 if (p > 30) return { cost: '380 €', points: '1', ban: '', tbnr: '334725' };
+                 if (p > 25) return { cost: '285 €', points: '1', ban: '', tbnr: '334724' };
+                 if (p > 20) return { cost: '190 €', points: '1', ban: '', tbnr: '334723' };
+                 if (p > 15) return { cost: '140 €', points: '1', ban: '', tbnr: '334722' };
+                 if (p > 10) return { cost: '110 €', points: '1', ban: '', tbnr: '334721' };
+                 if (p > 5)  return { cost: '80 €', points: '1', ban: '', tbnr: '334720' };
+                 if (p >= 2) return { cost: '30 €', points: '0', ban: '', tbnr: '334220' };
+                 return null;
+            }
+            // B. <= 7.5t (Revised series 3347xx)
+            else {
+                 if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '334746' };
+                 if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '334745' };
+                 if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '334744' };
+                 if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '334246' };
+                 if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '334245' };
+                 if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '334244' };
+                 return null;
+            }
+        } 
+        else if (role === 'owner') {
+             // A. > 7.5t (Revised series 33189x)
+             if (allowed > 7500) {
+                 if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331896' };
+                 if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331896' };
+                 if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331895' };
+                 if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331894' };
+                 if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331893' };
+                 if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331892' };
+                 if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331248' };
+                 return null;
+             }
+             // B. <= 7.5t (Standard owner logic for combinations <= 7.5t)
+             else {
+                 if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331918' };
+                 if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331917' };
+                 if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331916' };
+                 if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331274' };
+                 if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331273' };
+                 if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331272' };
+                 return null;
+             }
+        }
+        return null;
+    }
+
+    // --- FAHRER (Driver) - Single Vehicles & Trailers ---
     if (role === 'driver') {
-        // 1. Trailer <= 2t
+        // A. Anhänger <= 2t (in Kombination oder einzeln)
         if (isTrailer && allowed <= 2000) {
             if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '334698' }; // Annahme Fortführung
             if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '334697' };
@@ -909,9 +911,9 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '334196' };
             return null;
         }
-        // 2. Trailer > 2t OR Truck > 7.5t OR Combination > 7.5t
+        // B. Trailer > 2t OR Truck > 7.5t OR Combination > 7.5t
         // (Simplified logic: Heavy vehicles generally follow similar strict rules)
-        if ((isTrailer && allowed > 2000) || (!isTrailer && allowed > 7500) || (isCombination && allowed > 7500)) {
+        if (isTrailer && allowed > 2000)  {
             if (p > 30) return { cost: '380 €', points: '1', ban: '', tbnr: '334641' }; 
             if (p > 25) return { cost: '285 €', points: '1', ban: '', tbnr: '334640' };
             if (p > 20) return { cost: '190 €', points: '1', ban: '', tbnr: '334639' };
@@ -921,8 +923,8 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             if (p >= 2) return { cost: '30 €', points: '0', ban: '', tbnr: '334136' }; // 2-5%
             return null;
         }
-        // 3. Truck <= 7.5t OR Combination <= 7.5t
-        if ((!isTrailer && allowed <= 7500) || (isCombination && allowed <= 7500)) {
+        // 3. Truck <= 7.5t
+        if ((!isTrailer && allowed <= 7500)) {
             if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '334662' };
             if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '334661' };
             if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '334660' };
@@ -931,9 +933,20 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '334160' };
             return null;
         }
+        // 4. Truck > 7.5t
+        if ((!isTrailer && allowed > 7500)) {
+            if (p > 30) return { cost: '380 €', points: '1', ban: '', tbnr: '334605' };
+            if (p > 25) return { cost: '285 €', points: '1', ban: '', tbnr: '334604' };
+            if (p > 20) return { cost: '190 €', points: '1', ban: '', tbnr: '334603' };
+            if (p > 15) return { cost: '140 €', points: '1', ban: '', tbnr: '334602' };
+            if (p > 10) return { cost: '110 €', points: '1', ban: '', tbnr: '334601' };
+            if (p > 5)  return { cost: '80 €', points: '1', ban: '', tbnr: '334600' };
+            if (p >= 2) return { cost: '30 €', points: '0', ban: '', tbnr: '334100' };
+            return null;
+        }
     }
 
-    // --- HALTER (Owner) ---
+    // --- HALTER (Owner) - Single Vehicles & Trailers ---
     if (role === 'owner') {
         // 1. Trailer <= 2t
         if (isTrailer && allowed <= 2000) {
@@ -945,9 +958,9 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331226' };
             return null;
         }
-        // 2. Trailer > 2t OR Truck > 7.5t OR Combination > 7.5t
-        if ((isTrailer && allowed > 2000) || (!isTrailer && allowed > 7500) || (isCombination && allowed > 7500)) {
-            if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331897' }; // High bracket often 425 for owner
+        // 2. Trailer > 2t OR Truck > 7.5t
+        if (isTrailer && allowed > 2000)  {
+            if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' }; // High bracket often 425 for owner
             if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' };
             if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331823' };
             if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331822' };
@@ -956,14 +969,25 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331166' }; // 2-5%
             return null;
         }
-         // 3. Truck <= 7.5t OR Combination <= 7.5t
-        if ((!isTrailer && allowed <= 7500) || (isCombination && allowed <= 7500)) {
+         // 3. Truck <= 7.5t
+        if ((!isTrailer && allowed <= 7500)) {
             if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331846' };
             if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331845' };
             if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331844' };
             if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331192' };
             if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331191' };
             if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331190' };
+            return null;
+        }
+        // 4. Truck > 7.5t
+        if ((!isTrailer && allowed > 7500)) {
+            if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
+            if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
+            if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331787' };
+            if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331786' };
+            if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331785' };
+            if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331784' };
+            if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331130' };
             return null;
         }
     }
@@ -1767,33 +1791,90 @@ function InfoView() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5 text-sm text-slate-600">
                      <div className="flex items-center gap-2 mb-1 text-slate-800 pb-2 border-b border-slate-100"><Lock className="w-5 h-5" /><h3 className="font-black uppercase tracking-wide text-sm">Datenschutzerklärung</h3></div>
                     
-                    <div>
-                        <h4 className="font-bold text-slate-800 mb-2">1. Datenschutz auf einen Blick</h4>
-                        <p className="text-justify leading-relaxed mb-2 font-normal">
-                            <strong>Allgemeine Hinweise:</strong> Die folgenden Hinweise geben einen Überblick über die Verarbeitung personenbezogener Daten bei Nutzung dieser Applikation. Der Schutz persönlicher Daten wird sehr ernst genommen.
+                    {/* 1. Allgemeine Hinweise */}
+                    <div className="space-y-2">
+                        <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm"><Info className="w-4 h-4 text-slate-400"/> 1. Allgemeine Hinweise</h4>
+                        <p className="text-justify leading-relaxed font-normal">
+                            Diese Website wird rein informatorisch betrieben. Es werden durch den Verantwortlichen keine personenbezogenen Daten aktiv erhoben.
                         </p>
                         <p className="text-justify leading-relaxed font-normal">
-                            <strong>Datenerfassung:</strong> Diese Applikation ist eine sogenannte "Client-Side Application". Das bedeutet, alle Eingaben (Gewichte, Maße, Winkel), werden <strong>ausschließlich lokal</strong> im Browser verarbeitet (In-Memory). Es findet <strong>keine Übertragung</strong> der Eingabedaten an externe Server oder Datenbanken statt. Sobald der Tab geschlossen oder die Seite neu geladen wird, werden die Daten gelöscht.
+                            Insbesondere werden <strong>keine Kontaktformulare, Tracking-Tools, Analyse-Dienste oder Newsletter</strong> eingesetzt.
                         </p>
                     </div>
 
-                    <div>
-                        <h4 className="font-bold text-slate-800 mb-2">2. Hosting (Vercel)</h4>
+                    {/* 2. Hosting */}
+                    <div className="space-y-2 pt-2 border-t border-slate-50">
+                        <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm"><Server className="w-4 h-4 text-slate-400"/> 2. Hosting</h4>
                         <p className="text-justify leading-relaxed font-normal">
-                            Diese Applikation wird bei dem externen Dienstleister Vercel Inc., 340 S Lemon Ave #4133 Walnut, CA 91789, USA (im Folgenden „Vercel“) gehostet.
+                            Diese Website wird bei folgendem Anbieter gehostet:
                         </p>
-                        <p className="text-justify leading-relaxed mt-2 font-normal">
-                            Beim Aufruf der Applikation erfasst Vercel automatisch Daten und Informationen vom Computersystem des aufrufenden Rechners in sogenannten Server-Log-Dateien. Dies ist technisch notwendig, um die Website sicher und stabil auszuliefern. Erfasst werden können u.a.:
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs font-mono text-slate-500 my-2">
+                            Vercel Inc.<br/>
+                            340 S Lemon Ave #4133<br/>
+                            Walnut, CA 91789<br/>
+                            USA
+                        </div>
+                        <p className="text-justify leading-relaxed font-normal">
+                            Beim Aufruf dieser Website verarbeitet der Hosting-Anbieter automatisch sogenannte Server-Logfiles. Dies umfasst insbesondere:
                         </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-xs text-slate-500 font-normal">
+                        <ul className="list-disc pl-5 space-y-1 text-xs text-slate-500 font-normal my-2">
+                            <li>IP-Adresse</li>
+                            <li>Datum und Uhrzeit der Anfrage</li>
                             <li>Browsertyp und Browserversion</li>
-                            <li>Verwendetes Betriebssystem</li>
-                            <li>Referrer URL (die zuvor besuchte Seite)</li>
+                            <li>Betriebssystem</li>
+                            <li>Referrer-URL</li>
                             <li>Hostname des zugreifenden Rechners</li>
-                            <li>Uhrzeit der Serveranfrage</li>
-                            <li>IP-Adresse (ggf. anonymisiert)</li>
                         </ul>
+                        <p className="text-justify leading-relaxed font-normal text-xs text-slate-500">
+                            Diese Verarbeitung erfolgt zum Zweck der technischen Bereitstellung der Website sowie zur Gewährleistung von Stabilität und Sicherheit. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.
+                        </p>
+                        <p className="text-justify leading-relaxed font-normal text-xs text-slate-500">
+                            Es kann nicht ausgeschlossen werden, dass Daten in die USA übertragen werden. Vercel verwendet hierfür geeignete Garantien gemäß Art. 46 DSGVO (z.B. Standardvertragsklauseln).
+                        </p>
+                        <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline font-bold mt-1">
+                            Datenschutzerklärung von Vercel <Globe className="w-3 h-3"/>
+                        </a>
                     </div>
+
+                    {/* 3. Cookies */}
+                    <div className="space-y-2 pt-2 border-t border-slate-50">
+                         <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm"><Cookie className="w-4 h-4 text-slate-400"/> 3. Cookies</h4>
+                         <p className="text-justify leading-relaxed font-normal">
+                            Diese Website verwendet <strong>keine eigenen Cookies</strong>.
+                        </p>
+                    </div>
+
+                    {/* 4. Rechte */}
+                    <div className="space-y-2 pt-2 border-t border-slate-50">
+                        <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm"><Gavel className="w-4 h-4 text-slate-400"/> 4. Rechte der betroffenen Personen</h4>
+                        <p className="text-justify leading-relaxed font-normal">
+                            Du hast im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf:
+                        </p>
+                        <ul className="grid grid-cols-2 gap-2 text-xs text-slate-600 font-bold my-2">
+                            <li className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-500"/> Auskunft</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-500"/> Berichtigung</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-500"/> Löschung</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-500"/> Einschränkung</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-500"/> Widerspruch</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-500"/> Übertragbarkeit</li>
+                        </ul>
+                        <p className="text-justify leading-relaxed font-normal text-xs">
+                            Hierzu kannst du dich jederzeit an den Verantwortlichen wenden. Zudem steht dir ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde zu.
+                        </p>
+                    </div>
+
+                    {/* 5. Verantwortlicher */}
+                    <div className="space-y-2 pt-2 border-t border-slate-50">
+                        <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm"><UserCheck className="w-4 h-4 text-slate-400"/> 5. Verantwortlicher</h4>
+                        <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-indigo-900 text-xs font-medium">
+                            <p className="font-bold text-sm mb-1">Simon Demel</p>
+                            <p>Ellen-Gottlieb-Straße 15</p>
+                            <p>79106 Freiburg im Breisgau</p>
+                            <p>Deutschland</p>
+                            <p className="mt-2 font-mono text-indigo-600">E-Mail: demelsimon1@gmail.com</p>
+                        </div>
+                    </div>
+
                 </div>
             )}
           </div>
