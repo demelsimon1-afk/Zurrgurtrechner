@@ -1041,6 +1041,53 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             return null;
         }
     }
+    
+    // NEW OWNER LOGIC FOR SINGLE VEHICLES / TRACTORS / TRAILERS
+    if (role === 'owner') {
+        // Trailer Owner (Halter Anhänger) - Single View or non-combination context
+        if (isTrailer) {
+            if (allowed > 2000) {
+                 if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' }; // Using similar scaling as >7.5t
+                 if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' };
+                 if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331823' };
+                 if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331822' };
+                 if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331821' };
+                 if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331820' };
+                 if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331166' };
+                 return null;
+            } else {
+                 if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331870' };
+                 if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331869' };
+                 if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331868' };
+                 if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331228' };
+                 if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331227' };
+                 if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331226' };
+                 return null;
+            }
+        } 
+        // Tractor/Single Vehicle Owner (Halter Zugmaschine/KFZ)
+        else {
+             if (allowed > 7500) {
+                 if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
+                 if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331787' };
+                 if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331786' };
+                 if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331786' };
+                 if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331785' };
+                 if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331784' };
+                 if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331130' };
+                 return null;
+             } else {
+                 if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331846' };
+                 if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331845' };
+                 if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331844' };
+                 if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331192' };
+                 if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331191' };
+                 if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331190' };
+                 return null;
+             }
+        }
+    }
+    
     return null;
 };
 
