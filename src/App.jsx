@@ -5,7 +5,7 @@ import {
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
-  List
+  List, Heart, Coffee
 } from 'lucide-react';
 
 // --- GLOBAL STYLES FOR PRINTING ---
@@ -1973,10 +1973,14 @@ function InfoView() {
         <HeaderLogo />
       </div>
       <div className="p-3">
-          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto">
-            <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Haftung & Nutzung</button>
-            <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Impressum</button>
-            <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Datenschutz</button>
+          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
+            <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Haftung</button>
+            <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Impressum</button>
+            <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Datenschutz</button>
+            <button onClick={() => setView('donate')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${view === 'donate' ? 'bg-white shadow text-pink-600' : 'text-slate-500 hover:text-pink-600'}`}>
+                <Heart className="w-3 h-3" />
+                Spenden
+            </button>
           </div>
           
           <div className="animate-in fade-in duration-300 pb-20 no-print">
@@ -1994,7 +1998,57 @@ function InfoView() {
                     </div>
                 </div>
             )}
-            {/* Impressum & Privacy content (shortened for brevity but logic remains same) */}
+            
+            {view === 'impressum' && (
+                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-4">Impressum</h3>
+                    <p className="text-slate-500 text-sm">Angaben gemäß § 5 TMG</p>
+                    <div className="my-6 space-y-1 text-slate-700 font-medium">
+                        <p>Max Mustermann</p>
+                        <p>Musterstraße 1</p>
+                        <p>12345 Musterstadt</p>
+                    </div>
+                    <div className="text-sm text-slate-600">
+                        <p>Kontakt:</p>
+                        <a href="mailto:info@beispiel.de" className="text-indigo-600 hover:underline">info@beispiel.de</a>
+                    </div>
+                 </div>
+            )}
+
+            {view === 'privacy' && (
+                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-4">Datenschutz</h3>
+                    <div className="space-y-3 text-sm text-slate-600 text-justify">
+                        <p><strong>1. Datenerfassung:</strong> Diese Applikation arbeitet vollständig lokal auf Ihrem Endgerät ("Client-Side"). Es werden keinerlei personenbezogene Daten an externe Server übertragen oder dort gespeichert.</p>
+                        <p><strong>2. Sensoren:</strong> Für die Winkelmessung wird kurzzeitig auf die Lagesensoren (Gyroskop) Ihres Gerätes zugegriffen. Diese Daten werden nicht gespeichert und dienen ausschließlich der Echtzeit-Anzeige.</p>
+                        <p><strong>3. Keine Cookies:</strong> Diese Anwendung verwendet keine Tracking-Cookies oder Analysetools von Drittanbietern.</p>
+                    </div>
+                 </div>
+            )}
+
+            {view === 'donate' && (
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Heart className="w-8 h-8 fill-current" />
+                    </div>
+                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-2">Unterstützen Sie das Projekt</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                        Diese App wurde mit viel Herzblut entwickelt und wird kostenlos zur Verfügung gestellt. 
+                        Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
+                    </p>
+                    <a 
+                        href="https://www.paypal.com/simondemel@gmx.de/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block w-full py-3.5 bg-[#0070BA] text-white font-bold rounded-xl shadow-lg hover:bg-[#003087] transition-all flex items-center justify-center gap-2"
+                    >
+                        {/* Simple SVG for PayPal P logo */}
+                        <span className="fill-white"><svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M7.076 21.337l.486-3.08c.133-.84.852-1.464 1.703-1.464h1.725c3.55 0 6.315-1.44 7.15-5.698.417-2.126-.41-4.144-2.85-5.228-2.073-.92-4.947-.64-7.98 1.285l-.57-.027c-.89 0-1.666.626-1.83 1.503L2.83 19.34c-.08.43.25.823.69.823h2.95c.345 0 .64-.236.696-.576l.006-.03z"/></svg></span>
+                        <span>Spende per PayPal</span>
+                    </a>
+                    <p className="text-[10px] text-slate-400 mt-4">Sie werden zu PayPal weitergeleitet.</p>
+                </div>
+            )}
           </div>
       </div>
       <AppVersionFooter />
