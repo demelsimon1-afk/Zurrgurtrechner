@@ -4,7 +4,8 @@ import {
   ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, 
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
-  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer
+  Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
+  List
 } from 'lucide-react';
 
 // --- GLOBAL STYLES FOR PRINTING ---
@@ -230,7 +231,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        Demel App v2.2
+        RoadTool v. 2.2
     </div>
 );
 
@@ -954,9 +955,9 @@ function WoodCalculator() {
 // --- OVERLOAD CALCULATOR ---
 
 const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role) => {
+    // ... (Overload fine logic remains same) ...
     if (percentage < 2) return null; // Toleranzbereich
     const p = percentage;
-    // ... (Fine logic same as before) ...
     if (isCombination) {
         if (role === 'driver') {
             if (allowed > 7500) {
@@ -1116,6 +1117,18 @@ function OverloadCalculator() {
   const [totalAllowed, setTotalAllowed] = useState('');
   const [result, setResult] = useState(null);
   const dateTime = useDateTime();
+
+  // Determine standard values based on tractor weight
+  const tractorLimit = parseFloat(allowedWeight1) || 0;
+  const show35tOption = tractorLimit > 0 && tractorLimit <= 25000;
+
+  const standardTotalWeights = [
+      { label: 'Kombination < 4 Achsen', val: '28000', detail: '28 t' },
+      show35tOption 
+        ? { label: '4 Achsen (Zugf. ≤ 25t zGM)', val: '35000', detail: '35 t' }
+        : { label: '4 Achsen (2 ZM + 2 Anh)', val: '36000', detail: '36 t' },
+      { label: 'Kombination > 4 Achsen', val: '40000', detail: '40 t' }
+  ];
 
   useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); }, [mode]);
 
@@ -1314,8 +1327,28 @@ function OverloadCalculator() {
                     <Weight className="w-5 h-5" />
                     <span className="text-sm font-black uppercase tracking-wide">Gesamter Zug</span>
                 </div>
+                
+                <div className="mb-3">
+                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Standardwerte (zGM Gesamtzug)</label>
+                   <select 
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+                        onChange={(e) => {
+                            if (e.target.value) setTotalAllowed(e.target.value);
+                        }}
+                        value={standardTotalWeights.find(opt => opt.val === totalAllowed)?.val || ""}
+                   >
+                       <option value="" disabled>Bitte wählen oder manuell eingeben...</option>
+                       {standardTotalWeights.map((opt) => (
+                           <option key={opt.val} value={opt.val}>
+                               {opt.label} ({opt.detail})
+                           </option>
+                       ))}
+                       <option value="custom">Eigener Wert (manuell unten)</option>
+                   </select>
+                </div>
+
                 <div className="space-y-2">
-                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} placeholder="zGM Zug laut Schein" />
+                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug Manuell (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} placeholder="zGM Zug laut Schein" />
                 </div>
             </div>
         )}
