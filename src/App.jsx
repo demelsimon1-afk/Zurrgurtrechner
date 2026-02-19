@@ -854,7 +854,7 @@ function WoodCalculator() {
                 <tr><th>Festmeter</th><td>{solidVolume.toFixed(2)} m³</td></tr>
                 <tr><th>Berechnetes Holzgewicht</th><td><strong>{calculatedLoadWeight.toLocaleString()} kg</strong></td></tr>
                 <tr><th>Berechnetes Gesamtgewicht</th><td>{totalWeight.toLocaleString()} kg</td></tr>
-                <tr><th>Differenz zu zGM</th><td>{difference > 0 ? `+${difference.toLocaleString()} kg (Überladen)` : `${difference.toLocaleString()} kg (OK)`}</td></tr>
+                <tr><th>Differenz zu zGM</th><td>{difference > 0 ? <span className="print-warning">+{difference.toLocaleString()} kg (Verdacht auf Überladung)</span> : `${difference.toLocaleString()} kg (OK)`}</td></tr>
             </tbody>
         </table>
       </div>
@@ -915,7 +915,34 @@ function WoodCalculator() {
                 </div>
             </div>
         </div>
-        {calculatedLoadWeight > 0 && <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500"><div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-center text-white shadow-xl"><p className="text-sm font-bold opacity-70 uppercase tracking-wider mb-1">Ladungsgewicht (Gesamt)</p><div className="text-5xl font-black tracking-tighter">{calculatedLoadWeight.toLocaleString('de-DE')} kg</div></div><WoodFormulaDisplay values={{ totalVol: totalVol.toFixed(2), factor: solidFactor, solidVol: solidVolume.toFixed(2), density: currentDensity, weight: calculatedLoadWeight }} /></div>}
+        {calculatedLoadWeight > 0 && (
+            <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500">
+                <div className={`rounded-2xl p-4 text-white shadow-xl transition-colors duration-500 ${isOverloaded ? 'bg-gradient-to-br from-red-600 to-red-700' : 'bg-gradient-to-br from-emerald-600 to-teal-700'}`}>
+                    <div className="space-y-4 text-center">
+                        <div>
+                            <p className="text-xs font-bold opacity-80 uppercase tracking-wider mb-1">Berechnetes Holzgewicht</p>
+                            <div className="text-5xl font-black tracking-tighter">{calculatedLoadWeight.toLocaleString('de-DE')} kg</div>
+                        </div>
+                        
+                        <div className="w-full h-px bg-white/20"></div>
+
+                        <div>
+                            <p className="text-xs font-bold opacity-80 uppercase tracking-wider mb-1">Fahrzeuggewicht (Gesamt)</p>
+                            <div className="text-4xl font-black tracking-tighter">{totalWeight.toLocaleString('de-DE')} kg</div>
+                        </div>
+                    </div>
+
+                    {isOverloaded && (
+                        <div className="mt-4 bg-white/20 rounded-xl py-2 px-3 text-sm font-bold flex items-center justify-center gap-2 animate-pulse border border-white/30 shadow-sm">
+                            <AlertTriangle className="w-5 h-5" />
+                            <span>Verdacht auf Überladung</span>
+                        </div>
+                    )}
+                </div>
+
+                <WoodFormulaDisplay values={{ totalVol: totalVol.toFixed(2), factor: solidFactor, solidVol: solidVolume.toFixed(2), density: currentDensity, weight: calculatedLoadWeight }} />
+            </div>
+        )}
         
         <PrintButton />
       </div>
@@ -1010,46 +1037,6 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
             if (p > 10) return { cost: '110 €', points: '1', ban: '', tbnr: '334601' };
             if (p > 5)  return { cost: '80 €', points: '1', ban: '', tbnr: '334600' };
             if (p >= 2) return { cost: '30 €', points: '0', ban: '', tbnr: '334100' };
-            return null;
-        }
-    }
-    if (role === 'owner') {
-        if (isTrailer && allowed <= 2000) {
-            if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331870' };
-            if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331869' };
-            if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331868' };
-            if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331228' };
-            if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331227' };
-            if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331226' };
-            return null;
-        }
-        if (isTrailer && allowed > 2000)  {
-            if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' }; 
-            if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' };
-            if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331823' };
-            if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331822' };
-            if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331821' };
-            if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331820' };
-            if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331166' };
-            return null;
-        }
-        if ((!isTrailer && allowed <= 7500)) {
-            if (p > 30) return { cost: '235 €', points: '1', ban: '', tbnr: '331846' };
-            if (p > 25) return { cost: '140 €', points: '1', ban: '', tbnr: '331845' };
-            if (p > 20) return { cost: '95 €', points: '1', ban: '', tbnr: '331844' };
-            if (p > 15) return { cost: '35 €', points: '0', ban: '', tbnr: '331192' };
-            if (p > 10) return { cost: '30 €', points: '0', ban: '', tbnr: '331191' };
-            if (p > 5)  return { cost: '10 €', points: '0', ban: '', tbnr: '331190' };
-            return null;
-        }
-        if ((!isTrailer && allowed > 7500)) {
-            if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
-            if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
-            if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331787' };
-            if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331786' };
-            if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331785' };
-            if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331784' };
-            if (p >= 2) return { cost: '35 €', points: '0', ban: '', tbnr: '331130' };
             return null;
         }
     }
