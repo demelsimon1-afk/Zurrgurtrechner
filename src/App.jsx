@@ -2357,7 +2357,7 @@ function InfoView() {
                         Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
                     </p>
                     <a 
-                        href="https://www.paypal.com/paypalme/" 
+                        href="https://www.paypal.me/SimonDemel/" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="block w-full py-3.5 bg-[#0070BA] text-white font-bold rounded-xl shadow-lg hover:bg-[#003087] transition-all flex items-center justify-center gap-2"
