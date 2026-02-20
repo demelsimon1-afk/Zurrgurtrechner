@@ -5,7 +5,7 @@ import {
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
-  List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw
+  List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download
 } from 'lucide-react';
 
 // --- GLOBAL STYLES FOR PRINTING ---
@@ -230,7 +230,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.2.1
+        RoadTool v. 2.3
     </div>
 );
 
@@ -1146,7 +1146,7 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
 
 function OverloadCalculator() {
   const [mode, setMode] = useState('single'); 
-  const [isCommercial, setIsCommercial] = useState(false); // NEU: Gewerblicher Transport Schalter
+  const [isCommercial, setIsCommercial] = useState(false);
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
   const [allowedWeight2, setAllowedWeight2] = useState('');
@@ -1223,12 +1223,9 @@ function OverloadCalculator() {
 
   const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setResult(null); };
 
-  // Funktion zur Prüfung, ob Einziehung möglich ist
   const checkConfiscation = (res) => {
       if (!res || !isCommercial || !res.isOverloaded) return false;
-      // Überladung ab 15% für Fahrzeuge > 3,5t
       if (res.allowed > 3500 && res.percentage >= 15) return true;
-      // Überladung ab 20% für Fahrzeuge bis 3,5t
       if (res.allowed > 0 && res.allowed <= 3500 && res.percentage >= 20) return true;
       return false;
   };
@@ -1329,7 +1326,6 @@ function OverloadCalculator() {
       
       <div className="p-2 space-y-2 no-print">
         
-        {/* CHECKBOX: Gewerblicher Transport */}
         <label className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-2 cursor-pointer group">
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isCommercial ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-slate-50'}`}>
                 {isCommercial && <CheckSquare className="w-4 h-4 text-white" />}
@@ -1341,7 +1337,6 @@ function OverloadCalculator() {
             </div>
         </label>
 
-        {/* Interactive content */}
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
             <button onClick={() => setMode('single')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'single' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <Truck className="w-6 h-6" />
@@ -1447,7 +1442,7 @@ function OverloadCalculator() {
                          {checkConfiscation(result.vehicle1) && (
                              <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
                                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                                 <span>Einziehung möglich!</span>
+                                 <span>⚠️ Einziehung möglich!</span>
                              </div>
                          )}
 
@@ -1479,7 +1474,7 @@ function OverloadCalculator() {
                          {checkConfiscation(result.vehicle2) && (
                              <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
                                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                                 <span>Einziehung möglich!</span>
+                                 <span>⚠️ Einziehung möglich!</span>
                              </div>
                          )}
 
@@ -1685,7 +1680,7 @@ function LashingCalculator() {
 
     const nForward = calculateN(accFwd, fitFront ? wallFront : 0, 'forward');
     const nSide = calculateN(accSide, fitSide ? wallSide : 0, 'side');
-    const nRear = calculateN(accRear, fitRear ? wallRear : 0, 'rear');
+    const nRear = calculateN(accRear, calculateN(accRear, fitRear ? wallRear : 0, 'rear'));
 
     setLashingResult({
       forward: nForward, side: nSide, rear: nRear,
@@ -2017,11 +2012,13 @@ function KnowledgeBaseView() {
       </div>
       
       <div className="p-3">
+          {/* Geänderte Navigation für Wissen - jetzt 5 Buttons */}
           <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
             <button onClick={() => setView('einziehung')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'einziehung' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Einziehung</button>
             <button onClick={() => setView('btm')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'btm' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>BtM-Mengen</button>
             <button onClick={() => setView('ed')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ed' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>ED-Delikte</button>
-            <button onClick={() => setView('blut')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'blut' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Blutentnahme</button>
+            <button onClick={() => setView('blut')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'blut' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Blut</button>
+            <button onClick={() => setView('dako')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'dako' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Dako-Key</button>
           </div>
           
           <div className="animate-in fade-in duration-300 pb-20 no-print">
@@ -2155,6 +2152,73 @@ function KnowledgeBaseView() {
                                 </div>
                                 <span className="text-sm font-bold text-slate-700">Zwei Röhrchen zwingend bei Kokain und Opiaten (z.B. Morphin).</span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* DAKO-KEY */}
+            {view === 'dako' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Key className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Bedienung Dako-Key</h3>
+                        </div>
+                        
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-4">Auslesen des digitalen Kontrollgeräts:</p>
+                        
+                        <ol className="space-y-4 text-sm text-slate-700 font-medium mb-6">
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">1</div>
+                                <div className="mt-0.5"><strong>Zündung an schalten</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">2</div>
+                                <div className="mt-0.5"><strong>Kontrollkarte in Slot 2</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">3</div>
+                                <div className="mt-0.5"><strong>DAKO-Key in Downloadbuchse stecken</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">4</div>
+                                <div className="mt-0.5"><strong>T4 = Key-Aktivierung</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">5</div>
+                                <div className="flex-1">
+                                    <div className="mt-0.5 mb-3 leading-tight">
+                                        <strong>Warten bis LEDs aus sind und dann Tastenauswahl:</strong><br/>
+                                        <span className="text-[10px] text-slate-400 font-normal uppercase tracking-wide">(Bei doppelter Kombination beide Tasten zusammen drücken)</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-2.5 text-xs">
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T1</span> <span>Geschwindigkeit Fahrzeugeinheit + 2 Tage Aktivitäten</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T2</span> <span>Download Fahrzeugeinheit beginnend ab dem letzten vorgenommenen Download</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T3</span> <span>Download Fahrzeugeinheit 3 Monate (92 Tage)</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T4</span> <span>Download Fahrerkarte (Fahrerkarte steckt in Slot 1!)</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T1+T2</span> <span>Technische Daten / Fehler / Ereignisse</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T1+T3</span> <span>92 Tage Aktivitätsdaten</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T1+T4</span> <span>28 Tage Aktivitätsdaten</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T2+T4</span> <span>2 Tage Aktivitätsdaten</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T2+T3</span> <span>Speed-File (Unfalldaten)</span></div>
+                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T3+T4</span> <span>Komplettdownload der Fahrzeugeinheit – interessant für Werkstätten</span></div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">6</div>
+                                <div className="mt-0.5"><strong>T4 gedrückt halten bis LED/LEDs aus ist/sind.</strong> <span className="text-teal-700 block mt-0.5 text-xs"><Download className="inline w-3 h-3 mr-1"/>Download wird gestartet...</span></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">7</div>
+                                <div className="mt-0.5"><strong>Wenn alle LEDs leuchten ist der Download beendet.</strong></div>
+                            </li>
+                        </ol>
+
+                        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-center mt-4 shadow-sm">
+                            <AlertTriangle className="w-6 h-6 shrink-0 text-red-500"/>
+                            <span>Blinken alle LEDs = Fehler beim Download</span>
                         </div>
                     </div>
                 </div>
