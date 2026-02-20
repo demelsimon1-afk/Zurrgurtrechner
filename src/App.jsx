@@ -249,7 +249,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.2.5
+        RoadTool v. 2.5
     </div>
 );
 
@@ -1166,10 +1166,16 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
 function OverloadCalculator() {
   const [mode, setMode] = useState('single'); 
   const [isCommercial, setIsCommercial] = useState(false);
+  const [useCustomTolerance, setUseCustomTolerance] = useState(false); // NEUER STATE FÜR MANUELLE TOLERANZ
+  
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
+  const [customTol1, setCustomTol1] = useState(''); // NEUER STATE
+
   const [allowedWeight2, setAllowedWeight2] = useState('');
   const [actualWeight2, setActualWeight2] = useState('');
+  const [customTol2, setCustomTol2] = useState(''); // NEUER STATE
+  
   const [totalAllowed, setTotalAllowed] = useState('');
   const [result, setResult] = useState(null);
   const dateTime = useDateTime();
@@ -1185,21 +1191,25 @@ function OverloadCalculator() {
       { label: 'Kombination > 4 Achsen', val: '40000', detail: '40 t' }
   ];
 
-  useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); }, [mode]);
+  useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setCustomTol2(''); }, [mode]);
 
   useEffect(() => {
     if (mode === 'single') { if (!actualWeight1) { setResult(null); return; } } 
     else { if (!actualWeight1 || !actualWeight2) { setResult(null); return; } }
 
-    const calculateForVehicle = (allowedStr, actualStr) => {
+    const calculateForVehicle = (allowedStr, actualStr, customTolStr) => {
         const allowed = parseFloat(allowedStr);
         const actual = parseFloat(actualStr);
         if (isNaN(actual)) return null;
 
         let tolerance = 0;
-        if (actual <= 10000) tolerance = 20;
-        else if (actual <= 40000) tolerance = 40;
-        else tolerance = 60;
+        if (useCustomTolerance) {
+             tolerance = parseFloat(customTolStr) || 0;
+        } else {
+             if (actual <= 10000) tolerance = 20;
+             else if (actual <= 40000) tolerance = 40;
+             else tolerance = 60;
+        }
 
         let netWeightRaw = actual - tolerance;
         let netWeight = (allowed > 0 && allowed <= 3500) ? Math.floor(netWeightRaw) : Math.ceil(netWeightRaw);
@@ -1211,12 +1221,12 @@ function OverloadCalculator() {
         return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(actual) };
     };
 
-    const res1 = calculateForVehicle(allowedWeight1, actualWeight1);
+    const res1 = calculateForVehicle(allowedWeight1, actualWeight1, customTol1);
     let res2 = null;
     let resTotal = null;
 
     if (mode === 'combination') {
-        res2 = calculateForVehicle(allowedWeight2, actualWeight2);
+        res2 = calculateForVehicle(allowedWeight2, actualWeight2, customTol2);
         
         if (res1 && res2) {
             const sumNet = res1.netWeight + res2.netWeight;
@@ -1238,9 +1248,9 @@ function OverloadCalculator() {
         }
     }
     setResult({ vehicle1: res1, vehicle2: res2, total: resTotal });
-  }, [allowedWeight1, actualWeight1, allowedWeight2, actualWeight2, totalAllowed, mode]);
+  }, [allowedWeight1, actualWeight1, allowedWeight2, actualWeight2, totalAllowed, mode, customTol1, customTol2, useCustomTolerance]);
 
-  const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setResult(null); };
+  const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setCustomTol1(''); setCustomTol2(''); setUseCustomTolerance(false); setResult(null); };
 
   const checkConfiscation = (res) => {
       if (!res || !isCommercial || !res.isOverloaded) return false;
@@ -1264,7 +1274,7 @@ function OverloadCalculator() {
                     <th>Fahrzeugteil</th>
                     <th>Zul. Gesamt (zGM)</th>
                     <th>Gewogen (Ist)</th>
-                    <th>Toleranz</th>
+                    <th>Toleranz{useCustomTolerance && ' (Manuell)'}</th>
                     <th>Vorwerfbar (Netto)</th>
                 </tr>
             </thead>
@@ -1352,9 +1362,17 @@ function OverloadCalculator() {
             <input type="checkbox" checked={isCommercial} onChange={(e) => setIsCommercial(e.target.checked)} className="hidden" />
             <div className="flex flex-col">
                 <span className={`text-sm font-bold uppercase tracking-wide transition-colors ${isCommercial ? 'text-blue-800' : 'text-slate-600'}`}>Gewerblicher Transport</span>
-                <span className="text-[10px] text-slate-400">Aktiviert Prüfung auf Einziehung der Taterträge</span>
+                <span className="text-[10px] text-slate-400">Prüfung auf Einziehung der Taterträge</span>
             </div>
         </label>
+
+        {/* Dezente Checkbox für manuelle Toleranz */}
+        <div className="px-2 mb-3 flex items-center justify-end">
+             <label className="flex items-center gap-1.5 cursor-pointer group">
+                <input type="checkbox" checked={useCustomTolerance} onChange={(e) => setUseCustomTolerance(e.target.checked)} className="w-3.5 h-3.5 rounded border-slate-300 text-slate-600 focus:ring-slate-500 transition-colors" />
+                <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben, sonst Toleranz der GZA Weil am Rhein</span>
+             </label>
+        </div>
 
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
             <button onClick={() => setMode('single')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'single' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
@@ -1378,6 +1396,11 @@ function OverloadCalculator() {
                 <div className="space-y-2">
                     <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} />
                     <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} />
+                    {useCustomTolerance && (
+                        <div className="pt-2 border-t border-slate-50 mt-2 animate-in fade-in">
+                            <InputWithIcon icon={Edit3} label="Toleranzabzug (kg)" value={customTol1} onChange={(e) => setCustomTol1(e.target.value)} placeholder="0" />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -1390,6 +1413,11 @@ function OverloadCalculator() {
                     <div className="space-y-2">
                         <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} />
                         <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} />
+                        {useCustomTolerance && (
+                            <div className="pt-2 border-t border-slate-50 mt-2 animate-in fade-in">
+                                <InputWithIcon icon={Edit3} label="Toleranzabzug (kg)" value={customTol2} onChange={(e) => setCustomTol2(e.target.value)} placeholder="0" />
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -1623,7 +1651,7 @@ function LashingCalculator() {
     const empty = parseFloat(emptyWeight) || 0;
     const payload = Math.max(0, total - empty);
     if (bodyCert === 'L') return { front: 5000, side: Math.round(payload * 0.15), rear: 3100 };
-    if (bodyCert === 'XL') return { front: Math.round(payload * 0.50), side: Math.round(payload * 0.30), rear: Math.round(payload * 0.40) };
+    if (bodyCert === 'XL') return { Math: Math.round(payload * 0.50), side: Math.round(payload * 0.30), rear: Math.round(payload * 0.40) };
     return { front: 0, side: 0, rear: 0 };
   };
 
@@ -2333,7 +2361,7 @@ function InfoView() {
                         </div>
                         <div>
                             <p className="font-bold text-slate-800 mb-1">2. Hosting (Vercel)</p>
-                            <p>Die Website wird bei Vercel gehostet. Anbieter ist die Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA. Wenn Sie die Website besuchen, erfasst Vercel serverseitig standardmäßig Verbindungsdaten (z. B. Ihre IP-Adresse, Browsertyp, Datum und Uhrzeit des Abrufs) in sogenannten Server-Logfiles, um die fehlerfreie Auslieferung der Website und die IT-Sicherheit zu gewährleisten. Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Weitere Details finden Sie in der Datenschutzerklärung von Vercel.</p>
+                            <p>Wir hosten unsere Website bei Vercel. Anbieter ist die Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA. Wenn Sie unsere Website besuchen, erfasst Vercel serverseitig standardmäßig Verbindungsdaten (z. B. Ihre IP-Adresse, Browsertyp, Datum und Uhrzeit des Abrufs) in sogenannten Server-Logfiles, um die fehlerfreie Auslieferung der Website und die IT-Sicherheit zu gewährleisten. Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Weitere Details finden Sie in der Datenschutzerklärung von Vercel.</p>
                         </div>
                         <div>
                             <p className="font-bold text-slate-800 mb-1">3. Gerätesensoren (Winkelmessung)</p>
