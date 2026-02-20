@@ -136,6 +136,25 @@ const LashingStrapIcon = ({ className }) => (
   </svg>
 );
 
+const DiagonalLashingIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="6" y="6" width="12" height="12" rx="1" />
+    <path d="M2 2l4 4" />
+    <path d="M22 2l-4 4" />
+    <path d="M2 22l4-4" />
+    <path d="M22 22l-4-4" />
+  </svg>
+);
+
+const ConstructionConeIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M11.3 3.6c.3-.8 1.4-.8 1.7 0l8.4 16.8c.4.8-.2 1.6-1 1.6H3.6c-.8 0-1.4-.8-1-1.6l8.7-16.8z" fill="currentColor" fillOpacity="0.2" />
+    <path d="M11.3 3.6c.3-.8 1.4-.8 1.7 0l8.4 16.8c.4.8-.2 1.6-1 1.6H3.6c-.8 0-1.4-.8-1-1.6l8.7-16.8z" />
+    <path d="M7 14h10" />
+    <path d="M9 10h6" />
+  </svg>
+);
+
 const SpiritLevelIcon = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <rect x="2" y="8" width="20" height="8" rx="2" />
@@ -230,7 +249,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.3
+        RoadTool v. 2.4
     </div>
 );
 
@@ -1542,6 +1561,8 @@ function OverloadCalculator() {
 
 // --- LASHING CALCULATOR ---
 function LashingCalculator() {
+  const [lashingType, setLashingType] = useState('nieder'); // Toggle zwischen 'nieder' und 'diagonal'
+
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
@@ -1699,9 +1720,10 @@ function LashingCalculator() {
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
-      {/* PRINT VIEW ONLY */}
+      {/* PRINT VIEW ONLY (Nur für Niederzurren) */}
+      {lashingType === 'nieder' && (
       <div className="print-only print-container">
-        <h1 className="print-title">LaSi-Protokoll</h1>
+        <h1 className="print-title">LaSi-Protokoll (Niederzurren)</h1>
         <div className="print-meta">Erstellt am: {dateTime}</div>
 
         <h2 className="print-section">Eingabedaten</h2>
@@ -1744,13 +1766,14 @@ function LashingCalculator() {
         </>
         )}
       </div>
+      )}
       {/* END PRINT VIEW */}
 
       <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-indigo-900/10 no-print">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
-            <LashingStrapIcon className="w-5 h-5 shrink-0" />
-            LaSi-Niederzurren
+            {lashingType === 'nieder' ? <LashingStrapIcon className="w-5 h-5 shrink-0" /> : <DiagonalLashingIcon className="w-5 h-5 shrink-0" />}
+            LaSi-Rechner
           </h1>
           <p className="text-indigo-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-7">
              <Clock className="w-3 h-3" />
@@ -1764,235 +1787,263 @@ function LashingCalculator() {
 
       <div className="p-2 space-y-2 no-print">
         
-        {/* AUFBAU CARD */}
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-            <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5" /> Fahrzeugaufbau wählen
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-                 <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
-                    <span>Kein geprüfter Aufbau</span>
-                </button>
-                <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
-                    <span>Code L</span>
-                </button>
-                 <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
-                    <span>Code XL</span>
-                </button>
-            </div>
+        {/* Toggle Niederzurren / Diagonalzurren */}
+        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
+            <button onClick={() => setLashingType('nieder')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'nieder' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <LashingStrapIcon className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase">Niederzurren</span>
+            </button>
+            <button onClick={() => setLashingType('diagonal')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'diagonal' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <DiagonalLashingIcon className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase">Diagonalzurren</span>
+            </button>
         </div>
 
-        {/* GEWICHTE CARD */}
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-           <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-              <Scale className="w-5 h-5" />
-              <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
-           </div>
-           <div className="grid grid-cols-2 gap-2 mb-2">
-             <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
-             <InputWithIcon icon={ShieldCheck} label="Zul. Gesamt (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
-           </div>
-           <InputWithIcon icon={Box} label="Ladungsgewicht (kg) *" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
-        </div>
-
-        {/* SETTINGS CARD */}
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-          <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
-           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="relative col-span-2 sm:col-span-1">
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
-                {selectedFrictionId === 'CUSTOM' ? (
-                  <div className="flex gap-1">
-                    <div className="relative w-full">
-                        <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
-                        <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
-                    </div>
-                    <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
-                  </div>
-                ) : (
-                  <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
-                    {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
-                    <option disabled>──────────</option>
-                    <option value="CUSTOM">Eigener Wert...</option>
-                  </select>
-                )}
-            </div>
-
-            <div className="relative col-span-2 sm:col-span-1">
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
-                <div className="flex gap-1.5">
-                    <div className="relative w-full">
-                         <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
-                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
-                    </div>
-                    <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+        {lashingType === 'nieder' ? (
+        <>
+            {/* AUFBAU CARD */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+                <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Fahrzeugaufbau wählen
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                     <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
+                        <span>Kein geprüfter Aufbau</span>
+                    </button>
+                    <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
+                        <span>Code L</span>
+                    </button>
+                     <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
+                        <span>Code XL</span>
+                    </button>
                 </div>
             </div>
 
-            <div className="col-span-2 relative">
-                 <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
-                 <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
-                    {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600].map((val) => (<option key={val} value={val}>{val} daN</option>))}
-                </select>
+            {/* GEWICHTE CARD */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+               <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+                  <Scale className="w-5 h-5" />
+                  <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
+               </div>
+               <div className="grid grid-cols-2 gap-2 mb-2">
+                 <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
+                 <InputWithIcon icon={ShieldCheck} label="Zul. Gesamt (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
+               </div>
+               <InputWithIcon icon={Box} label="Ladungsgewicht (kg) *" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
             </div>
-          </div>
-        </div>
 
-        {/* FORMSCHLUSS CARD */}
-        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-           <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-              <Box className="w-5 h-5" />
-              <span className="text-sm font-black uppercase tracking-wide">Aufbau Belastbarkeit (daN)</span>
-           </div>
-           
-           <div className="grid grid-cols-3 gap-2">
-             <div className="flex flex-col">
-               <div className="flex items-center gap-1 mb-1">
-                 <input type="checkbox" checked={fitFront} onChange={(e) => setFitFront(e.target.checked)} id="cb_front" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
-                 <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
+            {/* SETTINGS CARD */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+              <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+                  <Settings className="w-5 h-5" />
+                  <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
                </div>
-               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Stirnwand</label>
-               <input type="number" inputMode="numeric" disabled={!fitFront} value={wallFront} onChange={(e) => setWallFront(e.target.value)} onBlur={(e) => handleBlur('front', e.target.value, setWallFront)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitFront ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
-             </div>
-             <div className="flex flex-col">
-               <div className="flex items-center gap-1 mb-1">
-                 <input type="checkbox" checked={fitSide} onChange={(e) => setFitSide(e.target.checked)} id="cb_side" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
-                 <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
-               </div>
-               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Seite</label>
-               <input type="number" inputMode="numeric" disabled={!fitSide} value={wallSide} onChange={(e) => setWallSide(e.target.value)} onBlur={(e) => handleBlur('side', e.target.value, setWallSide)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitSide ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
-             </div>
-             <div className="flex flex-col">
-               <div className="flex items-center gap-1 mb-1">
-                 <input type="checkbox" checked={fitRear} onChange={(e) => setFitRear(e.target.checked)} id="cb_rear" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
-                 <label htmlFor="cb_rear" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
-               </div>
-               <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Heck</label>
-               <input type="number" inputMode="numeric" disabled={!fitRear} value={wallRear} onChange={(e) => setWallRear(e.target.value)} onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitRear ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
-             </div>
-           </div>
-           
-           <div className="mt-2 flex gap-2 items-start text-xs text-slate-500 bg-slate-50 p-2 rounded-xl">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400" />
-              <p>Formschluss gilt bis 5 cm Abstand (hinten max. 30 cm).</p>
-           </div>
-        </div>
-
-        {/* KIPPGEFAHR */}
-        <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
-          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
-            {isTipping && <CheckSquare className="w-4 h-4" />}
-          </div>
-          <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
-          <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
-              Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
-          </span>
-        </label>
-
-        {/* RESULTAT */}
-        {lashingResult !== null && (
-          <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
-            <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
-              
-              <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-                <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Gurte</h3>
-                <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
-                  {lashingResult.weightClassInfo}
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                    { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward, hasFit: fitFront },
-                    { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
-                    { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
-                ].map((res, idx) => (
-                    <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50">
-                        <span className={`text-4xl font-black ${isTipping ? 'text-amber-600' : 'text-indigo-600'}`}>{res.count}</span>
-                        <span className="text-xs font-bold uppercase text-slate-400 mt-0.5">{res.label}</span>
-                        <div className="flex flex-col items-center gap-0.5">
-                            <span className="text-[10px] text-slate-300">({res.factor}g)</span>
-                            <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'}`}>
-                                {res.hasFit ? (
-                                    <span className="flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" /> Formschl.</span>
-                                ) : 'Kein Formschl.'}
-                            </span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="relative col-span-2 sm:col-span-1">
+                    <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
+                    {selectedFrictionId === 'CUSTOM' ? (
+                      <div className="flex gap-1">
+                        <div className="relative w-full">
+                            <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
+                            <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
                         </div>
-                    </div>
-                ))}
-              </div>
+                        <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
+                      </div>
+                    ) : (
+                      <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
+                        {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
+                        <option disabled>──────────</option>
+                        <option value="CUSTOM">Eigener Wert...</option>
+                      </select>
+                    )}
+                </div>
 
-               <div className={`mt-4 p-3 rounded-xl flex items-center justify-between ${isTipping ? 'bg-amber-50 text-amber-900' : 'bg-indigo-50 text-indigo-900'}`}>
-                 <span className="text-xs font-bold uppercase tracking-wide opacity-70">Minimum:</span>
-                 <div className="text-3xl font-black">
-                    {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
+                <div className="relative col-span-2 sm:col-span-1">
+                    <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
+                    <div className="flex gap-1.5">
+                        <div className="relative w-full">
+                             <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
+                             <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
+                        </div>
+                        <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+                    </div>
+                </div>
+
+                <div className="col-span-2 relative">
+                     <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
+                     <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
+                        {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600].map((val) => (<option key={val} value={val}>{val} daN</option>))}
+                    </select>
+                </div>
+              </div>
+            </div>
+
+            {/* FORMSCHLUSS CARD */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+               <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+                  <Box className="w-5 h-5" />
+                  <span className="text-sm font-black uppercase tracking-wide">Aufbau Belastbarkeit (daN)</span>
+               </div>
+               
+               <div className="grid grid-cols-3 gap-2">
+                 <div className="flex flex-col">
+                   <div className="flex items-center gap-1 mb-1">
+                     <input type="checkbox" checked={fitFront} onChange={(e) => setFitFront(e.target.checked)} id="cb_front" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                     <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
+                   </div>
+                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Stirnwand</label>
+                   <input type="number" inputMode="numeric" disabled={!fitFront} value={wallFront} onChange={(e) => setWallFront(e.target.value)} onBlur={(e) => handleBlur('front', e.target.value, setWallFront)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitFront ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
+                 </div>
+                 <div className="flex flex-col">
+                   <div className="flex items-center gap-1 mb-1">
+                     <input type="checkbox" checked={fitSide} onChange={(e) => setFitSide(e.target.checked)} id="cb_side" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                     <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
+                   </div>
+                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Seite</label>
+                   <input type="number" inputMode="numeric" disabled={!fitSide} value={wallSide} onChange={(e) => setWallSide(e.target.value)} onBlur={(e) => handleBlur('side', e.target.value, setWallSide)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitSide ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
+                 </div>
+                 <div className="flex flex-col">
+                   <div className="flex items-center gap-1 mb-1">
+                     <input type="checkbox" checked={fitRear} onChange={(e) => setFitRear(e.target.checked)} id="cb_rear" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                     <label htmlFor="cb_rear" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
+                   </div>
+                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Heck</label>
+                   <input type="number" inputMode="numeric" disabled={!fitRear} value={wallRear} onChange={(e) => setWallRear(e.target.value)} onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitRear ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
                  </div>
                </div>
                
-               <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} weightClass={lashingResult.weightClass} />
+               <div className="mt-2 flex gap-2 items-start text-xs text-slate-500 bg-slate-50 p-2 rounded-xl">
+                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400" />
+                  <p>Formschluss gilt bis 5 cm Abstand (hinten max. 30 cm).</p>
+               </div>
             </div>
 
-            {fineGroups.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
-                <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
-                    <div className="flex items-center gap-2">
-                        <Gavel className="w-5 h-5 text-slate-400" />
-                        <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
-                    </div>
-                    {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
-                </button>
-                
-                <div className={showFines ? 'block' : 'hidden print-visible'}>
-                  {fineGroups.map((group, gIdx) => (
-                      <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                          {group.title && (
-                              <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
-                          )}
-                          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                            <table className="w-full text-left text-sm">
-                              <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
-                                <tr>
-                                  <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
-                                  <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
-                                  <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100">
-                                {group.items.map((fine, fIdx) => (
-                                  <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-3 py-2.5">
-                                      <div className="flex items-start gap-2">
-                                          <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
-                                          <div>
-                                              <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
-                                              {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
-                                          </div>
-                                      </div>
-                                    </td>
-                                    <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                      <div className="mt-0.5">{fine.code}</div>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-right align-top">
-                                      <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
-                                      {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                      </div>
-                  ))}
+            {/* KIPPGEFAHR */}
+            <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
+                {isTipping && <CheckSquare className="w-4 h-4" />}
+              </div>
+              <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
+              <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
+                  Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
+              </span>
+            </label>
+
+            {/* RESULTAT */}
+            {lashingResult !== null && (
+              <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
+                <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
+                  
+                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                    <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Gurte</h3>
+                    <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+                      {lashingResult.weightClassInfo}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                        { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward, hasFit: fitFront },
+                        { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
+                        { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
+                    ].map((res, idx) => (
+                        <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50">
+                            <span className={`text-4xl font-black ${isTipping ? 'text-amber-600' : 'text-indigo-600'}`}>{res.count}</span>
+                            <span className="text-xs font-bold uppercase text-slate-400 mt-0.5">{res.label}</span>
+                            <div className="flex flex-col items-center gap-0.5">
+                                <span className="text-[10px] text-slate-300">({res.factor}g)</span>
+                                <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'}`}>
+                                    {res.hasFit ? (
+                                        <span className="flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" /> Formschl.</span>
+                                    ) : 'Kein Formschl.'}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                  </div>
+
+                   <div className={`mt-4 p-3 rounded-xl flex items-center justify-between ${isTipping ? 'bg-amber-50 text-amber-900' : 'bg-indigo-50 text-indigo-900'}`}>
+                     <span className="text-xs font-bold uppercase tracking-wide opacity-70">Minimum:</span>
+                     <div className="text-3xl font-black">
+                        {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
+                     </div>
+                   </div>
+                   
+                   <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} weightClass={lashingResult.weightClass} />
                 </div>
+
+                {fineGroups.length > 0 && (
+                  <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
+                    <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
+                        <div className="flex items-center gap-2">
+                            <Gavel className="w-5 h-5 text-slate-400" />
+                            <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
+                        </div>
+                        {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
+                    </button>
+                    
+                    <div className={showFines ? 'block' : 'hidden print-visible'}>
+                      {fineGroups.map((group, gIdx) => (
+                          <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
+                              {group.title && (
+                                  <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                              )}
+                              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                <table className="w-full text-left text-sm">
+                                  <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                                    <tr>
+                                      <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
+                                      <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
+                                      <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100">
+                                    {group.items.map((fine, fIdx) => (
+                                      <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-3 py-2.5">
+                                          <div className="flex items-start gap-2">
+                                              <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                              <div>
+                                                  <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                                  {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                              </div>
+                                          </div>
+                                        </td>
+                                        <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                          <div className="mt-0.5">{fine.code}</div>
+                                        </td>
+                                        <td className="px-3 py-2.5 text-right align-top">
+                                          <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                          {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                          </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+            
+            <PrintButton />
+        </>
+        ) : (
+            // PLATZHALTER DIAGONALZURREN
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mb-6 border-4 border-amber-100 relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#f59e0b_10px,#f59e0b_20px)]"></div>
+                    <ConstructionConeIcon className="w-12 h-12 text-amber-500 relative z-10 drop-shadow-sm" />
+                </div>
+                <h3 className="text-xl font-black text-slate-700 uppercase tracking-wider mb-2">Im Aufbau</h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed max-w-[250px]">
+                    Der Rechner für das Diagonalzurren befindet sich aktuell noch in der Programmierung und wird in einer der nächsten Versionen verfügbar sein.
+                </p>
+            </div>
         )}
-        
-        <PrintButton />
       </div>
       <AppVersionFooter />
     </div>
