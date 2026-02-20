@@ -5,7 +5,7 @@ import {
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
-  List, Heart, Coffee
+  List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw
 } from 'lucide-react';
 
 // --- GLOBAL STYLES FOR PRINTING ---
@@ -126,7 +126,6 @@ const PrintStyles = () => (
 );
 
 // --- HELPER COMPONENTS ---
-// (Icons kept for screen view)
 const LashingStrapIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M2 12h20" />
@@ -231,7 +230,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.2
+        RoadTool v. 2.2.1
     </div>
 );
 
@@ -388,7 +387,6 @@ const useDateTime = () => {
 };
 
 // --- ANGLE MEASUREMENT MODAL ---
-// (Kept same as before, no changes needed for printing logic here)
 const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
     const [step, setStep] = useState(1); 
     const referenceBetaRef = useRef(null); 
@@ -477,7 +475,6 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
 // --- CALCULATOR COMPONENTS ---
 
 function AgeCalculator() {
-    // ... (same implementation, but UI wrapped in screen-only class if printing needs to be blank, but user didn't request printing for this one)
     const [birthDate, setBirthDate] = useState('');
     const [ageInfo, setAgeInfo] = useState(null);
     const dateTime = useDateTime();
@@ -525,7 +522,6 @@ function AgeCalculator() {
 }
 
 function SpeedCalculator() {
-    // ... (Speed Calculator Implementation) ...
     const [mode, setMode] = useState('laser'); 
     const [vehicleType, setVehicleType] = useState('pkw'); 
     const [allowedSpeed, setAllowedSpeed] = useState('');
@@ -642,7 +638,6 @@ function SpeedCalculator() {
     );
 }
 
-// --- WOOD CALCULATOR ---
 function WoodCalculator() {
   const [vehicleType, setVehicleType] = useState('semi'); 
   const [allowedWeight, setAllowedWeight] = useState('');
@@ -953,9 +948,7 @@ function WoodCalculator() {
 }
 
 // --- OVERLOAD CALCULATOR ---
-
 const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role) => {
-    // ... (Overload fine logic remains same) ...
     if (percentage < 2) return null; // Toleranzbereich
     const p = percentage;
     if (isCombination) {
@@ -1042,12 +1035,10 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
         }
     }
     
-    // NEW OWNER LOGIC FOR SINGLE VEHICLES / TRACTORS / TRAILERS
     if (role === 'owner') {
-        // Trailer Owner (Halter Anhänger) - Single View or non-combination context
         if (isTrailer) {
             if (allowed > 2000) {
-                 if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' }; // Using similar scaling as >7.5t
+                 if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' }; 
                  if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331824' };
                  if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331823' };
                  if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331822' };
@@ -1065,7 +1056,6 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
                  return null;
             }
         } 
-        // Tractor/Single Vehicle Owner (Halter Zugmaschine/KFZ)
         else {
              if (allowed > 7500) {
                  if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
@@ -1114,7 +1104,6 @@ const PrintFineDisplay = ({ result, isTrailer, isCombination }) => {
 };
 
 const FineDisplay = ({ result, isTrailer, isCombination }) => {
-    // ... (Interactive FineDisplay for Screen - kept same) ...
     const [showDriver, setShowDriver] = useState(false);
     const [showOwner, setShowOwner] = useState(false);
 
@@ -1125,7 +1114,7 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
 
     return (
         <div className="mt-4 space-y-2 no-print">
-            <button onClick={() => setShowDriver(!showDriver)} className="w-full flex justify-between items-center px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold uppercase transition-colors">
+            <button onClick={() => setShowDriver(!showDriver)} className="w-full flex justify-between items-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold uppercase transition-colors">
                 <span>Tatbestand Fahrer</span>
                 {showDriver ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
             </button>
@@ -1157,6 +1146,7 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
 
 function OverloadCalculator() {
   const [mode, setMode] = useState('single'); 
+  const [isCommercial, setIsCommercial] = useState(false); // NEU: Gewerblicher Transport Schalter
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
   const [allowedWeight2, setAllowedWeight2] = useState('');
@@ -1165,7 +1155,6 @@ function OverloadCalculator() {
   const [result, setResult] = useState(null);
   const dateTime = useDateTime();
 
-  // Determine standard values based on tractor weight
   const tractorLimit = parseFloat(allowedWeight1) || 0;
   const show35tOption = tractorLimit > 0 && tractorLimit <= 25000;
 
@@ -1234,6 +1223,16 @@ function OverloadCalculator() {
 
   const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setResult(null); };
 
+  // Funktion zur Prüfung, ob Einziehung möglich ist
+  const checkConfiscation = (res) => {
+      if (!res || !isCommercial || !res.isOverloaded) return false;
+      // Überladung ab 15% für Fahrzeuge > 3,5t
+      if (res.allowed > 3500 && res.percentage >= 15) return true;
+      // Überladung ab 20% für Fahrzeuge bis 3,5t
+      if (res.allowed > 0 && res.allowed <= 3500 && res.percentage >= 20) return true;
+      return false;
+  };
+
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
@@ -1254,7 +1253,6 @@ function OverloadCalculator() {
                 </tr>
             </thead>
             <tbody>
-                {/* Vehicle 1 */}
                 <tr>
                     <td>{mode === 'single' ? 'Einzelfahrzeug' : 'Zugmaschine'}</td>
                     <td>{allowedWeight1 || 0} kg</td>
@@ -1262,7 +1260,6 @@ function OverloadCalculator() {
                     <td>-{result?.vehicle1?.tolerance || 0} kg</td>
                     <td><strong>{result?.vehicle1?.netWeight?.toLocaleString() || 0} kg</strong></td>
                 </tr>
-                {/* Vehicle 2 */}
                 {mode === 'combination' && (
                 <tr>
                     <td>Anhänger</td>
@@ -1285,6 +1282,7 @@ function OverloadCalculator() {
                 {result.vehicle1?.isOverloaded && (
                     <div>Differenz: +{result.vehicle1.difference.toLocaleString()} kg</div>
                 )}
+                {checkConfiscation(result.vehicle1) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
                 <PrintFineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
             </div>
 
@@ -1296,6 +1294,7 @@ function OverloadCalculator() {
                 {result.vehicle2?.isOverloaded && (
                     <div>Differenz: +{result.vehicle2.difference.toLocaleString()} kg</div>
                 )}
+                {checkConfiscation(result.vehicle2) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
                 <PrintFineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
             </div>
             )}
@@ -1314,6 +1313,7 @@ function OverloadCalculator() {
                 {result.total.isOverloaded && (
                     <div>Differenz: +{result.total.difference.toLocaleString()} kg</div>
                 )}
+                {checkConfiscation(result.total) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
                 <PrintFineDisplay result={result.total} isTrailer={false} isCombination={true} />
             </div>
             )}
@@ -1328,6 +1328,19 @@ function OverloadCalculator() {
       </div>
       
       <div className="p-2 space-y-2 no-print">
+        
+        {/* CHECKBOX: Gewerblicher Transport */}
+        <label className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-2 cursor-pointer group">
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isCommercial ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-slate-50'}`}>
+                {isCommercial && <CheckSquare className="w-4 h-4 text-white" />}
+            </div>
+            <input type="checkbox" checked={isCommercial} onChange={(e) => setIsCommercial(e.target.checked)} className="hidden" />
+            <div className="flex flex-col">
+                <span className={`text-sm font-bold uppercase tracking-wide transition-colors ${isCommercial ? 'text-blue-800' : 'text-slate-600'}`}>Gewerblicher Transport</span>
+                <span className="text-[10px] text-slate-400">Aktiviert Prüfung auf Einziehung der Taterträge</span>
+            </div>
+        </label>
+
         {/* Interactive content */}
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
             <button onClick={() => setMode('single')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'single' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
@@ -1408,47 +1421,71 @@ function OverloadCalculator() {
           <div className={`grid gap-2 ${mode === 'combination' ? 'grid-cols-2' : 'grid-cols-1'}`}>
              
              {result.vehicle1 && result.vehicle1.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5">
-                        <span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
-                            <Truck className="w-3 h-3 text-slate-400"/> {mode === 'single' ? 'Fahrzeug' : 'Zugm.'}
-                        </span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
-                    </div>
-                     {result.vehicle1.isOverloaded ? (
-                        <div className="text-center py-2">
-                            <div className="text-2xl font-black text-red-600 tracking-tighter">
-                                {result.vehicle1.percentage.toFixed(2)} <span className="text-sm">%</span>
-                            </div>
-                            <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
-                                + {result.vehicle1.difference.toLocaleString()} kg
-                            </div>
+                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all flex flex-col justify-between ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+                    <div>
+                        <div className="flex justify-between items-center mb-1.5">
+                            <span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
+                                <Truck className="w-3 h-3 text-slate-400"/> {mode === 'single' ? 'Fahrzeug' : 'Zugm.'}
+                            </span>
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
                         </div>
-                     ) : (
-                        <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
-                     )}
-                     <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />
-                     <FineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
+                        {result.vehicle1.isOverloaded ? (
+                            <div className="text-center py-2">
+                                <div className="text-2xl font-black text-red-600 tracking-tighter">
+                                    {result.vehicle1.percentage.toFixed(2)} <span className="text-sm">%</span>
+                                </div>
+                                <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
+                                    + {result.vehicle1.difference.toLocaleString()} kg
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
+                        )}
+                    </div>
+
+                     <div>
+                         {checkConfiscation(result.vehicle1) && (
+                             <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
+                                 <AlertTriangle className="w-4 h-4 shrink-0" />
+                                 <span>Einziehung möglich!</span>
+                             </div>
+                         )}
+
+                         <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />
+                         <FineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
+                     </div>
                  </div>
              )}
              
              {result.vehicle2 && result.vehicle2.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs"><Box className="w-3 h-3 text-slate-400"/> Anhänger</span><span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
-                     {result.vehicle2.isOverloaded ? (
-                        <div className="text-center py-2">
-                            <div className="text-2xl font-black text-red-600 tracking-tighter">
-                                {result.vehicle2.percentage.toFixed(2)} <span className="text-sm">%</span>
+                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all flex flex-col justify-between ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+                    <div>
+                        <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs"><Box className="w-3 h-3 text-slate-400"/> Anhänger</span><span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
+                        {result.vehicle2.isOverloaded ? (
+                            <div className="text-center py-2">
+                                <div className="text-2xl font-black text-red-600 tracking-tighter">
+                                    {result.vehicle2.percentage.toFixed(2)} <span className="text-sm">%</span>
+                                </div>
+                                <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
+                                    + {result.vehicle2.difference.toLocaleString()} kg
+                                </div>
                             </div>
-                            <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
-                                + {result.vehicle2.difference.toLocaleString()} kg
-                            </div>
-                        </div>
-                     ) : (
-                        <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
-                     )}
-                     <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />
-                     <FineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
+                        ) : (
+                            <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
+                        )}
+                    </div>
+                     
+                     <div>
+                         {checkConfiscation(result.vehicle2) && (
+                             <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
+                                 <AlertTriangle className="w-4 h-4 shrink-0" />
+                                 <span>Einziehung möglich!</span>
+                             </div>
+                         )}
+
+                         <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />
+                         <FineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
+                     </div>
                  </div>
              )}
           </div>
@@ -1486,6 +1523,14 @@ function OverloadCalculator() {
                         </div>
                         </>
                     )}
+
+                    {checkConfiscation(result.total) && (
+                         <div className="mt-4 bg-red-100 border border-red-400 text-red-800 px-3 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 animate-pulse uppercase tracking-widest shadow-inner">
+                             <AlertTriangle className="w-5 h-5 shrink-0" />
+                             <span>⚠️ Einziehung möglich!</span>
+                         </div>
+                    )}
+
                     <OverloadFormulaDisplay values={{ actual: result.total.actual, tolerance: result.total.tolerance, net: result.total.netWeight, allowed: result.total.allowed, diff: result.total.difference, percent: result.total.percentage }} isTotal={true} />
                     <FineDisplay result={result.total} isTrailer={false} isCombination={true} />
                 </div>
@@ -1505,7 +1550,6 @@ function LashingCalculator() {
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
-  // ... (Same Friction options) ...
   const FRICTION_OPTIONS = [
     { id: '0.20_dirty', val: 0.20, label: '0,20 μ - Nicht besenrein (verschmutzt)' },
     { id: '0.20_metal', val: 0.20, label: '0,20 μ - Metall auf Metall' },
@@ -1583,7 +1627,6 @@ function LashingCalculator() {
     const s_tf = parseFloat(stf);
     const alpha = parseFloat(angle);
     const maxWeight = parseFloat(allowedWeight);
-    const empty = parseFloat(emptyWeight) || 0;
 
     if (isNaN(m) || m <= 0) {
       setLashingResult(null); return;
@@ -1772,7 +1815,7 @@ function LashingCalculator() {
                         <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
                         <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
                     </div>
-                    <button onClick={() => { setSelectedFrictionId('0.3_holz'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
+                    <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
                   </div>
                 ) : (
                   <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
@@ -1961,7 +2004,169 @@ function LashingCalculator() {
   );
 }
 
-// --- INFO VIEW (No Changes) ---
+// --- KNOWLEDGE BASE VIEW (NEW) ---
+function KnowledgeBaseView() {
+  const dateTime = useDateTime();
+  const [view, setView] = useState('einziehung');
+
+  return (
+    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+      <div className="bg-teal-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-teal-900/10 no-print">
+        <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><BookOpen className="w-6 h-6 shrink-0" />Wissen & Handbuch</h1><p className="text-teal-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
+        <HeaderLogo />
+      </div>
+      
+      <div className="p-3">
+          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
+            <button onClick={() => setView('einziehung')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'einziehung' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Einziehung</button>
+            <button onClick={() => setView('btm')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'btm' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>BtM-Mengen</button>
+            <button onClick={() => setView('ed')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ed' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>ED-Delikte</button>
+            <button onClick={() => setView('blut')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'blut' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Blutentnahme</button>
+          </div>
+          
+          <div className="animate-in fade-in duration-300 pb-20 no-print">
+            
+            {/* EINZIEHUNG */}
+            {view === 'einziehung' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <ScaleLaw className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Voraussetzungen Einziehung</h3>
+                        </div>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Folgende Kriterien rechtfertigen eine Einziehung:</p>
+                        <ul className="space-y-2.5 text-sm text-slate-700 font-medium">
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überladung ab 15 %</strong> (LKW) bzw. bei Fahrzeugen bis 3,5 t zGM ab 20 %</span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überhöhe</strong> ab 4,20 m</span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überbreite</strong> ab 4,20 m</span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrzeuge <strong>ohne Zulassung</strong></span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Mehr als <strong>30 % der Ladung ungesichert</strong> <br/><span className="text-xs text-slate-500 font-normal">(nur wenn kein rutschhemmendes Material mitgeführt wird)</span></span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Verstoß gegen das <strong>Sonntags-/Feiertagsfahrverbot</strong></span></li>
+                        </ul>
+                    </div>
+                </div>
+            )}
+
+            {/* BTM MENGEN */}
+            {view === 'btm' && (
+                 <div className="space-y-4">
+                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <AlertCircle className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Nicht geringe Mengen (BtM)</h3>
+                        </div>
+                        <ul className="space-y-3 text-sm text-slate-700 mb-5">
+                            <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                <span className="font-bold">Marihuana</span>
+                                <div className="text-right"><span className="font-black text-teal-600 block">ab 30 g</span><span className="text-[10px] text-slate-400">bis 2024: 150 - 600 g</span></div>
+                            </li>
+                            <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                <span className="font-bold">Haschisch</span>
+                                <div className="text-right"><span className="font-black text-teal-600 block">ab 20 g</span><span className="text-[10px] text-slate-400">bis 2024: 100 g</span></div>
+                            </li>
+                            <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                <span className="font-bold">Ecstasy</span>
+                                <div className="text-right"><span className="font-black text-teal-600 block">ab 125 Tab. (~55 g)</span><span className="text-[10px] text-slate-400">bis 2024: 200 KE</span></div>
+                            </li>
+                            <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                <span className="font-bold">Amphetamin</span>
+                                <div className="text-right"><span className="font-black text-teal-600 block">ab 15 g</span><span className="text-[10px] text-slate-400">bis 2024: 180 g</span></div>
+                            </li>
+                            <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                <span className="font-bold">Kokain</span>
+                                <div className="text-right"><span className="font-black text-teal-600 block">ab 6 g</span><span className="text-[10px] text-slate-400">bis 2024: 10 g</span></div>
+                            </li>
+                            <li className="flex justify-between items-center pb-2">
+                                <span className="font-bold">Heroin</span>
+                                <div className="text-right"><span className="font-black text-teal-600 block">ab 3 g</span><span className="text-[10px] text-slate-400">bis 2024: 10 g</span></div>
+                            </li>
+                        </ul>
+                        
+                        <div className="bg-teal-50 p-3 rounded-xl space-y-2 text-xs text-teal-900 border border-teal-100">
+                            <div className="flex gap-2 items-start"><Info className="w-4 h-4 shrink-0 mt-0.5 opacity-70"/><span>Ab diesen Mengenangaben erfolgt eine Untersuchung auf den <strong>Wirkstoffgehalt</strong>.</span></div>
+                            <div className="flex gap-2 items-start"><Info className="w-4 h-4 shrink-0 mt-0.5 opacity-70"/><span><strong>Belehrung</strong> des Beschuldigten nach Verbrechen!</span></div>
+                            <div className="flex gap-2 items-start"><Info className="w-4 h-4 shrink-0 mt-0.5 opacity-70"/><span>Keine Folgemaßnahmen im Standardfall notwendig.</span></div>
+                        </div>
+                     </div>
+                 </div>
+            )}
+
+            {/* ED-DELIKTE */}
+            {view === 'ed' && (
+                 <div className="space-y-4">
+                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Fingerprint className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">ED-Delikte (Erkennungsdienst)</h3>
+                        </div>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">ED-Delikte sind u.a.:</p>
+                        <ul className="space-y-1.5 text-sm text-slate-700 font-medium mb-6">
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Besonders schwerer Fall des Diebstahls</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>5 oder mehr Fälle Diebstahl</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Raubdelikte</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Gefährliche / schwere KV</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Illegaler Handel / Schmuggel von BtM / illegale Einfuhr</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Verstoß gegen das WaffG</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Fälschungsdelikte</li>
+                        </ul>
+
+                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <p className="text-xs text-slate-500 font-bold uppercase mb-3 border-b border-slate-200 pb-2">Eine ED-Behandlung muss neu gemacht werden, wenn:</p>
+                            <ol className="space-y-2 text-sm text-slate-700 list-decimal list-inside font-medium">
+                                <li>Mehr als 5 Jahre her (Fingerabdrücke)</li>
+                                <li>ED-Material weist Qualitätsmängel auf</li>
+                                <li>Fingerglieder fehlen oder sind vernarbt</li>
+                                <li>Die letzte ED-Behandlung im Alter von unter 18 Jahren erfolgte und mehr als 1 Jahr zurückliegt</li>
+                                <li>Wenn sich das Aussehen der Person verändert hat</li>
+                            </ol>
+                        </div>
+                     </div>
+                 </div>
+            )}
+
+            {/* BLUTENTNAHME */}
+            {view === 'blut' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Syringe className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Hinweise zur Blutentnahme</h3>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <h4 className="font-black text-slate-800 text-sm mb-3">Alkohol</h4>
+                            <p className="text-xs text-slate-400 font-bold uppercase mb-2">Eine <u>zweite</u> Blutentnahme ist erforderlich, wenn:</p>
+                            <ul className="space-y-1.5 text-sm text-slate-700 font-medium mb-3">
+                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Nachtrunk geltend gemacht wird</li>
+                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Innerhalb 1 Stunde vor der ersten BE Alkohol getrunken wurde</li>
+                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Keine oder falsche Angaben zum Alkoholkonsum vorliegen</li>
+                            </ul>
+                            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-start mt-4">
+                                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-500"/>
+                                <span>Zweite BE frühestens nach 30 und spätestens nach 40 Minuten nach der ersten BE!</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-black text-slate-800 text-sm mb-3">Berauschende Mittel</h4>
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex gap-3 items-center">
+                                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                                    <span className="font-black text-slate-500">2x</span>
+                                </div>
+                                <span className="text-sm font-bold text-slate-700">Zwei Röhrchen zwingend bei Kokain und Opiaten (z.B. Morphin).</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+          </div>
+      </div>
+      <AppVersionFooter />
+    </div>
+  );
+}
+
+// --- INFO VIEW ---
 function InfoView() {
   const dateTime = useDateTime();
   const [view, setView] = useState('notes');
@@ -2037,12 +2242,11 @@ function InfoView() {
                         Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
                     </p>
                     <a 
-                        href="https://www.paypal.com/simondemel@gmx.de/" 
+                        href="https://www.paypal.com/paypalme/" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="block w-full py-3.5 bg-[#0070BA] text-white font-bold rounded-xl shadow-lg hover:bg-[#003087] transition-all flex items-center justify-center gap-2"
                     >
-                        {/* Simple SVG for PayPal P logo */}
                         <span className="fill-white"><svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M7.076 21.337l.486-3.08c.133-.84.852-1.464 1.703-1.464h1.725c3.55 0 6.315-1.44 7.15-5.698.417-2.126-.41-4.144-2.85-5.228-2.073-.92-4.947-.64-7.98 1.285l-.57-.027c-.89 0-1.666.626-1.83 1.503L2.83 19.34c-.08.43.25.823.69.823h2.95c.345 0 .64-.236.696-.576l.006-.03z"/></svg></span>
                         <span>Spende per PayPal</span>
                     </a>
@@ -2070,6 +2274,7 @@ export default function App() {
          activeTab === 'wood' ? <WoodCalculator /> : 
          activeTab === 'speed' ? <SpeedCalculator /> : 
          activeTab === 'age' ? <AgeCalculator /> :
+         activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
          activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
       </div>
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print">
@@ -2080,11 +2285,12 @@ export default function App() {
             { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' },
             { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
             { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
+            { id: 'knowledge', icon: BookOpen, label: 'Wissen', color: 'text-teal-600' }, 
             { id: 'info', icon: FileText, label: 'Infos', color: 'text-slate-600' }
           ].map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 px-1 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 px-0.5 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
               <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? tab.color : ''}`} />
-              <span className={`text-[10px] font-bold ${activeTab === tab.id ? 'text-slate-800' : ''}`}>{tab.label}</span>
+              <span className={`text-[9px] font-bold ${activeTab === tab.id ? 'text-slate-800' : ''}`}>{tab.label}</span>
             </button>
           ))}
         </div>
