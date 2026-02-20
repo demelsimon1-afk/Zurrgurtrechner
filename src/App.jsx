@@ -249,7 +249,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.4
+        RoadTool v. 2.2.5
     </div>
 );
 
@@ -2284,7 +2284,7 @@ function KnowledgeBaseView() {
 // --- INFO VIEW ---
 function InfoView() {
   const dateTime = useDateTime();
-  const [view, setView] = useState('notes');
+  const [view, setView] = useState('impressum'); // Geändert: Startet jetzt direkt im Impressum als Standard
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
@@ -2294,9 +2294,9 @@ function InfoView() {
       </div>
       <div className="p-3">
           <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
-            <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Haftung</button>
             <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Impressum</button>
             <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Datenschutz</button>
+            <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Haftung</button>
             <button onClick={() => setView('donate')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${view === 'donate' ? 'bg-white shadow text-pink-600' : 'text-slate-500 hover:text-pink-600'}`}>
                 <Heart className="w-3 h-3" />
                 Spenden
@@ -2304,6 +2304,49 @@ function InfoView() {
           </div>
           
           <div className="animate-in fade-in duration-300 pb-20 no-print">
+            
+            {view === 'impressum' && (
+                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-5 text-center">Impressum</h3>
+                    <div className="space-y-5 text-sm text-slate-600">
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">Angaben gemäß § 5 TMG</p>
+                            <p>Simon Demel</p>
+                            <p>Ellen-Gottlieb Straße 15</p>
+                            <p>79106 Freiburg im Breisgau</p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">Kontakt</p>
+                            <p>E-Mail: <a href="mailto:Demelsimon1@gmail.com" className="text-indigo-600 hover:underline">Demelsimon1@gmail.com</a></p>
+                        </div>
+                    </div>
+                 </div>
+            )}
+
+            {view === 'privacy' && (
+                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-5 text-center">Datenschutzerklärung</h3>
+                    <div className="space-y-5 text-sm text-slate-600 text-justify">
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">1. Datenerfassung & Lokale Verarbeitung</p>
+                            <p>Diese Applikation arbeitet primär vollständig lokal auf Ihrem Endgerät ("Client-Side"). Es werden von der Applikationslogik selbst keinerlei personenbezogene Daten (wie Berechnungen, Gewichte, Winkel etc.) an externe Server übertragen oder dort gespeichert.</p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">2. Hosting (Vercel)</p>
+                            <p>Die Website wird bei Vercel gehostet. Anbieter ist die Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA. Wenn Sie die Website besuchen, erfasst Vercel serverseitig standardmäßig Verbindungsdaten (z. B. Ihre IP-Adresse, Browsertyp, Datum und Uhrzeit des Abrufs) in sogenannten Server-Logfiles, um die fehlerfreie Auslieferung der Website und die IT-Sicherheit zu gewährleisten. Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Weitere Details finden Sie in der Datenschutzerklärung von Vercel.</p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">3. Gerätesensoren (Winkelmessung)</p>
+                            <p>Für die Funktion der Winkelmessung wird, nach Ihrer ausdrücklichen Zustimmung, kurzzeitig auf die Lagesensoren (Gyroskop) Ihres Gerätes zugegriffen. Diese Daten werden ausschließlich live für die Anzeige in Ihrem Browser verarbeitet und zu keinem Zeitpunkt gespeichert, protokolliert oder an Server übertragen.</p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">4. Cookies & Tracking</p>
+                            <p>Diese Anwendung verwendet keine eigenen Tracking-Cookies oder Analyse-Werkzeuge (z. B. Google Analytics), um das Nutzerverhalten auszuwerten oder Profile zu erstellen.</p>
+                        </div>
+                    </div>
+                 </div>
+            )}
+
             {view === 'notes' && (
                 <div className="space-y-4">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
@@ -2318,33 +2361,6 @@ function InfoView() {
                     </div>
                 </div>
             )}
-            
-            {view === 'impressum' && (
-                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
-                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-4">Impressum</h3>
-                    <p className="text-slate-500 text-sm">Angaben gemäß § 5 TMG</p>
-                    <div className="my-6 space-y-1 text-slate-700 font-medium">
-                        <p>Max Mustermann</p>
-                        <p>Musterstraße 1</p>
-                        <p>12345 Musterstadt</p>
-                    </div>
-                    <div className="text-sm text-slate-600">
-                        <p>Kontakt:</p>
-                        <a href="mailto:info@beispiel.de" className="text-indigo-600 hover:underline">info@beispiel.de</a>
-                    </div>
-                 </div>
-            )}
-
-            {view === 'privacy' && (
-                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-4">Datenschutz</h3>
-                    <div className="space-y-3 text-sm text-slate-600 text-justify">
-                        <p><strong>1. Datenerfassung:</strong> Diese Applikation arbeitet vollständig lokal auf Ihrem Endgerät ("Client-Side"). Es werden keinerlei personenbezogene Daten an externe Server übertragen oder dort gespeichert.</p>
-                        <p><strong>2. Sensoren:</strong> Für die Winkelmessung wird kurzzeitig auf die Lagesensoren (Gyroskop) Ihres Gerätes zugegriffen. Diese Daten werden nicht gespeichert und dienen ausschließlich der Echtzeit-Anzeige.</p>
-                        <p><strong>3. Keine Cookies:</strong> Diese Anwendung verwendet keine Tracking-Cookies oder Analysetools von Drittanbietern.</p>
-                    </div>
-                 </div>
-            )}
 
             {view === 'donate' && (
                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
@@ -2357,7 +2373,7 @@ function InfoView() {
                         Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
                     </p>
                     <a 
-                        href="https://www.paypal.me/SimonDemel/" 
+                        href="https://www.paypal.com/paypalme/" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="block w-full py-3.5 bg-[#0070BA] text-white font-bold rounded-xl shadow-lg hover:bg-[#003087] transition-all flex items-center justify-center gap-2"
