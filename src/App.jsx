@@ -473,7 +473,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                              <div>
                                  <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: Ladefläche nullen</div>
                                  <h4 className="font-bold text-slate-700 text-lg">Sensor Nullen</h4>
-                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf den <strong>Ladeboden</strong> legen, um die Neigung auszugleichen.</p>
+                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf den <strong>Ladeboden</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
                              </div>
                              <button onClick={handleZero} className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all">Jetzt Nullen (Referenz)</button>
                           </div>
@@ -481,7 +481,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                     {step === 3 && (
                         <div className="text-center space-y-6">
                             <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Aufgerundet +5°)</p></div>
-                            <div><p className="text-slate-500 text-sm leading-relaxed">Gerät nun auf den <strong>Zurrgurt</strong> legen.</p></div>
+                            <div><p className="text-slate-500 text-sm leading-relaxed">Gerät nun <strong>entlang des Zurrgurts</strong> auflegen.</p></div>
                             <button onClick={handleApply} className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" />Wert übernehmen</button>
                         </div>
                     )}
@@ -1627,6 +1627,7 @@ function LashingCalculator() {
 
   const [stf, setStf] = useState('500');
   const [angle, setAngle] = useState('90');
+  const [angleBeta, setAngleBeta] = useState('45');
   const [wallFront, setWallFront] = useState(''); 
   const [wallSide, setWallSide] = useState('');    
   const [wallRear, setWallRear] = useState('');    
@@ -1637,7 +1638,17 @@ function LashingCalculator() {
   const [isTipping, setIsTipping] = useState(false);
   const [lashingResult, setLashingResult] = useState(null);
   const [fineGroups, setFineGroups] = useState([]);
+  
+  // State für die mathematische Berechnung von Winkel Beta
+  const [distX, setDistX] = useState('');
+  const [distY, setDistY] = useState('');
+  const [showInfoX, setShowInfoX] = useState(false);
+  const [showInfoY, setShowInfoY] = useState(false);
+  
+  // State für die Handy-Winkelmessung
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
+  const [activeAngleField, setActiveAngleField] = useState(null); // 'alpha' oder 'beta'
+
   const [showFines, setShowFines] = useState(false);
   const dateTime = useDateTime();
 
@@ -1645,6 +1656,21 @@ function LashingCalculator() {
     let num = parseFloat(val);
     if (isNaN(num)) setter('0');
   };
+
+  // Automatische Berechnung von Beta über Tangens
+  useEffect(() => {
+    const x = parseFloat(distX);
+    const y = parseFloat(distY);
+    if (!isNaN(x) && !isNaN(y)) {
+        if (x === 0 && y > 0) {
+            setAngleBeta('90');
+        } else if (x > 0) {
+            const betaRad = Math.atan(y / x);
+            const betaDeg = Math.round(betaRad * (180 / Math.PI));
+            setAngleBeta(betaDeg.toString());
+        }
+    }
+  }, [distX, distY]);
 
   const getStandardForces = () => {
     const total = parseFloat(allowedWeight) || 0;
@@ -1670,6 +1696,7 @@ function LashingCalculator() {
     const mu = parseFloat(friction);
     const s_tf = parseFloat(stf);
     const alpha = parseFloat(angle);
+    const beta = parseFloat(angleBeta);
     const maxWeight = parseFloat(allowedWeight);
 
     if (isNaN(m) || m <= 0) {
@@ -1693,6 +1720,7 @@ function LashingCalculator() {
 
     const g = 9.81; 
     const alphaRad = (alpha * Math.PI) / 180; 
+    const betaRad = (beta * Math.PI) / 180;
     const stfInNewton = s_tf * 10; 
 
     // ACCELERATION FACTOR SELECTION
@@ -1705,6 +1733,7 @@ function LashingCalculator() {
         accFwd = isTipping ? 0.96 : 0.80; accSide = isTipping ? 0.60 : 0.50; accRear = isTipping ? 0.60 : 0.50;
     }
 
+    // --- NIEDERZURREN CALCULATION ---
     const calculateN = (acc, blockingDaN, direction) => {
        const weightForce = m * g;
        const blockingForce = (parseFloat(blockingDaN) || 0) * 10; 
@@ -1731,24 +1760,47 @@ function LashingCalculator() {
     const nSide = calculateN(accSide, fitSide ? wallSide : 0, 'side');
     const nRear = calculateN(accRear, calculateN(accRear, fitRear ? wallRear : 0, 'rear'));
 
+    // --- DIAGONALZURREN CALCULATION ---
+    const calcDiagLC = (c, isSide) => {
+        const f_mu = mu * 0.75; // Anpassung: Reibbeiwert * 0.75
+        const num = (m * g) * (c - f_mu); // Kraft in Newton
+        if (num <= 0) return 0;
+        
+        // isSide -> sin(beta) (Querbeschleunigung), ansonsten cos(beta) (Längsbeschleunigung)
+        const trigBeta = isSide ? Math.sin(betaRad) : Math.cos(betaRad);
+        
+        const geo = (Math.cos(alphaRad) * trigBeta) + (f_mu * Math.sin(alphaRad));
+        if (geo <= 0) return 0;
+        return (num / (2 * geo)) / 10; // Division durch 10 rechnet Newton in daN um
+    };
+
+    const lcDiagFwd = calcDiagLC(accFwd, false);
+    const lcDiagSide = calcDiagLC(accSide, true);
+    const lcDiagRear = calcDiagLC(accRear, false);
+    
+    // Die benötigte LC ist der Maximalwert aus allen Richtungen
+    const diagLC = Math.ceil(Math.max(lcDiagFwd, lcDiagSide, lcDiagRear));
+
     setLashingResult({
       forward: nForward, side: nSide, rear: nRear,
       factorForward: accFwd, factorSide: accSide, factorRear: accRear,
       weightClassInfo: !maxWeight ? '< 2000 kg (Standard)' : maxWeight <= 1999 ? '< 2000 kg' : maxWeight <= 3500 ? '2000 - 3500 kg' : '> 3500 kg',
       displayValues: { weightForceN: m * g, c: accFwd, formForceN: (parseFloat(fitFront ? wallFront : 0) * 10), mu, alphaRad, stfNewton: stfInNewton },
       weightClass: maxWeight,
+      lcDiagFwd, lcDiagSide, lcDiagRear,
+      diagonalLC: diagLC,
       detailRows: [
         { label: 'Vorne', mu: mu, c: accFwd, angle: angle, hasFit: fitFront, force: fitFront ? wallFront : 0, result: nForward },
         { label: 'Seite', mu: mu, c: accSide, angle: angle, hasFit: fitSide, force: fitSide ? wallSide : 0, result: nSide },
         { label: 'Hinten', mu: mu, c: accRear, angle: angle, hasFit: fitRear, force: fitRear ? wallRear : 0, result: nRear },
       ]
     });
-  }, [loadWeight, friction, stf, angle, allowedWeight, emptyWeight, isTipping, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
+  }, [loadWeight, friction, stf, angle, angleBeta, allowedWeight, emptyWeight, isTipping, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
-      {/* PRINT VIEW ONLY (Nur für Niederzurren) */}
+      {/* PRINT VIEW ONLY (Niederzurren) */}
       {lashingType === 'nieder' && (
       <div className="print-only print-container">
         <h1 className="print-title">LaSi-Protokoll (Niederzurren)</h1>
@@ -1795,6 +1847,33 @@ function LashingCalculator() {
         )}
       </div>
       )}
+
+      {/* PRINT VIEW ONLY (Diagonalzurren) */}
+      {lashingType === 'diagonal' && (
+      <div className="print-only print-container">
+          <h1 className="print-title">LaSi-Protokoll (Diagonalzurren)</h1>
+          <div className="print-meta">Erstellt am: {dateTime}</div>
+
+          <h2 className="print-section">Eingabedaten</h2>
+          <table className="print-table">
+              <tbody>
+                  <tr><th>Ladungsgewicht</th><td>{loadWeight || 0} kg</td></tr>
+                  <tr><th>Reibbeiwert (μ)</th><td>{friction.toFixed(2)}</td></tr>
+                  <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
+                  <tr><th>Längswinkel (β)</th><td>{angleBeta}°</td></tr>
+                  <tr><th>Kippgefahr</th><td>{isTipping ? 'Ja' : 'Nein'}</td></tr>
+              </tbody>
+          </table>
+          
+          {lashingResult && (
+          <div className="print-result-box">
+              <div className="print-result-header">Benötigte LC Werte je Gurt</div>
+              <div>Gurte vorne (Sicherung nach hinten/seitlich): <strong>{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</strong></div>
+              <div>Gurte hinten (Sicherung nach vorne/seitlich): <strong>{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</strong></div>
+          </div>
+          )}
+      </div>
+      )}
       {/* END PRINT VIEW */}
 
       <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-indigo-900/10 no-print">
@@ -1811,7 +1890,19 @@ function LashingCalculator() {
         <HeaderLogo />
       </div>
 
-      <AngleMeasureModal isOpen={isMeasureModalOpen} onClose={() => setIsMeasureModalOpen(false)} onApply={(a) => setAngle(a)} />
+      <AngleMeasureModal 
+         isOpen={isMeasureModalOpen} 
+         onClose={() => {
+             setIsMeasureModalOpen(false);
+             setActiveAngleField(null);
+         }} 
+         onApply={(a) => {
+             if (activeAngleField === 'alpha') setAngle(a.toString());
+             else if (activeAngleField === 'beta') setAngleBeta(a.toString());
+             setIsMeasureModalOpen(false);
+             setActiveAngleField(null);
+         }} 
+      />
 
       <div className="p-2 space-y-2 no-print">
         
@@ -1893,7 +1984,7 @@ function LashingCalculator() {
                              <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
                              <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
                         </div>
-                        <button onClick={() => setIsMeasureModalOpen(true)} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+                        <button onClick={() => { setActiveAngleField('alpha'); setIsMeasureModalOpen(true); }} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
                     </div>
                 </div>
 
@@ -1957,7 +2048,7 @@ function LashingCalculator() {
               </span>
             </label>
 
-            {/* RESULTAT */}
+            {/* RESULTAT NIEDERZURREN */}
             {lashingResult !== null && (
               <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
                 <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
@@ -1999,79 +2090,239 @@ function LashingCalculator() {
                    
                    <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} weightClass={lashingResult.weightClass} />
                 </div>
+              </div>
+            )}
+        </>
+        ) : (
+            <>
+                {/* HINWEIS FREISTEHENDE LADUNG */}
+                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-center mb-2 shadow-sm break-inside-avoid animate-in fade-in">
+                    <Info className="w-5 h-5 shrink-0 text-indigo-500" />
+                    <span className="text-xs font-bold text-indigo-800 leading-tight">
+                        Wichtig: Diagonalzurren ist nur bei <span className="underline decoration-indigo-300 decoration-2 underline-offset-2">freistehender Ladung</span> anwendbar!
+                    </span>
+                </div>
 
-                {fineGroups.length > 0 && (
-                  <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3">
-                    <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
-                        <div className="flex items-center gap-2">
-                            <Gavel className="w-5 h-5 text-slate-400" />
-                            <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
-                        </div>
-                        {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
-                    </button>
-                    
-                    <div className={showFines ? 'block' : 'hidden print-visible'}>
-                      {fineGroups.map((group, gIdx) => (
-                          <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                              {group.title && (
-                                  <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
-                              )}
-                              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                                <table className="w-full text-left text-sm">
-                                  <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
-                                    <tr>
-                                      <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
-                                      <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
-                                      <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-100">
-                                    {group.items.map((fine, fIdx) => (
-                                      <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-3 py-2.5">
-                                          <div className="flex items-start gap-2">
-                                              <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
-                                              <div>
-                                                  <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
-                                                  {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
-                                              </div>
-                                          </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                          <div className="mt-0.5">{fine.code}</div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right align-top">
-                                          <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
-                                          {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+                {/* GEWICHTE CARD (Diagonalzurren) */}
+                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+                   <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+                      <Scale className="w-5 h-5" />
+                      <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
+                   </div>
+                   <InputWithIcon icon={Box} label="Ladungsgewicht (kg) *" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
+                </div>
+
+                {/* SETTINGS CARD (Diagonalzurren) */}
+                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+                  <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+                      <Settings className="w-5 h-5" />
+                      <span className="text-sm font-black uppercase tracking-wide">Parameter (Diagonalzurren)</span>
+                   </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="relative col-span-2">
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
+                        {selectedFrictionId === 'CUSTOM' ? (
+                          <div className="flex gap-1">
+                            <div className="relative w-full">
+                                <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
+                                <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
+                            </div>
+                            <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
                           </div>
-                      ))}
+                        ) : (
+                          <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
+                            {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
+                            <option disabled>──────────</option>
+                            <option value="CUSTOM">Eigener Wert...</option>
+                          </select>
+                        )}
+                    </div>
+
+                    <div className="relative col-span-2">
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vertikalwinkel α</label>
+                        <div className="flex gap-1.5">
+                            <div className="relative w-full">
+                                 <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="z.B. 30" />
+                                 <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
+                            </div>
+                            <button onClick={() => { setActiveAngleField('alpha'); setIsMeasureModalOpen(true); }} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+                        </div>
+                    </div>
+
+                    <div className="relative col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200 mt-1">
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5"><Calculator className="w-4 h-4 text-indigo-500"/> Längswinkel β (Tangens-Berechnung)</label>
+                        
+                        <div className="grid grid-cols-2 gap-3 mb-3 items-start">
+                            <div className="flex flex-col h-full">
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase" title="Abstand vom Zurrpunkt der Ladung zum Zurrpunkt am Fahrzeug, parallel zur Seite">Längsabstand X</label>
+                                    <button onClick={() => setShowInfoX(!showInfoX)} className="text-indigo-400 hover:text-indigo-600 p-0.5 rounded-full hover:bg-indigo-50 transition-colors"><Info className="w-3.5 h-3.5"/></button>
+                                </div>
+                                <div className="relative mb-auto">
+                                    <input type="number" step="0.1" value={distX} onChange={(e) => setDistX(e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium shadow-sm" placeholder="z.B. 2.5" />
+                                    <span className="absolute right-3 top-2 text-slate-400 font-bold text-xs pointer-events-none">m</span>
+                                </div>
+                                {showInfoX && (
+                                    <div className="mt-1.5 p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-[9px] leading-relaxed text-indigo-800 animate-in fade-in slide-in-from-top-1">
+                                        <strong>Ankathete:</strong> Der Abstand in Längsrichtung (Abstand vom Zurrpunkt der Ladung zum Zurrpunkt am Fahrzeug, parallel zur Seite).
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex flex-col h-full">
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase" title="Seitlicher Abstand vom Anschlagpunkt der Ladung zur Befestigungsschiene">Querabstand Y</label>
+                                    <button onClick={() => setShowInfoY(!showInfoY)} className="text-indigo-400 hover:text-indigo-600 p-0.5 rounded-full hover:bg-indigo-50 transition-colors"><Info className="w-3.5 h-3.5"/></button>
+                                </div>
+                                <div className="relative mb-auto">
+                                    <input type="number" step="0.1" value={distY} onChange={(e) => setDistY(e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium shadow-sm" placeholder="z.B. 1.2" />
+                                    <span className="absolute right-3 top-2 text-slate-400 font-bold text-xs pointer-events-none">m</span>
+                                </div>
+                                {showInfoY && (
+                                    <div className="mt-1.5 p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-[9px] leading-relaxed text-indigo-800 animate-in fade-in slide-in-from-top-1">
+                                        <strong>Gegenkathete:</strong> Der seitliche Abstand vom Anschlagpunkt der Ladung zur Befestigungsschiene am Fahrzeug.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-2 items-center bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 shrink-0 flex-1">Resultierender Winkel β:</label>
+                            <div className="relative w-24 shrink-0">
+                                 <input type="number" min="0" max="90" value={angleBeta} onChange={(e) => { setAngleBeta(e.target.value); setDistX(''); setDistY(''); }} className="w-full bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg px-2 py-1.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-black text-center" placeholder="45" />
+                                 <span className="absolute right-2 top-1.5 text-indigo-400 font-bold pointer-events-none">°</span>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KIPPGEFAHR (Diagonalzurren) */}
+                <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
+                    {isTipping && <CheckSquare className="w-4 h-4" />}
+                  </div>
+                  <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
+                  <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
+                      Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
+                  </span>
+                </label>
+                
+                {/* RESULTAT DIAGONALZURREN */}
+                {lashingResult !== null && (
+                  <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
+                    <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
+                      <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Zugkraft (LC)</h3>
+                      </div>
+                      
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-center">
+                         <svg viewBox="0 0 300 360" className="w-full max-w-[280px] h-auto drop-shadow-sm">
+                            {/* Arrow Fahrtrichtung */}
+                            <path d="M150 15 L150 45 M135 30 L150 15 L165 30" stroke="#94a3b8" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                            <text x="150" y="60" textAnchor="middle" className="text-[11px] font-black fill-slate-400 uppercase tracking-widest">Fahrtrichtung</text>
+
+                            {/* Truck bed */}
+                            <rect x="30" y="80" width="240" height="260" rx="12" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="4" />
+                            <rect x="40" y="90" width="220" height="240" rx="8" fill="#f8fafc" stroke="none" />
+                            
+                            {/* Straps (Lines) */}
+                            <line x1="100" y1="160" x2="40" y2="100" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+                            <line x1="200" y1="160" x2="260" y2="100" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+                            <line x1="100" y1="280" x2="40" y2="320" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+                            <line x1="200" y1="280" x2="260" y2="320" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+
+                            {/* Cargo */}
+                            <rect x="100" y="160" width="100" height="120" rx="4" fill="#fcd34d" stroke="#f59e0b" strokeWidth="4" />
+                            <text x="150" y="225" textAnchor="middle" className="text-sm font-black fill-amber-700 tracking-widest">LADUNG</text>
+
+                            {/* Badges Front Straps */}
+                            <g transform="translate(10, 115)">
+                                <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
+                                <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</text>
+                            </g>
+                            <g transform="translate(220, 115)">
+                                <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
+                                <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</text>
+                            </g>
+
+                            {/* Badges Rear Straps */}
+                            <g transform="translate(10, 290)">
+                                <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
+                                <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</text>
+                            </g>
+                            <g transform="translate(220, 290)">
+                                <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
+                                <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</text>
+                            </g>
+                         </svg>
+                      </div>
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-            
-            <PrintButton />
-        </>
-        ) : (
-            // PLATZHALTER DIAGONALZURREN
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mb-6 border-4 border-amber-100 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#f59e0b_10px,#f59e0b_20px)]"></div>
-                    <ConstructionConeIcon className="w-12 h-12 text-amber-500 relative z-10 drop-shadow-sm" />
-                </div>
-                <h3 className="text-xl font-black text-slate-700 uppercase tracking-wider mb-2">Im Aufbau</h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed max-w-[250px]">
-                    Der Rechner für das Diagonalzurren befindet sich aktuell noch in der Programmierung und wird in einer der nächsten Versionen verfügbar sein.
-                </p>
-            </div>
+            </>
         )}
+        
+        {/* STRAFTATBESTÄNDE - SICHTBAR FÜR BEIDE RECHNERARTEN */}
+        {lashingResult !== null && fineGroups.length > 0 && (
+          <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 pb-20 break-inside-avoid print-full-width">
+            <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
+                <div className="flex items-center gap-2">
+                    <Gavel className="w-5 h-5 text-slate-400" />
+                    <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
+                </div>
+                {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
+            </button>
+            
+            <div className={showFines ? 'block' : 'hidden print-visible'}>
+              {fineGroups.map((group, gIdx) => (
+                  <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
+                      {group.title && (
+                          <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                      )}
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                            <tr>
+                              <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
+                              <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
+                              <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {group.items.map((fine, fIdx) => (
+                              <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-3 py-2.5">
+                                  <div className="flex items-start gap-2">
+                                      <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                      <div>
+                                          <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                          {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                      </div>
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                  <div className="mt-0.5">{fine.code}</div>
+                                </td>
+                                <td className="px-3 py-2.5 text-right align-top">
+                                  <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                  {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                  </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Print-Button für beide Reiter */}
+        {((lashingType === 'nieder' && lashingResult !== null) || (lashingType === 'diagonal' && lashingResult !== null)) && (
+             <PrintButton />
+        )}
+
       </div>
       <AppVersionFooter />
     </div>
@@ -2166,9 +2417,24 @@ function KnowledgeBaseView() {
                             <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
                             <div className="flex justify-center text-teal-600 font-black text-xs uppercase tracking-widest">+ UND +</div>
                             <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
-                            <div className="flex items-start gap-3">
+                            <div className="flex items-start gap-3 w-full">
                                 <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">B</div>
-                                <div className="pt-0.5">Unter der Wirkung von <strong>Alkohol</strong> (mind. 0,1 mg/l / 0,2 ‰) oder Wirkung von <strong>THC</strong> (mind. 1 ng/ml)<br/><span className="text-xs text-slate-500 block mt-2 pt-2 border-t border-slate-200"><strong>ODER:</strong> Während der Fahrt alkoholische Getränke / THC konsumieren</span></div>
+                                <div className="flex-1">
+                                    <div className="space-y-2.5 w-full">
+                                        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm leading-snug">
+                                            Unter der Wirkung von <strong>Alkohol</strong> <span className="text-xs text-slate-500 font-normal">(mind. 0,1 mg/l / 0,2 ‰)</span><br/>
+                                            oder <strong>THC</strong> <span className="text-xs text-slate-500 font-normal">(mind. 1,0 ng/ml)</span> stehen.
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-px bg-slate-200 flex-1"></div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">ODER</span>
+                                            <div className="h-px bg-slate-200 flex-1"></div>
+                                        </div>
+                                        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm leading-snug">
+                                            Während der Fahrt alkoholische Getränke oder THC <strong>konsumieren</strong>.
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2318,25 +2584,17 @@ function KnowledgeBaseView() {
                         <ol className="space-y-4 text-sm text-slate-700 font-medium mb-6">
                             <li className="flex gap-3">
                                 <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">1</div>
-                                <div className="mt-0.5"><strong>Zündung an schalten</strong></div>
+                                <div className="mt-0.5"><strong>Zündung ist an!</strong><br/><span className="text-xs text-slate-500">Kontrollkarte/Unternehmenskarte in Slot 2<br/>DAKO-Key in Downloadbuchse stecken</span></div>
                             </li>
                             <li className="flex gap-3">
                                 <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">2</div>
-                                <div className="mt-0.5"><strong>Kontrollkarte in Slot 2</strong></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">3</div>
-                                <div className="mt-0.5"><strong>DAKO-Key in Downloadbuchse stecken</strong></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">4</div>
-                                <div className="mt-0.5"><strong>Wenn alle LEDs leuchten ist der Download beendet.</strong></div>
+                                <div className="mt-0.5"><strong>Download beendet</strong><br/><span className="text-xs text-slate-500">Wenn alle LEDs leuchten ist der Download beendet.</span></div>
                             </li>
                         </ol>
 
                         <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-center mt-4 shadow-sm">
                             <AlertTriangle className="w-6 h-6 shrink-0 text-red-500"/>
-                            <span>Blinken alle LEDs = Fehler beim Download</span>
+                            <span>blinken alle LEDs = Fehler beim Download</span>
                         </div>
                     </div>
                 </div>
