@@ -249,7 +249,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.5
+        RoadTool v. 2.6
     </div>
 );
 
@@ -1166,15 +1166,15 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
 function OverloadCalculator() {
   const [mode, setMode] = useState('single'); 
   const [isCommercial, setIsCommercial] = useState(false);
-  const [useCustomTolerance, setUseCustomTolerance] = useState(false); // NEUER STATE FÜR MANUELLE TOLERANZ
+  const [useCustomTolerance, setUseCustomTolerance] = useState(false); 
   
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
-  const [customTol1, setCustomTol1] = useState(''); // NEUER STATE
+  const [customTol1, setCustomTol1] = useState(''); 
 
   const [allowedWeight2, setAllowedWeight2] = useState('');
   const [actualWeight2, setActualWeight2] = useState('');
-  const [customTol2, setCustomTol2] = useState(''); // NEUER STATE
+  const [customTol2, setCustomTol2] = useState(''); 
   
   const [totalAllowed, setTotalAllowed] = useState('');
   const [result, setResult] = useState(null);
@@ -1370,7 +1370,7 @@ function OverloadCalculator() {
         <div className="px-2 mb-3 flex items-center justify-end">
              <label className="flex items-center gap-1.5 cursor-pointer group">
                 <input type="checkbox" checked={useCustomTolerance} onChange={(e) => setUseCustomTolerance(e.target.checked)} className="w-3.5 h-3.5 rounded border-slate-300 text-slate-600 focus:ring-slate-500 transition-colors" />
-                <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben, sonst Toleranz der GZA Weil am Rhein</span>
+                <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben</span>
              </label>
         </div>
 
@@ -1651,7 +1651,7 @@ function LashingCalculator() {
     const empty = parseFloat(emptyWeight) || 0;
     const payload = Math.max(0, total - empty);
     if (bodyCert === 'L') return { front: 5000, side: Math.round(payload * 0.15), rear: 3100 };
-    if (bodyCert === 'XL') return { Math: Math.round(payload * 0.50), side: Math.round(payload * 0.30), rear: Math.round(payload * 0.40) };
+    if (bodyCert === 'XL') return { front: Math.round(payload * 0.50), side: Math.round(payload * 0.30), rear: Math.round(payload * 0.40) };
     return { front: 0, side: 0, rear: 0 };
   };
 
@@ -2081,7 +2081,7 @@ function LashingCalculator() {
 // --- KNOWLEDGE BASE VIEW (NEW) ---
 function KnowledgeBaseView() {
   const dateTime = useDateTime();
-  const [view, setView] = useState('einziehung');
+  const [view, setView] = useState('ph1'); // Startet jetzt standardmäßig mit § 24a StVG
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
@@ -2091,34 +2091,150 @@ function KnowledgeBaseView() {
       </div>
       
       <div className="p-3">
-          {/* Geänderte Navigation für Wissen - jetzt 5 Buttons */}
+          {/* Navigation für Wissen - 10 Buttons (Thematisch geordnet) */}
           <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
-            <button onClick={() => setView('einziehung')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'einziehung' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Einziehung</button>
-            <button onClick={() => setView('btm')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'btm' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>BtM-Mengen</button>
-            <button onClick={() => setView('ed')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ed' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>ED-Delikte</button>
-            <button onClick={() => setView('blut')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'blut' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Blut</button>
-            <button onClick={() => setView('dako')} className={`whitespace-nowrap flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'dako' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Dako-Key</button>
+            <button onClick={() => setView('ph1')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ph1' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>§ 24a StVG</button>
+            <button onClick={() => setView('ph2')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ph2' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>§ 24c StVG</button>
+            <button onClick={() => setView('ph3')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ph3' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Medikamente</button>
+            <button onClick={() => setView('blut')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'blut' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Blut</button>
+            <button onClick={() => setView('btm')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'btm' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>BtM-Mengen</button>
+            <button onClick={() => setView('einziehung')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'einziehung' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Einziehung</button>
+            <button onClick={() => setView('dako')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'dako' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Dako-Key</button>
+            <button onClick={() => setView('ed')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ed' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>ED-Delikte</button>
           </div>
           
           <div className="animate-in fade-in duration-300 pb-20 no-print">
             
-            {/* EINZIEHUNG */}
-            {view === 'einziehung' && (
+            {/* § 24a StVG (ehemals ph1) */}
+            {view === 'ph1' && (
                 <div className="space-y-4">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
                             <ScaleLaw className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Voraussetzungen Einziehung</h3>
+                            <h3 className="font-black uppercase tracking-wide text-xs">§ 24a StVG (0,5 Promille / Drogen)</h3>
                         </div>
-                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Folgende Kriterien rechtfertigen eine Einziehung:</p>
-                        <ul className="space-y-2.5 text-sm text-slate-700 font-medium">
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überladung ab 15 %</strong> (LKW) bzw. bei Fahrzeugen bis 3,5 t zGM ab 20 %</span></li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überhöhe</strong> ab 4,20 m</span></li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überbreite</strong> ab 4,20 m</span></li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrzeuge <strong>ohne Zulassung</strong></span></li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Mehr als <strong>30 % der Ladung ungesichert</strong> <br/><span className="text-xs text-slate-500 font-normal">(nur wenn kein rutschhemmendes Material mitgeführt wird)</span></span></li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Verstoß gegen das <strong>Sonntags-/Feiertagsfahrverbot</strong></span></li>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Tatvarianten:</p>
+                        <ul className="space-y-3 text-sm text-slate-700 font-medium">
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(1)</div>
+                                <div className="pt-1">mind. <strong>0,25 mg/l</strong> Alkohol im Atem oder mind. <strong>0,5 ‰</strong> Alkohol im Blut</div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(1a)</div>
+                                <div className="pt-1"><strong>3,5 ng/ml</strong> oder mehr THC im Blutserum</div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(2)</div>
+                                <div className="pt-1">
+                                    Wirkung einer <strong>Anlagensubstanz</strong>:
+                                    <ul className="mt-2 space-y-1 ml-1 border-l-2 border-teal-100 pl-3">
+                                        <li>Heroin = 10 ng/ml</li>
+                                        <li>Morphin = 10 ng/ml</li>
+                                        <li>Cocain = 75 ng/ml</li>
+                                        <li>Amphetamin = 25 ng/ml</li>
+                                        <li>Methamphetamin = 25 ng/ml</li>
+                                    </ul>
+                                    <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs mt-3 flex gap-2 shadow-sm">
+                                        <Info className="w-5 h-5 shrink-0 text-amber-500" />
+                                        <span>Die Wirkung kann jedoch auch schon <strong>unterhalb des Grenzwerts</strong> vorliegen, wenn eine Ausfallerscheinung hinzukommt.<br/><span className="text-[10px] opacity-70 block mt-1">(OLG Celle, Beschluss v. 30. 3. 2009 – 322 Ss Bs 57/09)</span></span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(2a)</div>
+                                <div className="pt-1"><strong>3,5 ng/ml THC + Alkoholische Getränke</strong> während der Fahrt konsumieren oder vor der Fahrt konsumieren (mind. jedoch 0,1 mg/l oder 0,2 ‰)</div>
+                            </li>
                         </ul>
+                    </div>
+                </div>
+            )}
+
+            {/* § 24c StVG (ehemals ph2) */}
+            {view === 'ph2' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <ScaleLaw className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">§ 24c StVG (Alkoholverbot Fahranfänger)</h3>
+                        </div>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Tatvarianten / Voraussetzungen:</p>
+                        <div className="space-y-3 text-sm text-slate-700 font-medium bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">A</div>
+                                <div className="pt-0.5">In der <strong>Probezeit</strong> bzw. <strong>vor Vollendung des 21. Lebensjahrs</strong></div>
+                            </div>
+                            <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
+                            <div className="flex justify-center text-teal-600 font-black text-xs uppercase tracking-widest">+ UND +</div>
+                            <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
+                            <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">B</div>
+                                <div className="pt-0.5">Unter der Wirkung von <strong>Alkohol</strong> (mind. 0,1 mg/l / 0,2 ‰) oder Wirkung von <strong>THC</strong> (mind. 1 ng/ml)<br/><span className="text-xs text-slate-500 block mt-2 pt-2 border-t border-slate-200"><strong>ODER:</strong> Während der Fahrt alkoholische Getränke / THC konsumieren</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Medikamentenprivileg (ehemals ph3) */}
+            {view === 'ph3' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Syringe className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Medikamentenprivileg</h3>
+                        </div>
+                        
+                        <div className="bg-teal-50 border border-teal-200 text-teal-900 p-4 rounded-xl text-sm mb-5 leading-relaxed">
+                            <strong>§ 24a und 24c StVG greifen nicht</strong>, wenn die Anlagesubstanz ärztlich verordnet wurde und <strong>bestimmungsgemäß</strong> eingenommen wurde.
+                        </div>
+
+                        <h4 className="font-black text-slate-800 text-sm mb-3 text-red-600">Keine bestimmungsgemäße Einnahme bei:</h4>
+                        <ul className="space-y-3 text-sm text-slate-700 font-medium mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Falsche Dosierung:</strong> Dosierung wird nicht eingehalten oder Konsumvariante ist anders vorgegeben.</span></li>
+                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Beikonsum:</strong> Sobald Beikonsum mit anderen Betäubungsmitteln vorliegt.</span></li>
+                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Alkohol:</strong> Sobald Alkohol konsumiert wird <em className="text-xs text-slate-500 block">(gilt nur bei Anlagensubstanzen, nicht THC)</em>.</span></li>
+                        </ul>
+
+                        <div className="bg-slate-800 text-white p-4 rounded-xl text-sm font-bold flex gap-3 items-center shadow-sm">
+                            <AlertTriangle className="w-8 h-8 shrink-0 text-amber-400"/>
+                            <span>Wichtig: Das Medikamentenprivileg befreit <u>nicht</u> von den Strafvorschriften der §§ 316, 315c StGB!</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* BLUTENTNAHME */}
+            {view === 'blut' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Syringe className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Hinweise zur Blutentnahme</h3>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <h4 className="font-black text-slate-800 text-sm mb-3">Alkohol</h4>
+                            <p className="text-xs text-slate-400 font-bold uppercase mb-2">Eine <u>zweite</u> Blutentnahme ist erforderlich, wenn:</p>
+                            <ul className="space-y-1.5 text-sm text-slate-700 font-medium mb-3">
+                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Nachtrunk geltend gemacht wird</li>
+                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Innerhalb 1 Stunde vor der ersten BE Alkohol getrunken wurde</li>
+                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Keine oder falsche Angaben zum Alkoholkonsum vorliegen</li>
+                            </ul>
+                            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-start mt-4">
+                                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-500"/>
+                                <span>Zweite BE frühestens nach 30 und spätestens nach 40 Minuten nach der ersten BE!</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-black text-slate-800 text-sm mb-3">Berauschende Mittel</h4>
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex gap-3 items-center">
+                                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                                    <span className="font-black text-slate-500">2x</span>
+                                </div>
+                                <span className="text-sm font-bold text-slate-700">Zwei Röhrchen zwingend bei Kokain und Opiaten (z.B. Morphin).</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -2167,6 +2283,65 @@ function KnowledgeBaseView() {
                  </div>
             )}
 
+            {/* EINZIEHUNG */}
+            {view === 'einziehung' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <ScaleLaw className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Voraussetzungen Einziehung</h3>
+                        </div>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Folgende Kriterien rechtfertigen eine Einziehung:</p>
+                        <ul className="space-y-2.5 text-sm text-slate-700 font-medium">
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überladung ab 15 %</strong> (LKW) bzw. bei Fahrzeugen bis 3,5 t zGM ab 20 %</span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überhöhe</strong> ab 4,20 m</span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span><strong>Überbreite</strong> ab 4,20 m</span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrzeuge <strong>ohne Zulassung</strong></span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Mehr als <strong>30 % der Ladung ungesichert</strong> <br/><span className="text-xs text-slate-500 font-normal">(nur wenn kein rutschhemmendes Material mitgeführt wird)</span></span></li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Verstoß gegen das <strong>Sonntags-/Feiertagsfahrverbot</strong></span></li>
+                        </ul>
+                    </div>
+                </div>
+            )}
+
+            {/* DAKO-KEY */}
+            {view === 'dako' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Key className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Bedienung Dako-Key</h3>
+                        </div>
+                        
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-4">Auslesen des digitalen Kontrollgeräts:</p>
+                        
+                        <ol className="space-y-4 text-sm text-slate-700 font-medium mb-6">
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">1</div>
+                                <div className="mt-0.5"><strong>Zündung an schalten</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">2</div>
+                                <div className="mt-0.5"><strong>Kontrollkarte in Slot 2</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">3</div>
+                                <div className="mt-0.5"><strong>DAKO-Key in Downloadbuchse stecken</strong></div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">4</div>
+                                <div className="mt-0.5"><strong>Wenn alle LEDs leuchten ist der Download beendet.</strong></div>
+                            </li>
+                        </ol>
+
+                        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-center mt-4 shadow-sm">
+                            <AlertTriangle className="w-6 h-6 shrink-0 text-red-500"/>
+                            <span>Blinken alle LEDs = Fehler beim Download</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ED-DELIKTE */}
             {view === 'ed' && (
                  <div className="space-y-4">
@@ -2199,109 +2374,6 @@ function KnowledgeBaseView() {
                      </div>
                  </div>
             )}
-
-            {/* BLUTENTNAHME */}
-            {view === 'blut' && (
-                <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Syringe className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Hinweise zur Blutentnahme</h3>
-                        </div>
-                        
-                        <div className="mb-6">
-                            <h4 className="font-black text-slate-800 text-sm mb-3">Alkohol</h4>
-                            <p className="text-xs text-slate-400 font-bold uppercase mb-2">Eine <u>zweite</u> Blutentnahme ist erforderlich, wenn:</p>
-                            <ul className="space-y-1.5 text-sm text-slate-700 font-medium mb-3">
-                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Nachtrunk geltend gemacht wird</li>
-                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Innerhalb 1 Stunde vor der ersten BE Alkohol getrunken wurde</li>
-                                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0"></div>Keine oder falsche Angaben zum Alkoholkonsum vorliegen</li>
-                            </ul>
-                            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-start mt-4">
-                                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-500"/>
-                                <span>Zweite BE frühestens nach 30 und spätestens nach 40 Minuten nach der ersten BE!</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="font-black text-slate-800 text-sm mb-3">Berauschende Mittel</h4>
-                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex gap-3 items-center">
-                                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                                    <span className="font-black text-slate-500">2x</span>
-                                </div>
-                                <span className="text-sm font-bold text-slate-700">Zwei Röhrchen zwingend bei Kokain und Opiaten (z.B. Morphin).</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* DAKO-KEY */}
-            {view === 'dako' && (
-                <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Key className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Bedienung Dako-Key</h3>
-                        </div>
-                        
-                        <p className="text-xs text-slate-400 font-bold uppercase mb-4">Auslesen des digitalen Kontrollgeräts:</p>
-                        
-                        <ol className="space-y-4 text-sm text-slate-700 font-medium mb-6">
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">1</div>
-                                <div className="mt-0.5"><strong>Zündung an schalten</strong></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">2</div>
-                                <div className="mt-0.5"><strong>Kontrollkarte in Slot 2</strong></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">3</div>
-                                <div className="mt-0.5"><strong>DAKO-Key in Downloadbuchse stecken</strong></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">4</div>
-                                <div className="mt-0.5"><strong>T4 = Key-Aktivierung</strong></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">5</div>
-                                <div className="flex-1">
-                                    <div className="mt-0.5 mb-3 leading-tight">
-                                        <strong>Warten bis LEDs aus sind und dann Tastenauswahl:</strong><br/>
-                                        <span className="text-[10px] text-slate-400 font-normal uppercase tracking-wide">(Bei doppelter Kombination beide Tasten zusammen drücken)</span>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-2.5 text-xs">
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T1</span> <span>Geschwindigkeit Fahrzeugeinheit + 2 Tage Aktivitäten</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T2</span> <span>Download Fahrzeugeinheit beginnend ab dem letzten vorgenommenen Download</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T3</span> <span>Download Fahrzeugeinheit 3 Monate (92 Tage)</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-8 text-center border border-slate-300 shadow-sm">T4</span> <span>Download Fahrerkarte (Fahrerkarte steckt in Slot 1!)</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T1+T2</span> <span>Technische Daten / Fehler / Ereignisse</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T1+T3</span> <span>92 Tage Aktivitätsdaten</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T1+T4</span> <span>28 Tage Aktivitätsdaten</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T2+T4</span> <span>2 Tage Aktivitätsdaten</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T2+T3</span> <span>Speed-File (Unfalldaten)</span></div>
-                                        <div className="flex items-start gap-2.5"><span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black font-mono shrink-0 w-[2.75rem] text-center border border-slate-300 shadow-sm">T3+T4</span> <span>Komplettdownload der Fahrzeugeinheit – interessant für Werkstätten</span></div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">6</div>
-                                <div className="mt-0.5"><strong>T4 gedrückt halten bis LED/LEDs aus ist/sind.</strong> <span className="text-teal-700 block mt-0.5 text-xs"><Download className="inline w-3 h-3 mr-1"/>Download wird gestartet...</span></div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-xs">7</div>
-                                <div className="mt-0.5"><strong>Wenn alle LEDs leuchten ist der Download beendet.</strong></div>
-                            </li>
-                        </ol>
-
-                        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl text-sm font-bold flex gap-2 items-center mt-4 shadow-sm">
-                            <AlertTriangle className="w-6 h-6 shrink-0 text-red-500"/>
-                            <span>Blinken alle LEDs = Fehler beim Download</span>
-                        </div>
-                    </div>
-                </div>
-            )}
           </div>
       </div>
       <AppVersionFooter />
@@ -2312,7 +2384,7 @@ function KnowledgeBaseView() {
 // --- INFO VIEW ---
 function InfoView() {
   const dateTime = useDateTime();
-  const [view, setView] = useState('impressum'); // Geändert: Startet jetzt direkt im Impressum als Standard
+  const [view, setView] = useState('impressum'); 
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
@@ -2346,6 +2418,10 @@ function InfoView() {
                         <div>
                             <p className="font-bold text-slate-800 mb-1">Kontakt</p>
                             <p>E-Mail: <a href="mailto:Demelsimon1@gmail.com" className="text-indigo-600 hover:underline">Demelsimon1@gmail.com</a></p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-800 mb-1">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</p>
+                            <p>Simon Demel<br />(Anschrift wie oben)</p>
                         </div>
                     </div>
                  </div>
