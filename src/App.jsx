@@ -5,7 +5,8 @@ import {
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, 
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
-  List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download
+  List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
+  Menu
 } from 'lucide-react';
 
 // --- GLOBAL STYLES FOR PRINTING ---
@@ -249,7 +250,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.6
+        RoadTool v. 2.7
     </div>
 );
 
@@ -404,6 +405,38 @@ const useDateTime = () => {
   }, []);
   return dateTime;
 };
+
+const AnglePictogram = ({ highlight }) => (
+    <svg viewBox="0 0 100 120" className="w-full h-32 mt-2 bg-white rounded-lg border border-indigo-100 p-2 shadow-inner">
+        <defs>
+            <marker id={`arrow-${highlight}`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <polygon points="0 0, 6 3, 0 6" fill="#ef4444" />
+            </marker>
+            <marker id={`arrowRev-${highlight}`} markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+                <polygon points="6 0, 0 3, 6 6" fill="#ef4444" />
+            </marker>
+        </defs>
+        <line x1="85" y1="10" x2="85" y2="110" stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" />
+        <text x="94" y="60" transform="rotate(90 94 60)" textAnchor="middle" className="text-[6px] fill-slate-400 font-bold uppercase">Fahrzeugseite</text>
+
+        <rect x="10" y="20" width="35" height="40" rx="2" fill="#fcd34d" stroke="#f59e0b" strokeWidth="2" />
+        <text x="27" y="42" textAnchor="middle" className="text-[7px] fill-amber-800 font-bold">LADUNG</text>
+
+        <circle cx="45" cy="60" r="2.5" fill="#f59e0b" />
+        <circle cx="85" cy="100" r="2.5" fill="#94a3b8" />
+
+        <line x1="45" y1="60" x2="85" y2="100" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" />
+
+        <line x1="45" y1="60" x2="85" y2="60" stroke={highlight === 'Y' ? '#ef4444' : '#cbd5e1'} strokeWidth={highlight === 'Y' ? 2 : 1} strokeDasharray={highlight === 'Y' ? "none" : "2 2"} markerEnd={highlight === 'Y' ? `url(#arrow-${highlight})` : "none"} markerStart={highlight === 'Y' ? `url(#arrowRev-${highlight})` : "none"} />
+        <line x1="85" y1="60" x2="85" y2="100" stroke={highlight === 'X' ? '#ef4444' : '#cbd5e1'} strokeWidth={highlight === 'X' ? 2 : 1} strokeDasharray={highlight === 'X' ? "none" : "2 2"} markerEnd={highlight === 'X' ? `url(#arrow-${highlight})` : "none"} markerStart={highlight === 'X' ? `url(#arrowRev-${highlight})` : "none"} />
+
+        <path d="M85 85 A 15 15 0 0 0 74 89" fill="none" stroke="#4f46e5" strokeWidth="1" />
+        <text x="79" y="83" className="text-[8px] fill-indigo-600 font-bold">β</text>
+
+        {highlight === 'Y' && <text x="65" y="55" textAnchor="middle" className="text-[8px] fill-red-600 font-black">Y (Gegenkathete)</text>}
+        {highlight === 'X' && <text x="78" y="80" transform="rotate(-90 78 80)" textAnchor="middle" className="text-[8px] fill-red-600 font-black">X (Ankathete)</text>}
+    </svg>
+);
 
 // --- ANGLE MEASUREMENT MODAL ---
 const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
@@ -657,7 +690,7 @@ function SpeedCalculator() {
     );
 }
 
-function WoodCalculator() {
+function WoodCalculator({ onSwitch }) {
   const [vehicleType, setVehicleType] = useState('semi'); 
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
@@ -881,6 +914,18 @@ function WoodCalculator() {
       </div>
       <div className="p-2 space-y-2 no-print">
         
+        {/* Haupt-Reiter Toggle (Gewicht) */}
+        {onSwitch && (
+            <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
+                <button onClick={onSwitch} className="flex-1 py-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all rounded-lg flex flex-col items-center gap-1">
+                    <Scale className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Überladung</span>
+                </button>
+                <button className="flex-1 py-2 bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-200 rounded-lg flex flex-col items-center gap-1 cursor-default">
+                    <Trees className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Holzgewicht</span>
+                </button>
+            </div>
+        )}
+
         {/* Screen Content (Inputs etc.) */}
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
             <button onClick={() => setVehicleType('semi')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${vehicleType === 'semi' ? 'bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
@@ -1163,7 +1208,7 @@ const FineDisplay = ({ result, isTrailer, isCombination }) => {
     );
 }
 
-function OverloadCalculator() {
+function OverloadCalculator({ onSwitch }) {
   const [mode, setMode] = useState('single'); 
   const [isCommercial, setIsCommercial] = useState(false);
   const [useCustomTolerance, setUseCustomTolerance] = useState(false); 
@@ -1355,6 +1400,18 @@ function OverloadCalculator() {
       
       <div className="p-2 space-y-2 no-print">
         
+        {/* Haupt-Reiter Toggle (Gewicht) */}
+        {onSwitch && (
+            <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
+                <button className="flex-1 py-2 bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200 rounded-lg flex flex-col items-center gap-1 cursor-default">
+                    <Scale className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Überladung</span>
+                </button>
+                <button onClick={onSwitch} className="flex-1 py-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all rounded-lg flex flex-col items-center gap-1">
+                    <Trees className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Holzgewicht</span>
+                </button>
+            </div>
+        )}
+
         <label className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-2 cursor-pointer group">
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isCommercial ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-slate-50'}`}>
                 {isCommercial && <CheckSquare className="w-4 h-4 text-white" />}
@@ -1585,6 +1642,12 @@ function OverloadCalculator() {
       <AppVersionFooter />
     </div>
   );
+}
+
+// --- WEIGHT MODULE (COMBINED) ---
+function WeightModule() {
+  const [subTab, setSubTab] = useState('overload');
+  return subTab === 'overload' ? <OverloadCalculator onSwitch={() => setSubTab('wood')} /> : <WoodCalculator onSwitch={() => setSubTab('overload')} />;
 }
 
 // --- LASHING CALCULATOR ---
@@ -2165,6 +2228,7 @@ function LashingCalculator() {
                                 {showInfoX && (
                                     <div className="mt-1.5 p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-[9px] leading-relaxed text-indigo-800 animate-in fade-in slide-in-from-top-1">
                                         <strong>Ankathete:</strong> Der Abstand in Längsrichtung (Abstand vom Zurrpunkt der Ladung zum Zurrpunkt am Fahrzeug, parallel zur Seite).
+                                        <AnglePictogram highlight="X" />
                                     </div>
                                 )}
                             </div>
@@ -2180,6 +2244,7 @@ function LashingCalculator() {
                                 {showInfoY && (
                                     <div className="mt-1.5 p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-[9px] leading-relaxed text-indigo-800 animate-in fade-in slide-in-from-top-1">
                                         <strong>Gegenkathete:</strong> Der seitliche Abstand vom Anschlagpunkt der Ladung zur Befestigungsschiene am Fahrzeug.
+                                        <AnglePictogram highlight="Y" />
                                     </div>
                                 )}
                             </div>
@@ -2333,28 +2398,71 @@ function LashingCalculator() {
 function KnowledgeBaseView() {
   const dateTime = useDateTime();
   const [view, setView] = useState('ph1'); // Startet jetzt standardmäßig mit § 24a StVG
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const tabs = [
+      { id: 'ph1', label: '§ 24a StVG' },
+      { id: 'ph2', label: '§ 24c StVG' },
+      { id: 'ph3', label: 'Medikamente' },
+      { id: 'blut', label: 'Blut' },
+      { id: 'btm', label: 'BtM-Mengen' },
+      { id: 'einziehung', label: 'Einziehung' },
+      { id: 'dako', label: 'Dako-Key' },
+      { id: 'ed', label: 'ED-Delikte' },
+      { id: 'lasi', label: 'LaSi' }
+  ];
+
+  const activeTabLabel = tabs.find(t => t.id === view)?.label || 'Wissen';
 
   return (
-    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-      <div className="bg-teal-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-teal-900/10 no-print">
-        <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><BookOpen className="w-6 h-6 shrink-0" />Wissen & Handbuch</h1><p className="text-teal-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
+    <div className="max-w-md mx-auto bg-slate-50 min-h-screen relative">
+      <div className="bg-teal-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-30 shadow-lg shadow-teal-900/10 no-print">
+        <div className="flex items-center gap-3">
+            <button onClick={() => setIsMenuOpen(true)} className="p-2 -ml-2 bg-teal-700/50 hover:bg-teal-700 rounded-xl transition-colors border border-teal-500/30 flex items-center justify-center shadow-sm">
+                <Menu className="w-6 h-6" />
+            </button>
+            <div>
+                <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">Handbuch</h1>
+                <p className="text-teal-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5"><Clock className="w-3 h-3" />{dateTime}</p>
+            </div>
+        </div>
         <HeaderLogo />
       </div>
-      
-      <div className="p-3">
-          {/* Navigation für Wissen - 10 Buttons (Thematisch geordnet) */}
-          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
-            <button onClick={() => setView('ph1')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ph1' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>§ 24a StVG</button>
-            <button onClick={() => setView('ph2')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ph2' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>§ 24c StVG</button>
-            <button onClick={() => setView('ph3')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ph3' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Medikamente</button>
-            <button onClick={() => setView('blut')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'blut' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Blut</button>
-            <button onClick={() => setView('btm')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'btm' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>BtM-Mengen</button>
-            <button onClick={() => setView('einziehung')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'einziehung' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Einziehung</button>
-            <button onClick={() => setView('dako')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'dako' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>Dako-Key</button>
-            <button onClick={() => setView('ed')} className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'ed' ? 'bg-white shadow text-teal-700' : 'text-slate-500 hover:text-slate-700'}`}>ED-Delikte</button>
-          </div>
-          
-          <div className="animate-in fade-in duration-300 pb-20 no-print">
+
+      {/* SLIDE-IN MENU OVERLAY */}
+      {isMenuOpen && (
+         <div className="fixed inset-0 z-[100] flex no-print">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={() => setIsMenuOpen(false)}></div>
+            <div className="relative w-[260px] max-w-[85%] bg-slate-50 h-full shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
+               <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-white shadow-sm z-10">
+                  <span className="font-black text-slate-700 uppercase tracking-wide flex items-center gap-2"><BookOpen className="w-5 h-5 text-teal-600"/> Kategorien</span>
+                  <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-600 hover:bg-slate-200 hover:text-red-500 transition-colors"><X className="w-4 h-4"/></button>
+               </div>
+               <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                   {tabs.map(tab => (
+                      <button
+                         key={tab.id}
+                         onClick={() => { setView(tab.id); setIsMenuOpen(false); }}
+                         className={`w-full text-left px-4 py-3.5 text-sm font-bold rounded-xl transition-all flex items-center justify-between ${view === tab.id ? 'bg-teal-600 text-white shadow-md transform scale-[1.02]' : 'bg-white border border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-teal-50'}`}
+                      >
+                         {tab.label}
+                         {view === tab.id && <ChevronRight className="w-4 h-4 text-teal-200" />}
+                      </button>
+                   ))}
+               </div>
+            </div>
+         </div>
+      )}
+
+      {/* QUICK CATEGORY DISPLAY (Clickable to open menu) */}
+      <div className="px-2 pt-2 pb-1 no-print">
+          <button onClick={() => setIsMenuOpen(true)} className="w-full bg-teal-50 border border-teal-200 text-teal-800 px-3 py-2.5 rounded-xl text-xs font-black uppercase flex items-center justify-between shadow-sm hover:bg-teal-100 transition-colors">
+              <span className="flex items-center gap-2"><List className="w-4 h-4 text-teal-600"/> Thema: {activeTabLabel}</span>
+              <span className="text-[10px] bg-teal-200/50 px-2 py-1 rounded text-teal-700">Ändern</span>
+          </button>
+      </div>
+
+      <div className="p-2 animate-in fade-in duration-300 pb-20 no-print">
             
             {/* § 24a StVG (ehemals ph1) */}
             {view === 'ph1' && (
@@ -2632,7 +2740,97 @@ function KnowledgeBaseView() {
                      </div>
                  </div>
             )}
-          </div>
+
+            {/* LASI WISSEN */}
+            {view === 'lasi' && (
+                <div className="space-y-4">
+                    {/* Allgemein */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <LashingStrapIcon className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">LaSi - Allgemein</h3>
+                        </div>
+                        <ol className="space-y-3 text-sm text-slate-700 font-medium list-decimal list-inside">
+                            <li className="pl-1"><strong>Formschluss</strong> besteht bis zu einem Abstand von 3 cm in alle Richtungen außer hinten, dort maximal 30 cm.</li>
+                            <li className="pl-1 leading-relaxed"><strong>Rutschhemmendes Material</strong> kann nur bezüglich des Reibwerts angenommen werden, wenn die Ladung gänzlich durch das rutschhemmende Material vom Boden angehoben wird.</li>
+                        </ol>
+                    </div>
+
+                    {/* Ablegereife */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <AlertTriangle className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Ablegereife</h3>
+                        </div>
+                        
+                        {/* 1. Zurrgurte */}
+                        <div className="mb-5">
+                            <h4 className="font-black text-slate-800 text-sm mb-2">1. Zurrgurte <span className="text-xs text-slate-400 font-normal">(VDI 2700 Blatt 3.1)</span></h4>
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
+                                <div>
+                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Gewebegurtband:</strong>
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>Einschnitte größer als 10 %</li>
+                                        <li>Verformungen</li>
+                                        <li>Etikett fehlt / unleserlich / CE Kennzeichnung vorhanden / Belastbarkeit in kg angegeben</li>
+                                    </ul>
+                                </div>
+                                <div className="border-t border-slate-200 pt-2">
+                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Endbeschlagteil:</strong>
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>Verformung</li>
+                                        <li>Risse</li>
+                                        <li>Rost</li>
+                                        <li>Etikett fehlt / unleserlich / CE Kennzeichnung vorhanden / Belastbarkeit in kg angegeben</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 2. Zurrketten */}
+                        <div className="mb-5">
+                            <h4 className="font-black text-slate-800 text-sm mb-2">2. Zurrketten <span className="text-xs text-slate-400 font-normal">(VDI 2700 Blatt 3.1)</span></h4>
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
+                                <div>
+                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Rundstahlkette:</strong>
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>Oberflächenrisse</li>
+                                        <li>Dehnung von mehr als 3 %</li>
+                                        <li>Verformungen</li>
+                                        <li>Verschleiß von mehr als 10 % der Nenndicke</li>
+                                    </ul>
+                                </div>
+                                <div className="border-t border-slate-200 pt-2">
+                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Verbindungsstellen / Spannelemente:</strong>
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>Verformungen</li>
+                                        <li>Risse</li>
+                                        <li>viel Rost</li>
+                                        <li className="leading-snug">Sicherung des Zurrhakens darf fehlen, wenn die Tiefe der Nut mind. dem 5-fachen Wert der Nenndicke der Rundstahlkette entspricht</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 3. Rutschhemmendes Material */}
+                        <div>
+                            <h4 className="font-black text-slate-800 text-sm mb-2">3. Rutschhemmendes Material <span className="text-xs text-slate-400 font-normal block sm:inline mt-0.5 sm:mt-0">(Ablegereife VDI 2700 Blatt 15)</span></h4>
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                    <li>Abrieb auf der Oberfläche</li>
+                                    <li>aufgequollene Stellen</li>
+                                    <li>ausgebrochene Materialien</li>
+                                    <li>bleibende Druckstellen oder Verformungen</li>
+                                    <li>Risse</li>
+                                    <li>Schäden durch Kontakt mit aggressiven Stoffen</li>
+                                    <li>Verschmutzung die Funktion beeinträchtigt</li>
+                                    <li>Versprödung</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
       </div>
       <AppVersionFooter />
     </div>
@@ -2676,10 +2874,6 @@ function InfoView() {
                         <div>
                             <p className="font-bold text-slate-800 mb-1">Kontakt</p>
                             <p>E-Mail: <a href="mailto:Demelsimon1@gmail.com" className="text-indigo-600 hover:underline">Demelsimon1@gmail.com</a></p>
-                        </div>
-                        <div>
-                            <p className="font-bold text-slate-800 mb-1">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</p>
-                            <p>Simon Demel<br />(Anschrift wie oben)</p>
                         </div>
                     </div>
                  </div>
@@ -2743,7 +2937,14 @@ function InfoView() {
                         <span className="fill-white"><svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M7.076 21.337l.486-3.08c.133-.84.852-1.464 1.703-1.464h1.725c3.55 0 6.315-1.44 7.15-5.698.417-2.126-.41-4.144-2.85-5.228-2.073-.92-4.947-.64-7.98 1.285l-.57-.027c-.89 0-1.666.626-1.83 1.503L2.83 19.34c-.08.43.25.823.69.823h2.95c.345 0 .64-.236.696-.576l.006-.03z"/></svg></span>
                         <span>Spende per PayPal</span>
                     </a>
-                    <p className="text-[10px] text-slate-400 mt-4">Sie werden zu PayPal weitergeleitet.</p>
+                    <p className="text-[10px] text-slate-400 mt-3 mb-4">Sie werden zu PayPal weitergeleitet.</p>
+                    
+                    <div className="pt-4 border-t border-slate-100">
+                        <p className="text-xs text-slate-500 mb-2">Falls der Link nicht funktioniert (manuelle Eingabe):</p>
+                        <div className="inline-block bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono font-bold text-slate-700 select-all cursor-text shadow-sm">
+                            simondemel@gmx.de
+                        </div>
+                    </div>
                 </div>
             )}
           </div>
@@ -2763,8 +2964,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
       <PrintStyles />
       <div className="flex-1 pb-24 z-10 relative">
-        {activeTab === 'overload' ? <OverloadCalculator /> : 
-         activeTab === 'wood' ? <WoodCalculator /> : 
+        {activeTab === 'weight' ? <WeightModule /> : 
          activeTab === 'speed' ? <SpeedCalculator /> : 
          activeTab === 'age' ? <AgeCalculator /> :
          activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
@@ -2774,8 +2974,7 @@ export default function App() {
         <div className="max-w-md mx-auto flex justify-around p-2">
           {[
             { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
-            { id: 'overload', icon: Scale, label: 'Gewicht', color: 'text-blue-600' },
-            { id: 'wood', icon: Trees, label: 'Holz', color: 'text-emerald-600' },
+            { id: 'weight', icon: Scale, label: 'Gewichte', color: 'text-blue-600' },
             { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
             { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
             { id: 'knowledge', icon: BookOpen, label: 'Wissen', color: 'text-teal-600' }, 
