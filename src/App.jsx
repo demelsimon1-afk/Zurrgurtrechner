@@ -457,8 +457,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
             if (referenceBetaRef.current !== null) {
                  let diff = Math.abs(beta - referenceBetaRef.current);
                  if (diff > 90) diff = 90;
-                 const rounded = Math.ceil(diff / 5) * 5;
-                 setMeasuredAngle(rounded);
+                 setMeasuredAngle(Math.round(diff));
             }
         }
     };
@@ -473,7 +472,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
         } else { window.addEventListener('deviceorientation', handleOrientation); setStep(2); }
     };
 
-    const handleZero = () => { referenceBetaRef.current = currentBeta; setStep(3); };
+    const handleZero = () => { referenceBetaRef.current = currentBeta; setMeasuredAngle(0); setStep(3); };
     const stopSensors = () => { window.removeEventListener('deviceorientation', handleOrientation); };
     const handleClose = () => { stopSensors(); onClose(); };
     const handleApply = () => { stopSensors(); onApply(measuredAngle); };
@@ -513,7 +512,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                     )}
                     {step === 3 && (
                         <div className="text-center space-y-6">
-                            <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Aufgerundet +5°)</p></div>
+                            <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Genau)</p></div>
                             <div><p className="text-slate-500 text-sm leading-relaxed">Gerät nun <strong>entlang des Zurrgurts</strong> auflegen.</p></div>
                             <button onClick={handleApply} className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" />Wert übernehmen</button>
                         </div>
@@ -525,6 +524,244 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
 };
 
 // --- CALCULATOR COMPONENTS ---
+
+function AccidentCalculator() {
+    const dateTime = useDateTime();
+    const [mode, setMode] = useState('brake'); // 'brake' | 'drift'
+
+    // States für Bremsspur
+    const [sVL, setSVL] = useState('');
+    const [sVR, setSVR] = useState('');
+    const [sHL, setSHL] = useState('');
+    const [sHR, setSHR] = useState('');
+    const [aBrake, setABrake] = useState('7.5');
+    const [tBrake, setTBrake] = useState('0.2');
+
+    // States für Driftspur
+    const [sDrift, setSDrift] = useState('');
+    const [hDrift, setHDrift] = useState('');
+    const [aDrift, setADrift] = useState('7.5');
+
+    // Berechnungen Bremsspur
+    const calcBrakeSpeed = (sStr, aStr, tStr) => {
+        const s = parseFloat(sStr);
+        const a = parseFloat(aStr);
+        const t = parseFloat(tStr);
+        if (!s || isNaN(s) || s <= 0 || isNaN(a) || isNaN(t)) return 0;
+        // v = sqrt(2 * a * s) + (a * t) / 2 -> Ergebnis in m/s, mal 3.6 für km/h
+        return (Math.sqrt(2 * a * s) + ((a * t) / 2)) * 3.6;
+    };
+
+    const speeds = [sVL, sVR, sHL, sHR].map(s => calcBrakeSpeed(s, aBrake, tBrake));
+    const maxBrakeSpeed = Math.max(...speeds, 0);
+
+    // Berechnungen Driftspur
+    let driftSpeed = 0;
+    const sD = parseFloat(sDrift);
+    const hD = parseFloat(hDrift);
+    const aD = parseFloat(aDrift);
+
+    if (sD > 0 && hD > 0 && !isNaN(aD)) {
+        // Radius R = s^2 / 8h + h/2
+        const r = (Math.pow(sD, 2) / (8 * hD)) + (hD / 2);
+        // v = sqrt(R * a) -> Ergebnis in m/s, mal 3.6 für km/h
+        driftSpeed = Math.sqrt(r * aD) * 3.6;
+    }
+
+    // Optionen für Dropdowns
+    const aOptions = Array.from({length: 20}, (_, i) => ((i + 1) * 0.5).toFixed(1));
+    const tOptions = Array.from({length: 10}, (_, i) => ((i + 1) * 0.1).toFixed(1));
+
+    return (
+        <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+            {/* PRINT VIEW */}
+            <div className="print-only print-container">
+                <h1 className="print-title">Unfall-Protokoll ({mode === 'brake' ? 'Bremsspur-Geschwindigkeitsrechner' : 'Driftspur-Geschwindigkeitsrechner'})</h1>
+                <div className="print-meta">Erstellt am: {dateTime}</div>
+
+                <h2 className="print-section">Eingabewerte</h2>
+                <table className="print-table">
+                    <tbody>
+                        {mode === 'brake' ? (
+                            <>
+                                <tr><th>Bremsverzögerung (a)</th><td>{aBrake} m/s²</td></tr>
+                                <tr><th>Bremsschwellenzeit (t)</th><td>{tBrake} s</td></tr>
+                                <tr><th>Spur Vorne Links</th><td>{sVL || 0} m</td></tr>
+                                <tr><th>Spur Vorne Rechts</th><td>{sVR || 0} m</td></tr>
+                                <tr><th>Spur Hinten Links</th><td>{sHL || 0} m</td></tr>
+                                <tr><th>Spur Hinten Rechts</th><td>{sHR || 0} m</td></tr>
+                            </>
+                        ) : (
+                            <>
+                                <tr><th>Querverzögerung (a)</th><td>{aDrift} m/s²</td></tr>
+                                <tr><th>Sekante (S)</th><td>{sDrift || 0} m</td></tr>
+                                <tr><th>Abstand (h)</th><td>{hDrift || 0} m</td></tr>
+                            </>
+                        )}
+                    </tbody>
+                </table>
+
+                <h2 className="print-section">Ergebnis</h2>
+                <div className="print-result-box">
+                    <div className="print-result-header">Berechnete Geschwindigkeit</div>
+                    <div>
+                        <strong>{mode === 'brake' ? maxBrakeSpeed.toFixed(1) : driftSpeed.toFixed(1)} km/h</strong>
+                    </div>
+                </div>
+            </div>
+            {/* END PRINT VIEW */}
+
+            <div className="bg-red-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-red-900/10 no-print">
+                <div>
+                    <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
+                        <AlertTriangle className="w-6 h-6 shrink-0" />
+                        Unfallrechner
+                    </h1>
+                    <p className="text-red-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8">
+                        <Clock className="w-3 h-3" />
+                        {dateTime}
+                    </p>
+                </div>
+                <HeaderLogo />
+            </div>
+
+            <div className="p-2 space-y-2 no-print">
+                {/* Toggle */}
+                <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 gap-1">
+                    <button onClick={() => setMode('brake')} className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-lg transition-all flex flex-col items-center justify-center leading-tight ${mode === 'brake' ? 'bg-red-50 text-red-800 shadow-sm ring-1 ring-red-200' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}>
+                        <span>Bremsspur-</span>
+                        <span>Geschwindigkeitsrechner</span>
+                    </button>
+                    <button onClick={() => setMode('drift')} className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-lg transition-all flex flex-col items-center justify-center leading-tight ${mode === 'drift' ? 'bg-red-50 text-red-800 shadow-sm ring-1 ring-red-200' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}>
+                        <span>Driftspur-</span>
+                        <span>Geschwindigkeitsrechner</span>
+                    </button>
+                </div>
+
+                {mode === 'brake' && (
+                    <div className="animate-in fade-in duration-300">
+                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                            <div className="flex items-center gap-2 mb-2 text-red-700 border-b border-slate-50 pb-2">
+                                <ActivityIcon className="w-5 h-5 shrink-0" />
+                                <span className="text-sm font-black uppercase tracking-wide">Brems-/Blockierspur-Geschwindigkeitsrechner</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Verzögerung (a)</label>
+                                    <select value={aBrake} onChange={(e) => setABrake(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
+                                        {aOptions.map(opt => <option key={opt} value={opt}>{opt} m/s²</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Schwellenzeit (t)</label>
+                                    <select value={tBrake} onChange={(e) => setTBrake(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
+                                        {tOptions.map(opt => <option key={opt} value={opt}>{opt} s {opt === '0.2' ? '(PKW)' : ''}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="pt-2">
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Länge der einzelnen Spuren (in Meter)</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <InputWithIcon icon={Ruler} label="Vorne Links" value={sVL} onChange={(e) => setSVL(e.target.value)} placeholder="0" />
+                                    <InputWithIcon icon={Ruler} label="Vorne Rechts" value={sVR} onChange={(e) => setSVR(e.target.value)} placeholder="0" />
+                                    <InputWithIcon icon={Ruler} label="Hinten Links" value={sHL} onChange={(e) => setSHL(e.target.value)} placeholder="0" />
+                                    <InputWithIcon icon={Ruler} label="Hinten Rechts" value={sHR} onChange={(e) => setSHR(e.target.value)} placeholder="0" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {maxBrakeSpeed > 0 && (
+                            <div className="mt-3 bg-white border-2 border-red-100 rounded-2xl p-4 shadow-xl text-center animate-in slide-in-from-bottom-2">
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Höchste Geschwindigkeit</span>
+                                <div className="text-5xl font-black text-red-600 tracking-tighter">
+                                    {maxBrakeSpeed.toFixed(1)} <span className="text-xl text-slate-400">km/h</span>
+                                </div>
+                                <div className="mt-3 text-[10px] text-slate-400 font-mono bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-100">
+                                    v = √ (2 · a · s) + ((a · t) / 2)
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {mode === 'drift' && (
+                    <div className="animate-in fade-in duration-300">
+                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                            <div className="flex items-center gap-2 mb-2 text-red-700 border-b border-slate-50 pb-2">
+                                <RotateCw className="w-5 h-5 shrink-0" />
+                                <span className="text-sm font-black uppercase tracking-wide">Driftspur-Geschwindigkeitsrechner</span>
+                            </div>
+
+                            {/* SVG Erklärungsgrafik */}
+                            <svg viewBox="0 0 300 130" className="w-full h-auto bg-slate-50 rounded-xl mb-4 border border-slate-200 shadow-inner p-2 mt-2">
+                                {/* Kurven-Spur */}
+                                <path d="M 40 100 Q 150 10 260 100" fill="none" stroke="#94a3b8" strokeWidth="8" strokeLinecap="round" />
+                                
+                                {/* S - Linie (Sekante) */}
+                                <line x1="40" y1="100" x2="260" y2="100" stroke="#334155" strokeWidth="2" />
+                                <polygon points="40,100 50,96 50,104" fill="#334155" />
+                                <polygon points="260,100 250,96 250,104" fill="#334155" />
+                                <text x="150" y="118" textAnchor="middle" className="text-sm font-black fill-slate-700">Sekante (S)</text>
+
+                                {/* h - Linie (Abstand) - Mittelpunkt der Kurve bei Q(150, 10) ist mathematisch y=55 */}
+                                <line x1="150" y1="95" x2="150" y2="60" stroke="#ef4444" strokeWidth="2" />
+                                <polygon points="150,100 146,90 154,90" fill="#ef4444" />
+                                <polygon points="150,55 146,65 154,65" fill="#ef4444" />
+                                <text x="162" y="82" className="text-sm font-black fill-red-600">h</text>
+                            </svg>
+
+                            <div className="bg-red-50/50 p-3 rounded-xl border border-red-100 mb-3">
+                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify">
+                                    Durchfährt ein Fahrzeug eine Kurve mit zu hoher Geschwindigkeit, so kann es zur Ausprägung sogenannter Driftspuren der zentrifugal belasteten kurvenäußeren Räder kommen.
+                                </p>
+                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify mt-1.5 font-bold">
+                                    Legt man ein Maßband zwischen Beginn und z.B. 10 - 15m (Sekante) der Driftspur geradlinig an und misst in der Mitte den senkrechten Abstand (h), kann die Geschwindigkeit ermittelt werden.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 mb-2">
+                                <div className="col-span-2">
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Querverzögerung (a)</label>
+                                    <select value={aDrift} onChange={(e) => setADrift(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
+                                        {aOptions.map(opt => <option key={opt} value={opt}>{opt} m/s² {opt === '7.5' ? '(Standard)' : ''}</option>)}
+                                    </select>
+                                </div>
+                                <InputWithIcon icon={Ruler} label="Sekante S (m)" value={sDrift} onChange={(e) => setSDrift(e.target.value)} placeholder="0" />
+                                <InputWithIcon icon={Ruler} label="Abstand h (m)" value={hDrift} onChange={(e) => setHDrift(e.target.value)} placeholder="0" />
+                            </div>
+                        </div>
+
+                        {driftSpeed > 0 && (
+                            <div className="mt-3 bg-white border-2 border-red-100 rounded-2xl p-4 shadow-xl text-center animate-in slide-in-from-bottom-2">
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Ausgangsgeschwindigkeit</span>
+                                <div className="text-5xl font-black text-red-600 tracking-tighter">
+                                    {driftSpeed.toFixed(1)} <span className="text-xl text-slate-400">km/h</span>
+                                </div>
+                                <div className="mt-3 text-[10px] text-slate-400 font-mono bg-slate-50 py-2 px-3 rounded-lg border border-slate-100 flex flex-col gap-1">
+                                    <span>R = S² / (8 · h) + (h / 2)</span>
+                                    <span>v = √ (R · a)</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+                
+                <PrintButton />
+            </div>
+            <AppVersionFooter />
+        </div>
+    );
+}
+
+// Helper für Icon (falls ActivityIcon aus lucide nicht importiert ist, nutzen wir eine einfache Alternative)
+const ActivityIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  </svg>
+);
+
 
 function AgeCalculator() {
     const [birthDate, setBirthDate] = useState('');
@@ -1225,15 +1462,14 @@ function OverloadCalculator({ onSwitch }) {
   const [result, setResult] = useState(null);
   const dateTime = useDateTime();
 
-  const tractorLimit = parseFloat(allowedWeight1) || 0;
-  const show35tOption = tractorLimit > 0 && tractorLimit <= 25000;
-
   const standardTotalWeights = [
-      { label: 'Kombination < 4 Achsen', val: '28000', detail: '28 t' },
-      show35tOption 
-        ? { label: '4 Achsen (Zugf. ≤ 25t zGM)', val: '35000', detail: '35 t' }
-        : { label: '4 Achsen (2 ZM + 2 Anh)', val: '36000', detail: '36 t' },
-      { label: 'Kombination > 4 Achsen', val: '40000', detail: '40 t' }
+      { label: 'PKW/LKW mit Anhänger', val: '7500', detail: '7,5 t' },
+      { label: 'ZGM + Anh < 4 Achsen', val: '28000', detail: '28 t' },
+      { label: '4 Achsen (2 ZGM -> 25 t + 2 Anh)', val: '35000', detail: '35 t' },
+      { label: '4 Achsen (2 ZGM + 2 Anh)', val: '36000', detail: '36 t' },
+      { label: 'ZGM + Anh > 4 Achsen', val: '40000', detail: '40 t' },
+      { label: 'Zug/Schiff/Flug + Straße (2 ZGM + 3 Anh)', val: '42000', detail: '42 t' },
+      { label: 'Zug/Schiff/Flug + Straße (3 ZGM + 2/3 Anh)', val: '44000', detail: '44 t' }
   ];
 
   useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setCustomTol2(''); }, [mode]);
@@ -1507,7 +1743,7 @@ function OverloadCalculator({ onSwitch }) {
                 </div>
 
                 <div className="space-y-2">
-                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug Manuell (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} placeholder="zGM Zug laut Schein" />
+                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug Manuell (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)}/>
                 </div>
             </div>
         )}
@@ -1821,7 +2057,7 @@ function LashingCalculator() {
 
     const nForward = calculateN(accFwd, fitFront ? wallFront : 0, 'forward');
     const nSide = calculateN(accSide, fitSide ? wallSide : 0, 'side');
-    const nRear = calculateN(accRear, calculateN(accRear, fitRear ? wallRear : 0, 'rear'));
+    const nRear = calculateN(accRear, fitRear ? wallRear : 0, 'rear');
 
     // --- DIAGONALZURREN CALCULATION ---
     const calcDiagLC = (c, isSide) => {
@@ -2011,7 +2247,7 @@ function LashingCalculator() {
                  <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
                  <InputWithIcon icon={ShieldCheck} label="Zul. Gesamt (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
                </div>
-               <InputWithIcon icon={Box} label="Ladungsgewicht (kg) *" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
+               <InputWithIcon icon={Box} label="Ladungsgewicht (kg)" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
             </div>
 
             {/* SETTINGS CARD */}
@@ -2172,14 +2408,14 @@ function LashingCalculator() {
                       <Scale className="w-5 h-5" />
                       <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
                    </div>
-                   <InputWithIcon icon={Box} label="Ladungsgewicht (kg) *" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
+                   <InputWithIcon icon={Box} label="Ladungsgewicht (kg)" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
                 </div>
 
                 {/* SETTINGS CARD (Diagonalzurren) */}
                 <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
                   <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
                       <Settings className="w-5 h-5" />
-                      <span className="text-sm font-black uppercase tracking-wide">Parameter (Diagonalzurren)</span>
+                      <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
                    </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="relative col-span-2">
@@ -2966,6 +3202,7 @@ export default function App() {
       <div className="flex-1 pb-24 z-10 relative">
         {activeTab === 'weight' ? <WeightModule /> : 
          activeTab === 'speed' ? <SpeedCalculator /> : 
+         activeTab === 'accident' ? <AccidentCalculator /> :
          activeTab === 'age' ? <AgeCalculator /> :
          activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
          activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
@@ -2976,6 +3213,7 @@ export default function App() {
             { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
             { id: 'weight', icon: Scale, label: 'Gewichte', color: 'text-blue-600' },
             { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
+            { id: 'accident', icon: AlertTriangle, label: 'Unfall', color: 'text-red-600' },
             { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
             { id: 'knowledge', icon: BookOpen, label: 'Wissen', color: 'text-teal-600' }, 
             { id: 'info', icon: FileText, label: 'Infos', color: 'text-slate-600' }
