@@ -438,6 +438,230 @@ const AnglePictogram = ({ highlight }) => (
     </svg>
 );
 
+// --- PKW TRANSPORTER HELPER COMPONENTS ---
+
+const validateCarSecuring = (car) => {
+    const { fl, fr, rl, rr } = car.wheels;
+    const hasStrap = (w) => w.strap === true;
+    const hasFront = (w) => w.chock === 'front' || w.chock === 'both';
+    const hasBoth = (w) => w.chock === 'both';
+
+    // Ausnahme: Keine Keile möglich (bis 1.500 kg -> 4 Gurte)
+    if (car.noChocks) {
+        if (car.weightClass === '1500') {
+            if (hasStrap(fl) && hasStrap(fr) && hasStrap(rl) && hasStrap(rr)) {
+                return { valid: true, msg: "Korrekt: 4 Gurte ohne Keile (Sonderregel bis 1500 kg)." };
+            }
+            return { valid: false, msg: "Fehler: Ohne Keile müssen zwingend alle 4 Räder mit Gurten gesichert sein." };
+        }
+        return { valid: false, msg: "Fehler: Sicherung gänzlich ohne Keile ist nur bei Fahrzeugen bis 1.500 kg zulässig." };
+    }
+
+    // Letztes Fahrzeug (bzw. Schräge)
+    if (car.isLast) {
+        const frontValid = (hasStrap(fl) && hasBoth(fl)) || (hasStrap(fr) && hasBoth(fr));
+        const rearValid = (hasStrap(rl) && hasBoth(rl)) && (hasStrap(rr) && hasBoth(rr));
+        if (frontValid && rearValid) {
+            return { valid: true, msg: "Korrekt: Letztes Fahrzeug (Vorne 1x Gurt+2 Keile, Hinten 2x Gurt+2 Keile)." };
+        }
+        return { valid: false, msg: "Fehler: Letztes Fzg benötigt an Achse in FR 1 Rad (Gurt+2 Keile) und an Achse gegen FR beide Räder (Gurt+2 Keile)." };
+    }
+
+    // Fahrzeuge von 2.000 bis 3.000 kg
+    if (car.weightClass === '3000') {
+        const rearValid = (hasStrap(rl) && hasBoth(rl)) && (hasStrap(rr) && hasBoth(rr));
+        const frontValid = (hasStrap(fl) && hasFront(fl)) || (hasStrap(fr) && hasFront(fr));
+        
+        if (rearValid) {
+            return { valid: true, msg: frontValid ? "Korrekt: 2000-3000kg (Vorne 1x Gurt+Keil, Hinten 2x Gurt+2 Keile)." : "Korrekt: 2000-3000kg (Hinterachse komplett mit 2x Gurt+2 Keile gesichert)." };
+        }
+        return { valid: false, msg: "Fehler: 2000-3000kg benötigt an der Hinterachse zwingend 2x(Gurt+2 Keile)." };
+    }
+
+    // Fahrzeuge bis 2.000 kg (und bis 1.500 kg, sofern Keile genutzt werden)
+    if (car.weightClass === '2000' || car.weightClass === '1500') {
+        const diag1 = hasStrap(fl) && hasFront(fl) && hasStrap(rr) && hasBoth(rr);
+        const diag2 = hasStrap(fr) && hasFront(fr) && hasStrap(rl) && hasBoth(rl);
+        if (diag1 || diag2) {
+            return { valid: true, msg: "Korrekt: Bis 2000kg (Diagonalsicherung)." };
+        }
+        return { valid: false, msg: "Fehler: Bis 2000kg benötigt an Achse in FR 1x(Gurt+1 Keil vorne) und diagonal Hinten 1x(Gurt+2 Keile)." };
+    }
+
+    return { valid: false, msg: "Ungültige Konfiguration." };
+};
+
+const PkwWheelConfig = ({ label, wheelData, onChange }) => (
+    <div className="bg-slate-50 p-2 rounded-xl border border-slate-200 flex flex-col gap-2">
+        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider text-center border-b border-slate-200 pb-1">{label}</span>
+        
+        <button 
+            onClick={() => onChange({ ...wheelData, strap: !wheelData.strap })}
+            className={`w-full py-1.5 rounded-lg text-xs font-bold transition-all border ${wheelData.strap ? 'bg-blue-500 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'}`}
+        >
+            {wheelData.strap ? 'Gurt aktiv' : 'Kein Gurt'}
+        </button>
+
+        <select 
+            value={wheelData.chock}
+            onChange={(e) => onChange({ ...wheelData, chock: e.target.value })}
+            className={`w-full text-xs font-bold p-1.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${wheelData.chock !== 'none' ? 'bg-yellow-50 border-yellow-300 text-yellow-800' : 'bg-white border-slate-200 text-slate-500'}`}
+        >
+            <option value="none">Kein Keil</option>
+            <option value="front">Vorne</option>
+            <option value="back">Hinten</option>
+            <option value="both">Beidseitig</option>
+        </select>
+    </div>
+);
+
+const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
+    const updateWheel = (wheelId, data) => {
+        onUpdate({ ...car, wheels: { ...car.wheels, [wheelId]: data } });
+    };
+
+    const validation = validateCarSecuring(car);
+
+    return (
+        <div className={`bg-white p-3 rounded-2xl shadow-sm border-2 mb-3 animate-in fade-in slide-in-from-bottom-2 transition-colors ${validation.valid ? 'border-emerald-200' : 'border-red-200'}`}>
+            <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-black ${validation.valid ? 'bg-emerald-500' : 'bg-red-500'}`}>{index + 1}</div>
+                    <span className="font-bold text-slate-700 uppercase tracking-wide text-sm">PKW Parameter</span>
+                </div>
+                <button onClick={onRemove} className="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors">
+                    <X className="w-4 h-4" />
+                </button>
+            </div>
+
+            <div className="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fahrzeuggewicht</label>
+                    <select 
+                        value={car.weightClass} 
+                        onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                        <option value="1500">bis 1.500 kg</option>
+                        <option value="2000">1.501 - 2.000 kg</option>
+                        <option value="3000">2.001 - 3.000 kg</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Position</label>
+                    <button
+                        onClick={() => onUpdate({ ...car, isLast: !car.isLast })}
+                        className={`w-full py-1.5 px-2 flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg transition-all border ${car.isLast ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                    >
+                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${car.isLast ? 'bg-amber-500 border-amber-500' : 'border-slate-300'}`}>
+                            {car.isLast && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                        </div>
+                        Letztes Fahrzeug
+                    </button>
+                </div>
+                <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Besonderheit</label>
+                    <button
+                        onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
+                        className={`w-full py-1.5 px-2 flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg transition-all border ${car.noChocks ? 'bg-red-50 text-red-700 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                    >
+                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${car.noChocks ? 'bg-red-500 border-red-500' : 'border-slate-300'}`}>
+                            {car.noChocks && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                        </div>
+                        Keine Keile mgl.
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-3">
+                <PkwWheelConfig label="Vorne Links" wheelData={car.wheels.fl} onChange={(d) => updateWheel('fl', d)} />
+                <PkwWheelConfig label="Vorne Rechts" wheelData={car.wheels.fr} onChange={(d) => updateWheel('fr', d)} />
+                <PkwWheelConfig label="Hinten Links" wheelData={car.wheels.rl} onChange={(d) => updateWheel('rl', d)} />
+                <PkwWheelConfig label="Hinten Rechts" wheelData={car.wheels.rr} onChange={(d) => updateWheel('rr', d)} />
+            </div>
+
+            <div className={`p-2.5 rounded-xl text-[10px] leading-tight font-bold flex items-start gap-1.5 ${validation.valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                {validation.valid ? <CheckCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> : <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />}
+                <span>{validation.msg}</span>
+            </div>
+        </div>
+    );
+};
+
+const SvgPkwTransporter = ({ deckName, cars }) => {
+    const carHeight = 130;
+    const padding = 20;
+    const svgHeight = Math.max(200, cars.length * carHeight + 80);
+
+    return (
+        <div className="flex justify-center bg-white p-4 rounded-xl border border-slate-200 shadow-inner mb-6">
+            <svg viewBox={`0 0 130 ${svgHeight}`} className="w-full max-w-[220px] h-auto font-sans">
+                {/* Deck Title */}
+                <text x="65" y="15" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#334155" className="uppercase tracking-widest">{deckName}</text>
+                
+                {/* Fahrtrichtung Indicator */}
+                <g transform="translate(5, 25)">
+                    <rect x="0" y="0" width="120" height="30" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1" rx="2" strokeDasharray="2 2" />
+                    <path d="M55 18 L60 8 L65 18" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="60" y1="8" x2="60" y2="22" stroke="#64748b" strokeWidth="2" />
+                    <text x="60" y="27" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#64748b" className="uppercase tracking-widest">Fahrtrichtung</text>
+                </g>
+
+                {/* Truck Bed Outline */}
+                <rect x="5" y="60" width="120" height={Math.max(100, cars.length * carHeight + 10)} fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+
+                {/* Render Cars */}
+                {cars.map((car, idx) => {
+                    const tilt = car.isLast ? -6 : 0;
+                    const yOffset = 70 + (idx * carHeight);
+
+                    const renderWheelFeatures = (x, y, data) => (
+                        <g transform={`translate(${x}, ${y})`}>
+                            {/* Rad */}
+                            <rect x="0" y="0" width="10" height="25" fill="#0f172a" rx="1" />
+                            
+                            {/* Keile (Gelb) */}
+                            {!car.noChocks && (data.chock === 'front' || data.chock === 'both') && <line x1="-6" y1="-2" x2="16" y2="-2" stroke="#fde047" strokeWidth="2.5" />}
+                            {!car.noChocks && (data.chock === 'back' || data.chock === 'both') && <line x1="-6" y1="27" x2="16" y2="27" stroke="#fde047" strokeWidth="2.5" />}
+                            
+                            {/* Gurt (Blau) */}
+                            {data.strap && <line x1="5" y1="-10" x2="5" y2="35" stroke="#3b82f6" strokeWidth="3" opacity="0.9" />}
+                        </g>
+                    );
+
+                    return (
+                        <g key={car.id} transform={`translate(15, ${yOffset})`}>
+                            <g transform={`rotate(${tilt} 50 55)`}>
+                                {/* Car Body */}
+                                <rect x="0" y="0" width="100" height="110" fill="#e2e8f0" stroke="#64748b" strokeWidth="1" rx="4" />
+                                
+                                {/* Front Arrow Indicator */}
+                                <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="1.5" />
+                                
+                                {/* Achsen Labels */}
+                                <text x="50" y="35" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse in FR</text>
+                                <text x="50" y="80" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse gegen FR</text>
+
+                                {/* Wheels */}
+                                {renderWheelFeatures(8, 10, car.wheels.fl)}
+                                {renderWheelFeatures(82, 10, car.wheels.fr)}
+                                {renderWheelFeatures(8, 65, car.wheels.rl)}
+                                {renderWheelFeatures(82, 65, car.wheels.rr)}
+                            </g>
+                        </g>
+                    );
+                })}
+
+                {/* Empty State Message */}
+                {cars.length === 0 && (
+                     <text x="65" y="110" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#cbd5e1">Keine Fahrzeuge</text>
+                )}
+            </svg>
+        </div>
+    );
+};
+
 // --- ANGLE MEASUREMENT MODAL ---
 const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
     const [step, setStep] = useState(1); 
@@ -1904,7 +2128,7 @@ function WeightModule() {
 
 // --- LASHING CALCULATOR ---
 function LashingCalculator() {
-  const [lashingType, setLashingType] = useState('nieder'); // Toggle zwischen 'nieder' und 'diagonal'
+  const [lashingType, setLashingType] = useState('nieder'); // Toggle zwischen 'nieder', 'diagonal', 'pkw'
 
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
@@ -1963,6 +2187,23 @@ function LashingCalculator() {
   // State für die Handy-Winkelmessung
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
   const [activeAngleField, setActiveAngleField] = useState(null); // 'alpha' oder 'beta'
+
+  // State für PKW-Transporter
+  const [carsTop, setCarsTop] = useState([]);
+  const [carsBottom, setCarsBottom] = useState([]);
+
+  const createNewCar = () => ({
+      id: Date.now() + Math.random(),
+      weightClass: '2000',
+      isLast: false,
+      noChocks: false,
+      wheels: {
+          fl: { strap: false, chock: 'none' },
+          fr: { strap: false, chock: 'none' },
+          rl: { strap: false, chock: 'none' },
+          rr: { strap: false, chock: 'none' }
+      }
+  });
 
   const [showFines, setShowFines] = useState(false);
   const dateTime = useDateTime();
@@ -2189,12 +2430,47 @@ function LashingCalculator() {
           )}
       </div>
       )}
+
+      {/* PRINT VIEW ONLY (PKW Transporter) */}
+      {lashingType === 'pkw' && (
+      <div className="print-only print-container">
+          <h1 className="print-title">LaSi-Protokoll (PKW-Transporter)</h1>
+          <div className="print-meta">Erstellt am: {dateTime}</div>
+
+          <h2 className="print-section">Schematische Beladungsübersicht</h2>
+          
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+              <div style={{ flex: 1 }}>
+                  <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
+              </div>
+              <div style={{ flex: 1 }}>
+                  <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
+              </div>
+          </div>
+
+          <div className="print-result-box">
+             <div className="print-result-header">Legende</div>
+             <table className="print-table" style={{ border: 'none', fontSize: '9pt' }}>
+                 <tbody>
+                     <tr>
+                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#fde047', border: '1px solid #ca8a04' }}></div></td>
+                         <td style={{ border: 'none', padding: '2px' }}>Radkeil</td>
+                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#3b82f6', border: '1px solid #1d4ed8' }}></div></td>
+                         <td style={{ border: 'none', padding: '2px' }}>Autotransportgurt</td>
+                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '10px', backgroundColor: '#0f172a' }}></div></td>
+                         <td style={{ border: 'none', padding: '2px' }}>Rad</td>
+                     </tr>
+                 </tbody>
+             </table>
+          </div>
+      </div>
+      )}
       {/* END PRINT VIEW */}
 
       <div className="bg-indigo-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-indigo-900/10 no-print">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
-            {lashingType === 'nieder' ? <LashingStrapIcon className="w-5 h-5 shrink-0" /> : <DiagonalLashingIcon className="w-5 h-5 shrink-0" />}
+            {lashingType === 'nieder' ? <LashingStrapIcon className="w-5 h-5 shrink-0" /> : lashingType === 'diagonal' ? <DiagonalLashingIcon className="w-5 h-5 shrink-0" /> : <Car className="w-5 h-5 shrink-0" />}
             LaSi-Rechner
           </h1>
           <p className="text-indigo-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-7">
@@ -2221,15 +2497,19 @@ function LashingCalculator() {
 
       <div className="p-2 space-y-2 no-print">
         
-        {/* Toggle Niederzurren / Diagonalzurren */}
-        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
-            <button onClick={() => setLashingType('nieder')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'nieder' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+        {/* Toggle Niederzurren / Diagonalzurren / PKW */}
+        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 gap-1 overflow-x-auto">
+            <button onClick={() => setLashingType('nieder')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'nieder' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <LashingStrapIcon className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase">Niederzurren</span>
             </button>
-            <button onClick={() => setLashingType('diagonal')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'diagonal' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+            <button onClick={() => setLashingType('diagonal')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'diagonal' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <DiagonalLashingIcon className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase">Diagonalzurren</span>
+            </button>
+            <button onClick={() => setLashingType('pkw')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'pkw' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <Car className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase">PKW-Transp.</span>
             </button>
         </div>
 
@@ -2408,7 +2688,7 @@ function LashingCalculator() {
               </div>
             )}
         </>
-        ) : (
+        ) : lashingType === 'diagonal' ? (
             <>
                 {/* HINWEIS FREISTEHENDE LADUNG */}
                 <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-center mb-2 shadow-sm break-inside-avoid animate-in fade-in">
@@ -2577,10 +2857,95 @@ function LashingCalculator() {
                   </div>
                 )}
             </>
-        )}
+        ) : lashingType === 'pkw' ? (
+            <div className="animate-in fade-in duration-300 pb-20">
+                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-start mb-3 shadow-sm break-inside-avoid">
+                    <Info className="w-5 h-5 shrink-0 mt-0.5 text-indigo-500" />
+                    <span className="text-xs font-bold text-indigo-800 leading-tight">
+                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter. Im Druckprotokoll wird eine Übersichtsgrafik für die Anzeige generiert.
+                    </span>
+                </div>
+
+                {/* OBERE EBENE */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between bg-slate-800 text-white p-3 rounded-xl mb-3 shadow-md">
+                        <span className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                            <Truck className="w-5 h-5" /> Obere Ebene
+                        </span>
+                        <span className="bg-slate-700 px-2 py-0.5 rounded text-xs font-mono font-bold">{carsTop.length} PKW</span>
+                    </div>
+                    
+                    {carsTop.map((car, idx) => (
+                        <PkwCarEditor 
+                            key={car.id} 
+                            car={car} 
+                            index={idx} 
+                            onUpdate={(updatedCar) => setCarsTop(carsTop.map(c => c.id === car.id ? updatedCar : c))}
+                            onRemove={() => setCarsTop(carsTop.filter(c => c.id !== car.id))}
+                        />
+                    ))}
+
+                    <button 
+                        onClick={() => setCarsTop([...carsTop, createNewCar()])}
+                        className="w-full py-3 bg-white border-2 border-dashed border-slate-300 hover:border-indigo-400 text-slate-500 hover:text-indigo-600 rounded-2xl font-bold uppercase tracking-wide text-xs transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Car className="w-4 h-4" /> PKW Hinzufügen (Oben)
+                    </button>
+                </div>
+
+                {/* UNTERE EBENE */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between bg-slate-700 text-white p-3 rounded-xl mb-3 shadow-md">
+                        <span className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                            <Truck className="w-5 h-5 opacity-70" /> Untere Ebene
+                        </span>
+                        <span className="bg-slate-600 px-2 py-0.5 rounded text-xs font-mono font-bold">{carsBottom.length} PKW</span>
+                    </div>
+                    
+                    {carsBottom.map((car, idx) => (
+                        <PkwCarEditor 
+                            key={car.id} 
+                            car={car} 
+                            index={idx} 
+                            onUpdate={(updatedCar) => setCarsBottom(carsBottom.map(c => c.id === car.id ? updatedCar : c))}
+                            onRemove={() => setCarsBottom(carsBottom.filter(c => c.id !== car.id))}
+                        />
+                    ))}
+
+                    <button 
+                        onClick={() => setCarsBottom([...carsBottom, createNewCar()])}
+                        className="w-full py-3 bg-white border-2 border-dashed border-slate-300 hover:border-indigo-400 text-slate-500 hover:text-indigo-600 rounded-2xl font-bold uppercase tracking-wide text-xs transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Car className="w-4 h-4" /> PKW Hinzufügen (Unten)
+                    </button>
+                </div>
+
+                {/* LIVE PREVIEW (SCREEN ONLY) */}
+                {(carsTop.length > 0 || carsBottom.length > 0) && (
+                    <div className="mt-8 pt-6 border-t border-slate-200 animate-in fade-in">
+                        <div className="flex items-center justify-center gap-2 mb-4 text-indigo-700">
+                            <Eye className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-sm">Live-Vorschau Beladung</h3>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start">
+                            {carsTop.length > 0 && (
+                                <div className="w-full max-w-[220px]">
+                                    <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
+                                </div>
+                            )}
+                            {carsBottom.length > 0 && (
+                                <div className="w-full max-w-[220px]">
+                                    <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        ) : null}
         
         {/* STRAFTATBESTÄNDE - SICHTBAR FÜR BEIDE RECHNERARTEN */}
-        {lashingResult !== null && fineGroups.length > 0 && (
+        {lashingType !== 'pkw' && lashingResult !== null && fineGroups.length > 0 && (
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 pb-20 break-inside-avoid print-full-width">
             <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
                 <div className="flex items-center gap-2">
@@ -2635,8 +3000,8 @@ function LashingCalculator() {
           </div>
         )}
         
-        {/* Print-Button für beide Reiter */}
-        {((lashingType === 'nieder' && lashingResult !== null) || (lashingType === 'diagonal' && lashingResult !== null)) && (
+        {/* Print-Button für alle Reiter */}
+        {((lashingType === 'nieder' && lashingResult !== null) || (lashingType === 'diagonal' && lashingResult !== null) || (lashingType === 'pkw' && (carsTop.length > 0 || carsBottom.length > 0))) && (
              <PrintButton />
         )}
 
@@ -3106,6 +3471,16 @@ function KnowledgeBaseView() {
                             <h3 className="font-black uppercase tracking-wide text-xs">PKW-Transporter (Verladung)</h3>
                         </div>
 
+                        {/* NEUE REGELN INFO */}
+                        <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6">
+                            <h4 className="font-black text-teal-800 text-sm mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> Allgemeine Grundregeln</h4>
+                            <ul className="space-y-1.5 text-xs text-teal-900 font-medium list-disc list-inside">
+                                <li><strong>Es ist irrelevant</strong>, ob Fahrzeuge vorwärts oder rückwärts verladen werden. Die Achse in Fahrtrichtung ist ausschlaggebend.</li>
+                                <li>Die verwendeten Gurte müssen eine <strong>STF von mindestens 330 daN</strong> aufweisen.</li>
+                                <li>Die Radvorleger (Keile) müssen <strong>mindestens 12 cm hoch</strong> sein.</li>
+                            </ul>
+                        </div>
+
                         <div className="flex flex-col md:flex-row gap-6">
                             
                             {/* SCHEMATISCHE DARSTELLUNG (SVG) */}
@@ -3115,14 +3490,9 @@ function KnowledgeBaseView() {
                                     {/* Fahrtrichtung Box */}
                                     <g transform="translate(5, 0)">
                                         <rect x="0" y="0" width="120" height="40" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
-                                        
-                                        {/* Cursor Arrow */}
                                         <path d="M25 8 L25 22 L30 18 L34 26 L36 25 L32 17 L38 17 Z" fill="#ffffff" stroke="#000000" strokeWidth="1" />
-                                        
-                                        {/* Red A-Arrow */}
                                         <path d="M55 22 L60 12 L65 22" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                         <line x1="57.5" y1="18" x2="62.5" y2="18" stroke="#ef4444" strokeWidth="2" />
-                                        
                                         <text x="60" y="30" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#000">Fahrtrichtung</text>
                                         <text x="60" y="37" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#000">des Transporters</text>
                                     </g>
@@ -3130,15 +3500,13 @@ function KnowledgeBaseView() {
                                     {/* Truck Bed */}
                                     <rect x="5" y="45" width="120" height="380" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
 
-                                    {/* CAR 1: In Fahrtrichtung */}
+                                    {/* CAR 1: Bis 2000 kg */}
                                     <g transform="translate(15, 55)">
                                         <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
-                                        
                                         <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                         <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
-                                        
-                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Vorderachse</text>
-                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Hinterachse</text>
+                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse in FR</text>
+                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse gegen FR</text>
                                         
                                         {/* Wheels */}
                                         <rect x="8" y="10" width="10" height="25" fill="#000" />
@@ -3146,25 +3514,22 @@ function KnowledgeBaseView() {
                                         <rect x="8" y="65" width="10" height="25" fill="#000" />
                                         <rect x="82" y="65" width="10" height="25" fill="#000" />
                                         
-                                        {/* Securing */}
-                                        {/* Vorne Links: 1 Keil (vorne) */}
+                                        {/* Securing: FL (front chock + strap), RR (both chocks + strap) */}
                                         <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
-                                        
-                                        {/* Hinten Rechts: 2 Keile, 1 Gurt */}
+                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
+
                                         <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
                                     </g>
 
-                                    {/* CAR 2: Rückwärts verladen */}
+                                    {/* CAR 2: 2000 bis 3000 kg */}
                                     <g transform="translate(15, 180)">
                                         <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
-                                        
-                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Hinterachse</text>
-                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Vorderachse</text>
-                                        
-                                        <path d="M45 95 L50 105 L55 95" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <line x1="47.5" y1="99" x2="52.5" y2="99" stroke="#ef4444" strokeWidth="2" />
+                                        <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
+                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse in FR</text>
+                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse gegen FR</text>
                                         
                                         {/* Wheels */}
                                         <rect x="8" y="10" width="10" height="25" fill="#000" />
@@ -3172,46 +3537,42 @@ function KnowledgeBaseView() {
                                         <rect x="8" y="65" width="10" height="25" fill="#000" />
                                         <rect x="82" y="65" width="10" height="25" fill="#000" />
                                         
-                                        {/* Securing */}
-                                        {/* Hinten Links (Top Left): 2 Keile, 1 Gurt */}
+                                        {/* Securing: Hinten beide kpl. Vorne 1 Rad. */}
                                         <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="2" y1="37" x2="24" y2="37" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
-                                        
-                                        {/* Vorne Rechts (Bottom Right): 2 Keile, 1 Gurt */}
-                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
-                                    </g>
 
-                                    {/* CAR 3: Auf schräger Ebene */}
-                                    <g transform="translate(15, 305)">
-                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
-                                        
-                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Hinterachse</text>
-                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Vorderachse</text>
-                                        
-                                        <path d="M45 95 L50 105 L55 95" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <line x1="47.5" y1="99" x2="52.5" y2="99" stroke="#ef4444" strokeWidth="2" />
-                                        
-                                        {/* Wheels */}
-                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
-                                        
-                                        {/* Securing */}
-                                        {/* Hinten Links (Top Left): 2 Keile, 1 Gurt */}
-                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="2" y1="37" x2="24" y2="37" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
-                                        
-                                        {/* Vorne Links (Bottom Left): 2 Keile, 1 Gurt */}
                                         <line x1="2" y1="63" x2="24" y2="63" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="2" y1="92" x2="24" y2="92" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="13" y1="55" x2="13" y2="105" stroke="#3b82f6" strokeWidth="3" />
+
+                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
+                                    </g>
+
+                                    {/* CAR 3: Letztes Fahrzeug (Schräge) */}
+                                    <g transform="translate(15, 305)">
+                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
+                                        <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
+                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse in FR</text>
+                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse gegen FR</text>
                                         
-                                        {/* Vorne Rechts (Bottom Right): 2 Keile, 1 Gurt */}
+                                        {/* Wheels */}
+                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
+                                        
+                                        {/* Securing: Vorne 1 Rad kpl. Hinten beide Räder kpl. */}
+                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="2" y1="37" x2="24" y2="37" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
+
+                                        <line x1="2" y1="63" x2="24" y2="63" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="2" y1="92" x2="24" y2="92" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="13" y1="55" x2="13" y2="105" stroke="#3b82f6" strokeWidth="3" />
+
                                         <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
                                         <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
@@ -3225,25 +3586,33 @@ function KnowledgeBaseView() {
                                     
                                     {/* Text 1 */}
                                     <div>
-                                        <h4 className="font-black text-slate-800 text-sm mb-1">In Fahrtrichtung verladene Fahrzeuge</h4>
+                                        <h4 className="font-black text-slate-800 text-sm mb-1">Gewicht bis zu 2.000 kg</h4>
                                         <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            Einen Radkeil vor eines der beiden Vorderräder legen, das diagonale Hinterrad mit 2 Radkeilen sichern und zusätzlich mit einem 3-Punkt Autotransportgurt sichern.
+                                            An der <strong>Achse in Fahrtrichtung</strong> wird an einem Rad ein Gurt + <u>1 Vorleger davor</u> angebracht. An der <strong>schräg gegenüberliegenden</strong> Achse (gegen Fahrtrichtung) wird 1 Gurt + <u>2 Vorleger (davor & dahinter)</u> angebracht.
                                         </p>
                                     </div>
                                     
                                     {/* Text 2 */}
                                     <div>
-                                        <h4 className="font-black text-slate-800 text-sm mb-1">Rückwärts verladene Fahrzeuge</h4>
+                                        <h4 className="font-black text-slate-800 text-sm mb-1">Gewicht von 2.000 bis 3.000 kg</h4>
                                         <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            Ein Hinterrad mit 2 Radkeilen und einem 3-Punkt Autotransportgurt sichern und das diagonale Vorderrad ebenfalls mit 2 Radkeilen und einem 3-Punkt Autotransportgurt sichern.
+                                            An der Achse in Fahrtrichtung: 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit 1 Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. <br/><span className="text-xs opacity-80">(Alternativ reicht es auch, <i>nur</i> die Achse gegen die Fahrtrichtung an beiden Rädern mit Gurt + 2 Vorlegern zu sichern).</span>
                                         </p>
                                     </div>
                                     
                                     {/* Text 3 */}
                                     <div>
-                                        <h4 className="font-black text-slate-800 text-sm mb-1">Letztes Fahrzeug auf schräger Ebene</h4>
+                                        <h4 className="font-black text-slate-800 text-sm mb-1">Letztes Fahrzeug (bzw. auf Schräge)</h4>
                                         <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            Beide Räder der letzten Achse mit je 2 Radkeilen und einem 3-Punkt Autotransportgurt sichern, und ein Rad der ersten Achse ebenfalls mit 2 Keilen und einem 3-Punkt Autotransportgurt sichern.
+                                            An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
+                                        </p>
+                                    </div>
+
+                                    {/* Sonderregel Text */}
+                                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl mt-4">
+                                        <h4 className="font-black text-slate-800 text-sm mb-1 flex items-center gap-2"><Info className="w-4 h-4 text-indigo-500" /> Ausnahme ohne Keile (Bis 1.500 kg)</h4>
+                                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                                            Wenn ein Fahrzeug bauartbedingt <u>nicht</u> mit Keilen gesichert werden kann und <strong>maximal 1.500 kg</strong> wiegt, darf es alternativ auch an <strong>jedem der 4 Räder</strong> mit jeweils einem Gurt (ohne Radvorleger) gesichert werden.
                                         </p>
                                     </div>
                                 </div>
@@ -3254,7 +3623,7 @@ function KnowledgeBaseView() {
                                     <ul className="space-y-3 text-sm text-slate-700 font-bold">
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
-                                            = Radkeil
+                                            = Radkeil / Vorleger
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
@@ -3263,13 +3632,6 @@ function KnowledgeBaseView() {
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
                                             = Rad
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" className="shrink-0 drop-shadow-sm">
-                                                <path d="M6 16 L12 6 L18 16" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                                <line x1="9" y1="11" x2="15" y2="11" stroke="#ef4444" strokeWidth="2.5" />
-                                            </svg> 
-                                            = Fahrzeugfront
                                         </li>
                                     </ul>
                                 </div>
