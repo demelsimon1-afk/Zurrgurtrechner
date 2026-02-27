@@ -446,9 +446,9 @@ const validateCarSecuring = (car) => {
     const hasFront = (w) => w.chock === 'front' || w.chock === 'both';
     const hasBoth = (w) => w.chock === 'both';
 
-    // Ausnahme: Keine Keile möglich (bis 1.500 kg -> 4 Gurte)
+    // Ausnahme: Keine Keile möglich (Sonderregel bis 1.500 kg -> 4 Gurte)
     if (car.noChocks) {
-        if (car.weightClass === '1500') {
+        if (car.weightClass === '2000') {
             if (hasStrap(fl) && hasStrap(fr) && hasStrap(rl) && hasStrap(rr)) {
                 return { valid: true, msg: "Korrekt: 4 Gurte ohne Keile (Sonderregel bis 1500 kg)." };
             }
@@ -478,8 +478,8 @@ const validateCarSecuring = (car) => {
         return { valid: false, msg: "Fehler: 2000-3000kg benötigt an der Hinterachse zwingend 2x(Gurt+2 Keile)." };
     }
 
-    // Fahrzeuge bis 2.000 kg (und bis 1.500 kg, sofern Keile genutzt werden)
-    if (car.weightClass === '2000' || car.weightClass === '1500') {
+    // Fahrzeuge bis 2.000 kg
+    if (car.weightClass === '2000') {
         const diag1 = hasStrap(fl) && hasFront(fl) && hasStrap(rr) && hasBoth(rr);
         const diag2 = hasStrap(fr) && hasFront(fr) && hasStrap(rl) && hasBoth(rl);
         if (diag1 || diag2) {
@@ -542,8 +542,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                         onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none"
                     >
-                        <option value="1500">bis 1.500 kg</option>
-                        <option value="2000">1.501 - 2.000 kg</option>
+                        <option value="2000">bis 2.000 kg</option>
                         <option value="3000">2.001 - 3.000 kg</option>
                     </select>
                 </div>
@@ -3012,6 +3011,45 @@ function LashingCalculator() {
 }
 
 // --- KNOWLEDGE BASE VIEW (NEW) ---
+const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
+    const renderWheelFeatures = (x, y, data) => (
+        <g transform={`translate(${x}, ${y})`}>
+            {/* Rad */}
+            <rect x="0" y="0" width="10" height="25" fill="#0f172a" rx="1" />
+            
+            {/* Keile (Gelb) */}
+            {(data.chock === 'front' || data.chock === 'both') && <line x1="-6" y1="-2" x2="16" y2="-2" stroke="#fde047" strokeWidth="2.5" />}
+            {(data.chock === 'back' || data.chock === 'both') && <line x1="-6" y1="27" x2="16" y2="27" stroke="#fde047" strokeWidth="2.5" />}
+            
+            {/* Gurt (Blau) */}
+            {data.strap && <line x1="5" y1="-10" x2="5" y2="35" stroke="#3b82f6" strokeWidth="3" opacity="0.9" />}
+        </g>
+    );
+
+    return (
+        <div className="flex justify-center bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner mb-4">
+            <svg viewBox="0 0 130 160" className="w-full max-w-[160px] h-auto font-sans drop-shadow-sm">
+                <g transform="translate(5, 5)">
+                    <rect x="0" y="0" width="120" height="20" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" rx="2" />
+                    <path d="M55 14 L60 6 L65 14" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="60" y1="6" x2="60" y2="18" stroke="#ef4444" strokeWidth="2" />
+                </g>
+                <g transform={`translate(15, 35) ${isTilted ? 'rotate(-6 50 55)' : ''}`}>
+                    <rect x="0" y="0" width="100" height="110" fill="#e2e8f0" stroke="#64748b" strokeWidth="1" rx="4" />
+                    <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="1.5" />
+                    <text x="50" y="35" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse in FR</text>
+                    <text x="50" y="80" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse gegen FR</text>
+                    {renderWheelFeatures(8, 10, carConfig.fl)}
+                    {renderWheelFeatures(82, 10, carConfig.fr)}
+                    {renderWheelFeatures(8, 65, carConfig.rl)}
+                    {renderWheelFeatures(82, 65, carConfig.rr)}
+                </g>
+            </svg>
+        </div>
+    );
+};
+
 function KnowledgeBaseView() {
   const dateTime = useDateTime();
   const [view, setView] = useState('ph1'); // Startet jetzt standardmäßig mit § 24a StVG
@@ -3481,160 +3519,60 @@ function KnowledgeBaseView() {
                             </ul>
                         </div>
 
-                        <div className="flex flex-col md:flex-row gap-6">
+                        <div className="space-y-8">
                             
-                            {/* SCHEMATISCHE DARSTELLUNG (SVG) */}
-                            <div className="w-full md:w-auto flex-shrink-0 flex justify-center bg-white p-4 rounded-xl border border-slate-200 shadow-inner">
-                                <svg viewBox="0 0 130 430" className="w-full max-w-[160px] h-auto drop-shadow-sm font-sans">
-                                    
-                                    {/* Fahrtrichtung Box */}
-                                    <g transform="translate(5, 0)">
-                                        <rect x="0" y="0" width="120" height="40" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
-                                        <path d="M25 8 L25 22 L30 18 L34 26 L36 25 L32 17 L38 17 Z" fill="#ffffff" stroke="#000000" strokeWidth="1" />
-                                        <path d="M55 22 L60 12 L65 22" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <line x1="57.5" y1="18" x2="62.5" y2="18" stroke="#ef4444" strokeWidth="2" />
-                                        <text x="60" y="30" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#000">Fahrtrichtung</text>
-                                        <text x="60" y="37" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#000">des Transporters</text>
-                                    </g>
-
-                                    {/* Truck Bed */}
-                                    <rect x="5" y="45" width="120" height="380" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
-
-                                    {/* CAR 1: Bis 2000 kg */}
-                                    <g transform="translate(15, 55)">
-                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
-                                        <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
-                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse in FR</text>
-                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse gegen FR</text>
-                                        
-                                        {/* Wheels */}
-                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
-                                        
-                                        {/* Securing: FL (front chock + strap), RR (both chocks + strap) */}
-                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
-
-                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
-                                    </g>
-
-                                    {/* CAR 2: 2000 bis 3000 kg */}
-                                    <g transform="translate(15, 180)">
-                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
-                                        <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
-                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse in FR</text>
-                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse gegen FR</text>
-                                        
-                                        {/* Wheels */}
-                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
-                                        
-                                        {/* Securing: Hinten beide kpl. Vorne 1 Rad. */}
-                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
-
-                                        <line x1="2" y1="63" x2="24" y2="63" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="2" y1="92" x2="24" y2="92" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="13" y1="55" x2="13" y2="105" stroke="#3b82f6" strokeWidth="3" />
-
-                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
-                                    </g>
-
-                                    {/* CAR 3: Letztes Fahrzeug (Schräge) */}
-                                    <g transform="translate(15, 305)">
-                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
-                                        <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
-                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse in FR</text>
-                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Achse gegen FR</text>
-                                        
-                                        {/* Wheels */}
-                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
-                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
-                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
-                                        
-                                        {/* Securing: Vorne 1 Rad kpl. Hinten beide Räder kpl. */}
-                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="2" y1="37" x2="24" y2="37" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
-
-                                        <line x1="2" y1="63" x2="24" y2="63" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="2" y1="92" x2="24" y2="92" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="13" y1="55" x2="13" y2="105" stroke="#3b82f6" strokeWidth="3" />
-
-                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
-                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
-                                    </g>
-                                </svg>
+                            {/* Bis 2.000 kg */}
+                            <div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">1. Gewicht bis zu 2.000 kg</h4>
+                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: false, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    An der <strong>Achse in Fahrtrichtung</strong> wird an einem Rad ein Gurt + <u>1 Vorleger davor</u> angebracht. An der <strong>schräg gegenüberliegenden</strong> Achse (gegen Fahrtrichtung) wird 1 Gurt + <u>2 Vorleger (davor & dahinter)</u> angebracht.
+                                </p>
+                            </div>
+                            
+                            {/* 2.000 bis 3.000 kg */}
+                            <div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">2. Gewicht von 2.000 bis 3.000 kg</h4>
+                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    An der Achse in Fahrtrichtung: 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit 1 Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. <br/><span className="text-xs opacity-80">(Alternativ reicht es auch, <i>nur</i> die Achse gegen die Fahrtrichtung an beiden Rädern mit Gurt + 2 Vorlegern zu sichern).</span>
+                                </p>
+                            </div>
+                            
+                            {/* Letztes Fahrzeug */}
+                            <div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">3. Letztes Fahrzeug (bzw. auf Schräge)</h4>
+                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} isTilted={true} />
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
+                                </p>
                             </div>
 
-                            {/* BESCHREIBUNG & TEXTE */}
-                            <div className="w-full md:w-2/3 flex flex-col justify-between">
-                                <div className="space-y-6">
-                                    
-                                    {/* Text 1 */}
-                                    <div>
-                                        <h4 className="font-black text-slate-800 text-sm mb-1">Gewicht bis zu 2.000 kg</h4>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            An der <strong>Achse in Fahrtrichtung</strong> wird an einem Rad ein Gurt + <u>1 Vorleger davor</u> angebracht. An der <strong>schräg gegenüberliegenden</strong> Achse (gegen Fahrtrichtung) wird 1 Gurt + <u>2 Vorleger (davor & dahinter)</u> angebracht.
-                                        </p>
-                                    </div>
-                                    
-                                    {/* Text 2 */}
-                                    <div>
-                                        <h4 className="font-black text-slate-800 text-sm mb-1">Gewicht von 2.000 bis 3.000 kg</h4>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            An der Achse in Fahrtrichtung: 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit 1 Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. <br/><span className="text-xs opacity-80">(Alternativ reicht es auch, <i>nur</i> die Achse gegen die Fahrtrichtung an beiden Rädern mit Gurt + 2 Vorlegern zu sichern).</span>
-                                        </p>
-                                    </div>
-                                    
-                                    {/* Text 3 */}
-                                    <div>
-                                        <h4 className="font-black text-slate-800 text-sm mb-1">Letztes Fahrzeug (bzw. auf Schräge)</h4>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                            An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
-                                        </p>
-                                    </div>
+                            {/* Ausnahme ohne Keile */}
+                            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mt-4">
+                                <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2"><Info className="w-5 h-5 text-indigo-500" /> Ausnahme ohne Keile (Bis 1.500 kg)</h4>
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    Wenn ein Fahrzeug bauartbedingt <u>nicht</u> mit Keilen gesichert werden kann und <strong>maximal 1.500 kg</strong> wiegt, darf es alternativ auch an <strong>jedem der 4 Räder</strong> mit jeweils einem Gurt (ohne Radvorleger) gesichert werden.
+                                </p>
+                            </div>
 
-                                    {/* Sonderregel Text */}
-                                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl mt-4">
-                                        <h4 className="font-black text-slate-800 text-sm mb-1 flex items-center gap-2"><Info className="w-4 h-4 text-indigo-500" /> Ausnahme ohne Keile (Bis 1.500 kg)</h4>
-                                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                                            Wenn ein Fahrzeug bauartbedingt <u>nicht</u> mit Keilen gesichert werden kann und <strong>maximal 1.500 kg</strong> wiegt, darf es alternativ auch an <strong>jedem der 4 Räder</strong> mit jeweils einem Gurt (ohne Radvorleger) gesichert werden.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* LEGENDE */}
-                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-6">
-                                    <h5 className="font-black text-slate-800 text-sm mb-3">Legende:</h5>
-                                    <ul className="space-y-3 text-sm text-slate-700 font-bold">
-                                        <li className="flex items-center gap-3">
-                                            <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
-                                            = Radkeil / Vorleger
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
-                                            = Autotransportgurt
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
-                                            = Rad
-                                        </li>
-                                    </ul>
-                                </div>
+                            {/* Legende */}
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <h5 className="font-black text-slate-800 text-sm mb-3">Legende:</h5>
+                                <ul className="space-y-3 text-sm text-slate-700 font-bold flex flex-wrap gap-x-6 gap-y-2">
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
+                                        = Radkeil / Vorleger
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
+                                        = Autotransportgurt
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
+                                        = Rad
+                                    </li>
+                                </ul>
                             </div>
                         </div>
 
