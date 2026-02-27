@@ -525,6 +525,22 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
 
 // --- CALCULATOR COMPONENTS ---
 
+const ACCIDENT_SURFACES = [
+  { label: "Asphalt trocken", value: 7.5 },
+  { label: "Asphalt nass", value: 6.0 },
+  { label: "Beton trocken", value: 7.5 },
+  { label: "Beton nass (neue Bauart)", value: 7.0 },
+  { label: "Beton nass (alte Bauart)", value: 5.9 },
+  { label: "Verbundpflaster trocken", value: 6.0 },
+  { label: "Verbundpflaster nass", value: 5.0 },
+  { label: "Kopfsteinpflaster trocken", value: 6.0 },
+  { label: "Kopfsteinpflaster nass", value: 5.0 },
+  { label: "Sand/Kies trocken", value: 5.5 },
+  { label: "Sand/Kies nass", value: 4.5 },
+  { label: "Schneedecke", value: 2.5 },
+  { label: "Eis", value: 1.0 }
+];
+
 function AccidentCalculator() {
     const dateTime = useDateTime();
     const [mode, setMode] = useState('brake'); // 'brake' | 'drift'
@@ -534,13 +550,13 @@ function AccidentCalculator() {
     const [sVR, setSVR] = useState('');
     const [sHL, setSHL] = useState('');
     const [sHR, setSHR] = useState('');
-    const [aBrake, setABrake] = useState('7.5');
+    const [bremsSurfaceIdx, setBremsSurfaceIdx] = useState(0);
     const [tBrake, setTBrake] = useState('0.2');
 
     // States für Driftspur
     const [sDrift, setSDrift] = useState('');
     const [hDrift, setHDrift] = useState('');
-    const [aDrift, setADrift] = useState('7.5');
+    const [driftSurfaceIdx, setDriftSurfaceIdx] = useState(0);
 
     // Berechnungen Bremsspur
     const calcBrakeSpeed = (sStr, aStr, tStr) => {
@@ -552,6 +568,7 @@ function AccidentCalculator() {
         return (Math.sqrt(2 * a * s) + ((a * t) / 2)) * 3.6;
     };
 
+    const aBrake = ACCIDENT_SURFACES[bremsSurfaceIdx].value;
     const speeds = [sVL, sVR, sHL, sHR].map(s => calcBrakeSpeed(s, aBrake, tBrake));
     const maxBrakeSpeed = Math.max(...speeds, 0);
 
@@ -559,17 +576,16 @@ function AccidentCalculator() {
     let driftSpeed = 0;
     const sD = parseFloat(sDrift);
     const hD = parseFloat(hDrift);
-    const aD = parseFloat(aDrift);
+    const aDrift = ACCIDENT_SURFACES[driftSurfaceIdx].value;
 
-    if (sD > 0 && hD > 0 && !isNaN(aD)) {
+    if (sD > 0 && hD > 0 && !isNaN(aDrift)) {
         // Radius R = s^2 / 8h + h/2
         const r = (Math.pow(sD, 2) / (8 * hD)) + (hD / 2);
         // v = sqrt(R * a) -> Ergebnis in m/s, mal 3.6 für km/h
-        driftSpeed = Math.sqrt(r * aD) * 3.6;
+        driftSpeed = Math.sqrt(r * aDrift) * 3.6;
     }
 
     // Optionen für Dropdowns
-    const aOptions = Array.from({length: 20}, (_, i) => ((i + 1) * 0.5).toFixed(1));
     const tOptions = Array.from({length: 10}, (_, i) => ((i + 1) * 0.1).toFixed(1));
 
     return (
@@ -584,7 +600,7 @@ function AccidentCalculator() {
                     <tbody>
                         {mode === 'brake' ? (
                             <>
-                                <tr><th>Bremsverzögerung (a)</th><td>{aBrake} m/s²</td></tr>
+                                <tr><th>Fahrbahnbelag (a)</th><td>{ACCIDENT_SURFACES[bremsSurfaceIdx].label} ({aBrake} m/s²)</td></tr>
                                 <tr><th>Bremsschwellenzeit (t)</th><td>{tBrake} s</td></tr>
                                 <tr><th>Spur Vorne Links</th><td>{sVL || 0} m</td></tr>
                                 <tr><th>Spur Vorne Rechts</th><td>{sVR || 0} m</td></tr>
@@ -593,7 +609,7 @@ function AccidentCalculator() {
                             </>
                         ) : (
                             <>
-                                <tr><th>Querverzögerung (a)</th><td>{aDrift} m/s²</td></tr>
+                                <tr><th>Fahrbahnbelag (a)</th><td>{ACCIDENT_SURFACES[driftSurfaceIdx].label} ({aDrift} m/s²)</td></tr>
                                 <tr><th>Sekante (S)</th><td>{sDrift || 0} m</td></tr>
                                 <tr><th>Abstand (h)</th><td>{hDrift || 0} m</td></tr>
                             </>
@@ -648,9 +664,9 @@ function AccidentCalculator() {
                             
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Verzögerung (a)</label>
-                                    <select value={aBrake} onChange={(e) => setABrake(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
-                                        {aOptions.map(opt => <option key={opt} value={opt}>{opt} m/s²</option>)}
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fahrbahnbelag (a)</label>
+                                    <select value={bremsSurfaceIdx} onChange={(e) => setBremsSurfaceIdx(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
+                                        {ACCIDENT_SURFACES.map((opt, idx) => <option key={idx} value={idx}>{opt.label} ({opt.value} m/s²)</option>)}
                                     </select>
                                 </div>
                                 <div>
@@ -723,9 +739,9 @@ function AccidentCalculator() {
 
                             <div className="grid grid-cols-2 gap-3 mb-2">
                                 <div className="col-span-2">
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Querverzögerung (a)</label>
-                                    <select value={aDrift} onChange={(e) => setADrift(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
-                                        {aOptions.map(opt => <option key={opt} value={opt}>{opt} m/s² {opt === '7.5' ? '(Standard)' : ''}</option>)}
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fahrbahnbelag (a)</label>
+                                    <select value={driftSurfaceIdx} onChange={(e) => setDriftSurfaceIdx(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
+                                        {ACCIDENT_SURFACES.map((opt, idx) => <option key={idx} value={idx}>{opt.label} ({opt.value} m/s²)</option>)}
                                     </select>
                                 </div>
                                 <InputWithIcon icon={Ruler} label="Sekante S (m)" value={sDrift} onChange={(e) => setSDrift(e.target.value)} placeholder="0" />
@@ -1663,7 +1679,7 @@ function OverloadCalculator({ onSwitch }) {
         <div className="px-2 mb-3 flex items-center justify-end">
              <label className="flex items-center gap-1.5 cursor-pointer group">
                 <input type="checkbox" checked={useCustomTolerance} onChange={(e) => setUseCustomTolerance(e.target.checked)} className="w-3.5 h-3.5 rounded border-slate-300 text-slate-600 focus:ring-slate-500 transition-colors" />
-                <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben</span>
+                <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben, sonst Toleranzen der GZA Weil am Rhein</span>
              </label>
         </div>
 
@@ -2639,13 +2655,14 @@ function KnowledgeBaseView() {
   const tabs = [
       { id: 'ph1', label: '§ 24a StVG' },
       { id: 'ph2', label: '§ 24c StVG' },
-      { id: 'ph3', label: 'Medikamente' },
-      { id: 'blut', label: 'Blut' },
+      { id: 'ph3', label: 'Medikamentenprivileg' },
+      { id: 'blut', label: 'Blutentnahme' },
       { id: 'btm', label: 'BtM-Mengen' },
       { id: 'einziehung', label: 'Einziehung' },
       { id: 'dako', label: 'Dako-Key' },
       { id: 'ed', label: 'ED-Delikte' },
-      { id: 'lasi', label: 'LaSi' }
+      { id: 'lasi', label: 'Ladungssicherung' },
+      { id: 'pkw', label: 'PKW-Transporter' }
   ];
 
   const activeTabLabel = tabs.find(t => t.id === view)?.label || 'Wissen';
@@ -3008,7 +3025,6 @@ function KnowledgeBaseView() {
                                     <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
                                         <li>Einschnitte größer als 10 %</li>
                                         <li>Verformungen</li>
-                                        <li>Etikett fehlt / unleserlich / CE Kennzeichnung vorhanden / Belastbarkeit in kg angegeben</li>
                                     </ul>
                                 </div>
                                 <div className="border-t border-slate-200 pt-2">
@@ -3017,8 +3033,21 @@ function KnowledgeBaseView() {
                                         <li>Verformung</li>
                                         <li>Risse</li>
                                         <li>Rost</li>
-                                        <li>Etikett fehlt / unleserlich / CE Kennzeichnung vorhanden / Belastbarkeit in kg angegeben</li>
                                     </ul>
+                                </div>
+                                <div className="border-t border-slate-200 pt-2">
+                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Etikett:</strong>
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>fehlt</li>
+                                        <li>unleserlich</li>
+                                        <li>CE Kennzeichnung vorhanden</li>
+                                        <li>Belastbarkeit in kg angegeben</li>
+                                    </ul>
+                                    <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs text-slate-700 font-medium">
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-blue-500 shrink-0 shadow-sm border border-blue-600/20"></div>PES (Polyester) = blaues Etikett</div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-emerald-500 shrink-0 shadow-sm border border-emerald-600/20"></div>PA (Polyamid) = grünes Etikett</div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#8B4513] shrink-0 shadow-sm border border-black/20"></div>PP (Polypropylen) = braunes Etikett</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3064,6 +3093,189 @@ function KnowledgeBaseView() {
                                 </ul>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PKW TRANSPORTER */}
+            {view === 'pkw' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-6 text-teal-700 pb-2 border-b border-slate-50">
+                            <Car className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">PKW-Transporter (Verladung)</h3>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-6">
+                            
+                            {/* SCHEMATISCHE DARSTELLUNG (SVG) */}
+                            <div className="w-full md:w-auto flex-shrink-0 flex justify-center bg-white p-4 rounded-xl border border-slate-200 shadow-inner">
+                                <svg viewBox="0 0 130 430" className="w-full max-w-[160px] h-auto drop-shadow-sm font-sans">
+                                    
+                                    {/* Fahrtrichtung Box */}
+                                    <g transform="translate(5, 0)">
+                                        <rect x="0" y="0" width="120" height="40" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
+                                        
+                                        {/* Cursor Arrow */}
+                                        <path d="M25 8 L25 22 L30 18 L34 26 L36 25 L32 17 L38 17 Z" fill="#ffffff" stroke="#000000" strokeWidth="1" />
+                                        
+                                        {/* Red A-Arrow */}
+                                        <path d="M55 22 L60 12 L65 22" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <line x1="57.5" y1="18" x2="62.5" y2="18" stroke="#ef4444" strokeWidth="2" />
+                                        
+                                        <text x="60" y="30" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#000">Fahrtrichtung</text>
+                                        <text x="60" y="37" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#000">des Transporters</text>
+                                    </g>
+
+                                    {/* Truck Bed */}
+                                    <rect x="5" y="45" width="120" height="380" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
+
+                                    {/* CAR 1: In Fahrtrichtung */}
+                                    <g transform="translate(15, 55)">
+                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
+                                        
+                                        <path d="M45 15 L50 5 L55 15" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <line x1="47.5" y1="11" x2="52.5" y2="11" stroke="#ef4444" strokeWidth="2" />
+                                        
+                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Vorderachse</text>
+                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Hinterachse</text>
+                                        
+                                        {/* Wheels */}
+                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
+                                        
+                                        {/* Securing */}
+                                        {/* Vorne Links: 1 Keil (vorne) */}
+                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
+                                        
+                                        {/* Hinten Rechts: 2 Keile, 1 Gurt */}
+                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
+                                    </g>
+
+                                    {/* CAR 2: Rückwärts verladen */}
+                                    <g transform="translate(15, 180)">
+                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
+                                        
+                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Hinterachse</text>
+                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Vorderachse</text>
+                                        
+                                        <path d="M45 95 L50 105 L55 95" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <line x1="47.5" y1="99" x2="52.5" y2="99" stroke="#ef4444" strokeWidth="2" />
+                                        
+                                        {/* Wheels */}
+                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
+                                        
+                                        {/* Securing */}
+                                        {/* Hinten Links (Top Left): 2 Keile, 1 Gurt */}
+                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="2" y1="37" x2="24" y2="37" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
+                                        
+                                        {/* Vorne Rechts (Bottom Right): 2 Keile, 1 Gurt */}
+                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
+                                    </g>
+
+                                    {/* CAR 3: Auf schräger Ebene */}
+                                    <g transform="translate(15, 305)">
+                                        <rect x="0" y="0" width="100" height="110" fill="#9ca3af" stroke="#4b5563" strokeWidth="1" />
+                                        
+                                        <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Hinterachse</text>
+                                        <text x="50" y="80" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#000">Vorderachse</text>
+                                        
+                                        <path d="M45 95 L50 105 L55 95" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <line x1="47.5" y1="99" x2="52.5" y2="99" stroke="#ef4444" strokeWidth="2" />
+                                        
+                                        {/* Wheels */}
+                                        <rect x="8" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="10" width="10" height="25" fill="#000" />
+                                        <rect x="8" y="65" width="10" height="25" fill="#000" />
+                                        <rect x="82" y="65" width="10" height="25" fill="#000" />
+                                        
+                                        {/* Securing */}
+                                        {/* Hinten Links (Top Left): 2 Keile, 1 Gurt */}
+                                        <line x1="2" y1="8" x2="24" y2="8" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="2" y1="37" x2="24" y2="37" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="13" y1="0" x2="13" y2="50" stroke="#3b82f6" strokeWidth="3" />
+                                        
+                                        {/* Vorne Links (Bottom Left): 2 Keile, 1 Gurt */}
+                                        <line x1="2" y1="63" x2="24" y2="63" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="2" y1="92" x2="24" y2="92" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="13" y1="55" x2="13" y2="105" stroke="#3b82f6" strokeWidth="3" />
+                                        
+                                        {/* Vorne Rechts (Bottom Right): 2 Keile, 1 Gurt */}
+                                        <line x1="76" y1="63" x2="98" y2="63" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="76" y1="92" x2="98" y2="92" stroke="#fde047" strokeWidth="2.5" />
+                                        <line x1="87" y1="55" x2="87" y2="105" stroke="#3b82f6" strokeWidth="3" />
+                                    </g>
+                                </svg>
+                            </div>
+
+                            {/* BESCHREIBUNG & TEXTE */}
+                            <div className="w-full md:w-2/3 flex flex-col justify-between">
+                                <div className="space-y-6">
+                                    
+                                    {/* Text 1 */}
+                                    <div>
+                                        <h4 className="font-black text-slate-800 text-sm mb-1">In Fahrtrichtung verladene Fahrzeuge</h4>
+                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                            Einen Radkeil vor eines der beiden Vorderräder legen, das diagonale Hinterrad mit 2 Radkeilen sichern und zusätzlich mit einem 3-Punkt Autotransportgurt sichern.
+                                        </p>
+                                    </div>
+                                    
+                                    {/* Text 2 */}
+                                    <div>
+                                        <h4 className="font-black text-slate-800 text-sm mb-1">Rückwärts verladene Fahrzeuge</h4>
+                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                            Ein Hinterrad mit 2 Radkeilen und einem 3-Punkt Autotransportgurt sichern und das diagonale Vorderrad ebenfalls mit 2 Radkeilen und einem 3-Punkt Autotransportgurt sichern.
+                                        </p>
+                                    </div>
+                                    
+                                    {/* Text 3 */}
+                                    <div>
+                                        <h4 className="font-black text-slate-800 text-sm mb-1">Letztes Fahrzeug auf schräger Ebene</h4>
+                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                            Beide Räder der letzten Achse mit je 2 Radkeilen und einem 3-Punkt Autotransportgurt sichern, und ein Rad der ersten Achse ebenfalls mit 2 Keilen und einem 3-Punkt Autotransportgurt sichern.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* LEGENDE */}
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-6">
+                                    <h5 className="font-black text-slate-800 text-sm mb-3">Legende:</h5>
+                                    <ul className="space-y-3 text-sm text-slate-700 font-bold">
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
+                                            = Radkeil
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
+                                            = Autotransportgurt
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
+                                            = Rad
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" className="shrink-0 drop-shadow-sm">
+                                                <path d="M6 16 L12 6 L18 16" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                                <line x1="9" y1="11" x2="15" y2="11" stroke="#ef4444" strokeWidth="2.5" />
+                                            </svg> 
+                                            = Fahrzeugfront
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             )}
