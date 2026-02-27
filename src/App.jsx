@@ -250,7 +250,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.8
+        RoadTool v. 3.0
     </div>
 );
 
@@ -611,7 +611,7 @@ const SvgPkwTransporter = ({ deckName, cars }) => {
 
                 {/* Render Cars */}
                 {cars.map((car, idx) => {
-                    const tilt = car.isLast ? -6 : 0;
+                    const tilt = 0; // Schräge Darstellung entfernt
                     const yOffset = 70 + (idx * carHeight);
 
                     const renderWheelFeatures = (x, y, data) => (
@@ -2861,7 +2861,7 @@ function LashingCalculator() {
                 <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-start mb-3 shadow-sm break-inside-avoid">
                     <Info className="w-5 h-5 shrink-0 mt-0.5 text-indigo-500" />
                     <span className="text-xs font-bold text-indigo-800 leading-tight">
-                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter. Im Druckprotokoll wird eine Übersichtsgrafik für die Anzeige generiert.
+                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter.
                     </span>
                 </div>
 
@@ -2943,8 +2943,8 @@ function LashingCalculator() {
             </div>
         ) : null}
         
-        {/* STRAFTATBESTÄNDE - SICHTBAR FÜR BEIDE RECHNERARTEN */}
-        {lashingType !== 'pkw' && lashingResult !== null && fineGroups.length > 0 && (
+        {/* STRAFTATBESTÄNDE - SICHTBAR FÜR ALLE RECHNERARTEN */}
+        {((lashingType !== 'pkw' && lashingResult !== null && fineGroups.length > 0) || lashingType === 'pkw') && (
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 pb-20 break-inside-avoid print-full-width">
             <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
                 <div className="flex items-center gap-2">
@@ -2955,11 +2955,9 @@ function LashingCalculator() {
             </button>
             
             <div className={showFines ? 'block' : 'hidden print-visible'}>
-              {fineGroups.map((group, gIdx) => (
-                  <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                      {group.title && (
-                          <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
-                      )}
+              {lashingType === 'pkw' ? (
+                  <div className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
+                      <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">LKW bzw. dessen Anhänger</div>
                       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                         <table className="w-full text-left text-sm">
                           <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
@@ -2970,31 +2968,85 @@ function LashingCalculator() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {group.items.map((fine, fIdx) => (
-                              <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                              <tr className="hover:bg-slate-50/50 transition-colors">
                                 <td className="px-3 py-2.5">
                                   <div className="flex items-start gap-2">
-                                      <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                      <div className="mt-0.5"><User className="w-4 h-4 text-indigo-500"/></div>
+                                      <div><span className="block font-bold text-indigo-700">Fahrer</span></div>
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                  <div className="mt-0.5">122600</div>
+                                </td>
+                                <td className="px-3 py-2.5 text-right align-top">
+                                  <div className="font-black text-slate-800 mt-0.5">60 €</div>
+                                  <div className="text-[10px] font-bold text-red-500">1 Pkt</div>
+                                </td>
+                              </tr>
+                              <tr className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-3 py-2.5">
+                                  <div className="flex items-start gap-2">
+                                      <div className="mt-0.5"><Briefcase className="w-4 h-4 text-slate-500"/></div>
                                       <div>
-                                          <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
-                                          {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                          <span className="block font-bold text-slate-700">Halter</span>
+                                          <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">Nur wenn nicht genug Zurrmittel bereitgestellt</span>
                                       </div>
                                   </div>
                                 </td>
                                 <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                  <div className="mt-0.5">{fine.code}</div>
+                                  <div className="mt-0.5">331618</div>
                                 </td>
                                 <td className="px-3 py-2.5 text-right align-top">
-                                  <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
-                                  {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                  <div className="font-black text-slate-800 mt-0.5">270 €</div>
+                                  <div className="text-[10px] font-bold text-red-500">1 Pkt</div>
                                 </td>
                               </tr>
-                            ))}
                           </tbody>
                         </table>
                       </div>
                   </div>
-              ))}
+              ) : (
+                  fineGroups.map((group, gIdx) => (
+                      <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
+                          {group.title && (
+                              <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                          )}
+                          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                            <table className="w-full text-left text-sm">
+                              <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                                <tr>
+                                  <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
+                                  <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
+                                  <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {group.items.map((fine, fIdx) => (
+                                  <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="px-3 py-2.5">
+                                      <div className="flex items-start gap-2">
+                                          <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
+                                          <div>
+                                              <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                              {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
+                                          </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
+                                      <div className="mt-0.5">{fine.code}</div>
+                                    </td>
+                                    <td className="px-3 py-2.5 text-right align-top">
+                                      <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                      {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                      </div>
+                  ))
+              )}
             </div>
           </div>
         )}
@@ -3541,8 +3593,8 @@ function KnowledgeBaseView() {
                             
                             {/* Letztes Fahrzeug */}
                             <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">3. Letztes Fahrzeug (bzw. auf Schräge)</h4>
-                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} isTilted={true} />
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">3. Letztes Fahrzeug</h4>
+                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
                                 <p className="text-sm text-slate-600 leading-relaxed font-medium">
                                     An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
                                 </p>
