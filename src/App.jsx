@@ -250,7 +250,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.8
+        RoadTool v. 3.0
     </div>
 );
 
@@ -534,40 +534,40 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                 </button>
             </div>
 
-            <div className="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="mb-3 grid grid-cols-3 gap-1.5">
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fahrzeuggewicht</label>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1 ml-0.5 truncate">Gewicht</label>
                     <select 
                         value={car.weightClass} 
                         onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-1 py-1.5 text-[10px] sm:text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none text-center appearance-none"
                     >
-                        <option value="2000">bis 2.000 kg</option>
-                        <option value="3000">2.001 - 3.000 kg</option>
+                        <option value="2000">≤ 2.000 kg</option>
+                        <option value="3000">&gt; 2.000 kg</option>
                     </select>
                 </div>
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Position</label>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1 ml-0.5 truncate">Position</label>
                     <button
                         onClick={() => onUpdate({ ...car, isLast: !car.isLast })}
-                        className={`w-full py-1.5 px-2 flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg transition-all border ${car.isLast ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`w-full py-1.5 px-1 flex items-center justify-center gap-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all border ${car.isLast ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
-                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${car.isLast ? 'bg-amber-500 border-amber-500' : 'border-slate-300'}`}>
-                            {car.isLast && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                        <div className={`w-3 h-3 rounded border flex items-center justify-center transition-colors shrink-0 ${car.isLast ? 'bg-amber-500 border-amber-500' : 'border-slate-300'}`}>
+                            {car.isLast && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-2 h-2"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                         </div>
-                        Letztes Fahrzeug
+                        <span className="truncate">Letztes Fzg.</span>
                     </button>
                 </div>
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Besonderheit</label>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1 ml-0.5 truncate">Besonderheit</label>
                     <button
                         onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
-                        className={`w-full py-1.5 px-2 flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg transition-all border ${car.noChocks ? 'bg-red-50 text-red-700 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`w-full py-1.5 px-1 flex items-center justify-center gap-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all border ${car.noChocks ? 'bg-red-50 text-red-700 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
-                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${car.noChocks ? 'bg-red-500 border-red-500' : 'border-slate-300'}`}>
-                            {car.noChocks && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                        <div className={`w-3 h-3 rounded border flex items-center justify-center transition-colors shrink-0 ${car.noChocks ? 'bg-red-500 border-red-500' : 'border-slate-300'}`}>
+                            {car.noChocks && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-2 h-2"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                         </div>
-                        Keine Keile mgl.
+                        <span className="truncate">Ohne Keile</span>
                     </button>
                 </div>
             </div>
@@ -2864,7 +2864,7 @@ function LashingCalculator() {
                 <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-start mb-3 shadow-sm break-inside-avoid">
                     <Info className="w-5 h-5 shrink-0 mt-0.5 text-indigo-500" />
                     <span className="text-xs font-bold text-indigo-800 leading-tight">
-                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter. Im Druckprotokoll wird eine Übersichtsgrafik für die Anzeige generiert.
+                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter.
                     </span>
                 </div>
 
