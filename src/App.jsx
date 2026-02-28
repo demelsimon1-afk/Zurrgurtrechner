@@ -114,7 +114,7 @@ const PrintStyles = () => (
       }
 
       /* HIDE ICONS GLOBALLY IN PRINT */
-      svg {
+      svg:not(.print-safe) {
         display: none !important;
       }
     }
@@ -250,7 +250,7 @@ const HeaderLogo = () => (
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.0
+        RoadTool v. 2.8
     </div>
 );
 
@@ -407,7 +407,7 @@ const useDateTime = () => {
 };
 
 const AnglePictogram = ({ highlight }) => (
-    <svg viewBox="0 0 100 120" className="w-full h-32 mt-2 bg-white rounded-lg border border-indigo-100 p-2 shadow-inner">
+    <svg viewBox="0 0 100 120" className="w-full h-32 mt-2 bg-white rounded-lg border border-indigo-100 p-2 shadow-inner print-safe">
         <defs>
             <marker id={`arrow-${highlight}`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                 <polygon points="0 0, 6 3, 0 6" fill="#ef4444" />
@@ -593,8 +593,11 @@ const SvgPkwTransporter = ({ deckName, cars }) => {
     const svgHeight = Math.max(200, cars.length * carHeight + 80);
 
     return (
-        <div className="flex justify-center bg-white p-4 rounded-xl border border-slate-200 shadow-inner mb-6">
-            <svg viewBox={`0 0 130 ${svgHeight}`} className="w-full max-w-[220px] h-auto font-sans">
+        <div 
+            className="flex justify-center bg-white p-4 rounded-xl border border-slate-200 shadow-inner mb-6"
+            style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+        >
+            <svg viewBox={`0 0 130 ${svgHeight}`} className="w-full max-w-[220px] h-auto font-sans print-safe" style={{ overflow: 'visible' }}>
                 {/* Deck Title */}
                 <text x="65" y="15" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#334155" className="uppercase tracking-widest">{deckName}</text>
                 
@@ -2432,22 +2435,22 @@ function LashingCalculator() {
 
       {/* PRINT VIEW ONLY (PKW Transporter) */}
       {lashingType === 'pkw' && (
-      <div className="print-only print-container">
+      <div className="print-only print-container" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
           <h1 className="print-title">LaSi-Protokoll (PKW-Transporter)</h1>
           <div className="print-meta">Erstellt am: {dateTime}</div>
 
           <h2 className="print-section">Schematische Beladungsübersicht</h2>
           
-          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
-              <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'center', marginTop: '20px', pageBreakInside: 'avoid' }}>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                   <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
               </div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                   <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
               </div>
           </div>
 
-          <div className="print-result-box">
+          <div className="print-result-box" style={{ pageBreakInside: 'avoid', marginTop: '30px' }}>
              <div className="print-result-header">Legende</div>
              <table className="print-table" style={{ border: 'none', fontSize: '9pt' }}>
                  <tbody>
@@ -2812,7 +2815,7 @@ function LashingCalculator() {
                       </div>
                       
                       <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-center">
-                         <svg viewBox="0 0 300 360" className="w-full max-w-[280px] h-auto drop-shadow-sm">
+                         <svg viewBox="0 0 300 360" className="w-full max-w-[280px] h-auto drop-shadow-sm print-safe">
                             {/* Arrow Fahrtrichtung */}
                             <path d="M150 15 L150 45 M135 30 L150 15 L165 30" stroke="#94a3b8" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                             <text x="150" y="60" textAnchor="middle" className="text-[11px] font-black fill-slate-400 uppercase tracking-widest">Fahrtrichtung</text>
@@ -2861,7 +2864,7 @@ function LashingCalculator() {
                 <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-start mb-3 shadow-sm break-inside-avoid">
                     <Info className="w-5 h-5 shrink-0 mt-0.5 text-indigo-500" />
                     <span className="text-xs font-bold text-indigo-800 leading-tight">
-                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter.
+                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter. Im Druckprotokoll wird eine Übersichtsgrafik für die Anzeige generiert.
                     </span>
                 </div>
 
@@ -2943,8 +2946,8 @@ function LashingCalculator() {
             </div>
         ) : null}
         
-        {/* STRAFTATBESTÄNDE - SICHTBAR FÜR ALLE RECHNERARTEN */}
-        {((lashingType !== 'pkw' && lashingResult !== null && fineGroups.length > 0) || lashingType === 'pkw') && (
+        {/* STRAFTATBESTÄNDE - SICHTBAR FÜR BEIDE RECHNERARTEN */}
+        {lashingType !== 'pkw' && lashingResult !== null && fineGroups.length > 0 && (
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 pb-20 break-inside-avoid print-full-width">
             <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
                 <div className="flex items-center gap-2">
@@ -2955,9 +2958,11 @@ function LashingCalculator() {
             </button>
             
             <div className={showFines ? 'block' : 'hidden print-visible'}>
-              {lashingType === 'pkw' ? (
-                  <div className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                      <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">LKW bzw. dessen Anhänger</div>
+              {fineGroups.map((group, gIdx) => (
+                  <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
+                      {group.title && (
+                          <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
+                      )}
                       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                         <table className="w-full text-left text-sm">
                           <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
@@ -2968,85 +2973,31 @@ function LashingCalculator() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                              <tr className="hover:bg-slate-50/50 transition-colors">
+                            {group.items.map((fine, fIdx) => (
+                              <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
                                 <td className="px-3 py-2.5">
                                   <div className="flex items-start gap-2">
-                                      <div className="mt-0.5"><User className="w-4 h-4 text-indigo-500"/></div>
-                                      <div><span className="block font-bold text-indigo-700">Fahrer</span></div>
-                                  </div>
-                                </td>
-                                <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                  <div className="mt-0.5">122600</div>
-                                </td>
-                                <td className="px-3 py-2.5 text-right align-top">
-                                  <div className="font-black text-slate-800 mt-0.5">60 €</div>
-                                  <div className="text-[10px] font-bold text-red-500">1 Pkt</div>
-                                </td>
-                              </tr>
-                              <tr className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-3 py-2.5">
-                                  <div className="flex items-start gap-2">
-                                      <div className="mt-0.5"><Briefcase className="w-4 h-4 text-slate-500"/></div>
+                                      <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
                                       <div>
-                                          <span className="block font-bold text-slate-700">Halter</span>
-                                          <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">Nur wenn nicht genug Zurrmittel bereitgestellt</span>
+                                          <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
+                                          {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
                                       </div>
                                   </div>
                                 </td>
                                 <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                  <div className="mt-0.5">331618</div>
+                                  <div className="mt-0.5">{fine.code}</div>
                                 </td>
                                 <td className="px-3 py-2.5 text-right align-top">
-                                  <div className="font-black text-slate-800 mt-0.5">270 €</div>
-                                  <div className="text-[10px] font-bold text-red-500">1 Pkt</div>
+                                  <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
+                                  {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
                                 </td>
                               </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
                   </div>
-              ) : (
-                  fineGroups.map((group, gIdx) => (
-                      <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                          {group.title && (
-                              <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
-                          )}
-                          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                            <table className="w-full text-left text-sm">
-                              <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
-                                <tr>
-                                  <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
-                                  <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
-                                  <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100">
-                                {group.items.map((fine, fIdx) => (
-                                  <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-3 py-2.5">
-                                      <div className="flex items-start gap-2">
-                                          <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
-                                          <div>
-                                              <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
-                                              {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
-                                          </div>
-                                      </div>
-                                    </td>
-                                    <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                      <div className="mt-0.5">{fine.code}</div>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-right align-top">
-                                      <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
-                                      {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                      </div>
-                  ))
-              )}
+              ))}
             </div>
           </div>
         )}
@@ -3080,7 +3031,7 @@ const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
 
     return (
         <div className="flex justify-center bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner mb-4">
-            <svg viewBox="0 0 130 160" className="w-full max-w-[160px] h-auto font-sans drop-shadow-sm">
+            <svg viewBox="0 0 130 160" className="w-full max-w-[160px] h-auto font-sans drop-shadow-sm print-safe">
                 <g transform="translate(5, 5)">
                     <rect x="0" y="0" width="120" height="20" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" rx="2" />
                     <path d="M55 14 L60 6 L65 14" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
