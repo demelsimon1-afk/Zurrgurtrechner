@@ -6,8 +6,38 @@ import {
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Wand2,
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
   List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
-  Menu
+  Menu, Sun, Moon, Home, Search, Shield, Users
 } from 'lucide-react';
+
+// --- THEME CONTEXT & STYLES ---
+const ThemeContext = React.createContext({ isDarkMode: false, toggleDarkMode: () => {} });
+
+const darkThemeCSS = `
+  .dark { background-color: #0f172a; min-height: 100vh; }
+  .dark .bg-slate-50 { background-color: #0f172a !important; }
+  .dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; }
+  .dark .text-slate-800, .dark .text-slate-700, .dark .text-slate-900 { color: #f1f5f9 !important; }
+  .dark .text-slate-600, .dark .text-slate-500, .dark .text-slate-400 { color: #94a3b8 !important; }
+  .dark .border-slate-100, .dark .border-slate-200 { border-color: #334155 !important; }
+  .dark input, .dark select { background-color: #1e293b !important; color: #f8fafc !important; border-color: #334155 !important; color-scheme: dark; }
+  .dark .bg-slate-800, .dark .bg-slate-700 { background-color: #0f172a !important; border-color: #334155 !important; }
+  .dark .shadow-sm, .dark .shadow-md, .dark .shadow-xl { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important; }
+  
+  /* Preserve specific colored boxes but dim them for dark mode */
+  .dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.15) !important; border-color: rgba(239, 68, 68, 0.2) !important; }
+  .dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15) !important; border-color: rgba(99, 102, 241, 0.2) !important; }
+  .dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.15) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+  .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.15) !important; border-color: rgba(59, 130, 246, 0.2) !important; }
+  .dark .bg-emerald-50, .dark .bg-green-50 { background-color: rgba(16, 185, 129, 0.15) !important; border-color: rgba(16, 185, 129, 0.2) !important; }
+  .dark .bg-teal-50 { background-color: rgba(20, 184, 166, 0.15) !important; border-color: rgba(20, 184, 166, 0.2) !important; }
+  .dark .bg-purple-50 { background-color: rgba(168, 85, 247, 0.15) !important; border-color: rgba(168, 85, 247, 0.2) !important; }
+  .dark .bg-cyan-50 { background-color: rgba(6, 182, 212, 0.15) !important; border-color: rgba(6, 182, 212, 0.2) !important; }
+  .dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.15) !important; border-color: rgba(244, 63, 94, 0.2) !important; }
+
+  /* Bottom Nav dark mode */
+  .dark .fixed.bottom-0.bg-white\\/95 { background-color: rgba(15, 23, 42, 0.95) !important; border-color: #334155 !important; }
+  .dark .bg-slate-100 { background-color: #1e293b !important; }
+`;
 
 // --- GLOBAL STYLES FOR PRINTING ---
 const PrintStyles = () => (
@@ -242,11 +272,23 @@ const TrafficSign = ({ value, selected, onClick }) => (
     </button>
 );
 
-const HeaderLogo = () => (
-  <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm no-print">
-    Demel
-  </span>
-);
+const HeaderLogo = () => {
+  const { isDarkMode, toggleDarkMode } = React.useContext(ThemeContext);
+  return (
+    <div className="flex items-center gap-3 no-print">
+        <button 
+            onClick={toggleDarkMode}
+            className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors border border-white/10 shadow-sm"
+            title="Nachtmodus"
+        >
+            {isDarkMode ? <Sun className="w-4 h-4 text-yellow-300" /> : <Moon className="w-4 h-4 text-white" />}
+        </button>
+        <span className="text-base font-black text-white/50 tracking-wider italic select-none border border-white/20 px-3 py-1 rounded-md backdrop-blur-sm">
+            Demel
+        </span>
+    </div>
+  );
+};
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
@@ -945,6 +987,15 @@ function AccidentCalculator() {
                                 <ActivityIcon className="w-5 h-5 shrink-0" />
                                 <span className="text-sm font-black uppercase tracking-wide">Brems-/Blockierspur-Geschwindigkeitsrechner</span>
                             </div>
+
+                            <div className="bg-red-50/50 p-3 rounded-xl border border-red-100 mb-3 mt-3">
+                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify">
+                                    Kommt es infolge einer Gefahrenbremsung zum Blockieren der Räder, zeichnen sich diese durch charakteristische Brems- bzw. Blockierspuren auf der Fahrbahnoberfläche ab.
+                                </p>
+                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify mt-1.5 font-bold">
+                                    Zur Ermittlung der Ausgangsgeschwindigkeit ist die Länge jeder einzelnen Spur ab dem Beginn bis zum Ende zu vermessen.
+                                </p>
+                            </div>
                             
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -1040,10 +1091,10 @@ function AccidentCalculator() {
 
                             <div className="bg-red-50/50 p-3 rounded-xl border border-red-100 mb-3">
                                 <p className="text-[10px] text-slate-600 leading-relaxed text-justify">
-                                    Durchfährt ein Fahrzeug eine Kurve mit zu hoher Geschwindigkeit, so kann es zur Ausprägung sogenannter Driftspuren der zentrifugal belasteten kurvenäußeren Räder kommen.
+                                    Durchfährt ein Fahrzeug eine Kurve mit überhöhter Geschwindigkeit, so kann es zur Ausprägung charakteristischer Driftspuren durch die zentrifugal belasteten kurvenäußeren Räder kommen.
                                 </p>
                                 <p className="text-[10px] text-slate-600 leading-relaxed text-justify mt-1.5 font-bold">
-                                    Legt man ein Maßband zwischen Beginn und z.B. 10 - 15m (Sekante) der Driftspur geradlinig an und misst in der Mitte den senkrechten Abstand (h), kann die Geschwindigkeit ermittelt werden.
+                                    Zur Ermittlung der Ausgangsgeschwindigkeit wird eine geradlinige Messstrecke (Sekante S, z.B. 10 - 15 m) zwischen zwei Punkten der Spur angelegt. In der Mitte dieser Sekante ist der senkrechte Abstand (Pfeilhöhe h) zu messen.
                                 </p>
                             </div>
 
@@ -1142,6 +1193,7 @@ function SpeedCalculator() {
     const [allowedSpeed, setAllowedSpeed] = useState('');
     const [measuredSpeedRaw, setMeasuredSpeedRaw] = useState('');
     const [followDistance, setFollowDistance] = useState('');
+    const [followGap, setFollowGap] = useState('');
     const [result, setResult] = useState(null);
     const dateTime = useDateTime();
 
@@ -1223,7 +1275,12 @@ function SpeedCalculator() {
                     </div>
                     <div className="space-y-3">
                         <InputWithIcon icon={Gauge} label={mode === 'laser' ? "Gemessener Wert (Brutto)" : "Abgelesener Tacho-Wert"} value={measuredSpeedRaw} onChange={(e) => setMeasuredSpeedRaw(e.target.value)} placeholder="0" />
-                        {mode === 'follow' && (<InputWithIcon icon={Ruler} label="Nachfahrstrecke (ca. Meter)" value={followDistance} onChange={(e) => setFollowDistance(e.target.value)} placeholder="z.B. 500" />)}
+                        {mode === 'follow' && (
+                            <>
+                                <InputWithIcon icon={Ruler} label="Nachfahrstrecke (ca. Meter)" value={followDistance} onChange={(e) => setFollowDistance(e.target.value)} placeholder="z.B. 500" />
+                                <InputWithIcon icon={Car} label="Abstand zum Betroffenen (von - bis in m)" type="text" value={followGap} onChange={(e) => setFollowGap(e.target.value)} placeholder="z.B. 50 - 80" />
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -1802,13 +1859,13 @@ function OverloadCalculator({ onSwitch }) {
   const dateTime = useDateTime();
 
   const standardTotalWeights = [
-      { label: 'PKW/LKW mit Anhänger', val: '7500', detail: '7,5 t' },
-      { label: 'ZGM + Anh < 4 Achsen', val: '28000', detail: '28 t' },
-      { label: '4 Achsen (2 ZGM -> 25 t + 2 Anh)', val: '35000', detail: '35 t' },
-      { label: '4 Achsen (2 ZGM + 2 Anh)', val: '36000', detail: '36 t' },
-      { label: 'ZGM + Anh > 4 Achsen', val: '40000', detail: '40 t' },
-      { label: 'Zug/Schiff/Flug + Straße (2 ZGM + 3 Anh)', val: '42000', detail: '42 t' },
-      { label: 'Zug/Schiff/Flug + Straße (3 ZGM + 2/3 Anh)', val: '44000', detail: '44 t' }
+      { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: 'Leichte Fahrzeugkombination (z.B. PKW)', val: '7500', detail: '7,5 t' },
+      { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: 'Fahrzeugkombination unter 4 Achsen', val: '28000', detail: '28,0 t' },
+      { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: '4 Achsen (Zugmaschine bis 25 t)', val: '35000', detail: '35,0 t' },
+      { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: '4 Achsen (Regelfall)', val: '36000', detail: '36,0 t' },
+      { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: 'Fahrzeugkombination ab 5 Achsen', val: '40000', detail: '40,0 t' },
+      { group: 'Kombinierter Verkehr', label: '2-Achs-Zugm. + 3-Achs-Anhänger', val: '42000', detail: '42,0 t' },
+      { group: 'Kombinierter Verkehr', label: '3-Achs-Zugm. + 2/3-Achs-Anhänger', val: '44000', detail: '44,0 t' }
   ];
 
   useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setCustomTol2(''); }, [mode]);
@@ -2063,21 +2120,28 @@ function OverloadCalculator({ onSwitch }) {
                 </div>
                 
                 <div className="mb-3">
-                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Standardwerte (zGM Gesamtzug)</label>
+                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Gesetzliche Normwerte (zGM Gesamtzug)</label>
                    <select 
                         className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
                         onChange={(e) => {
-                            if (e.target.value) setTotalAllowed(e.target.value);
+                            if (e.target.value !== 'custom') setTotalAllowed(e.target.value);
                         }}
-                        value={standardTotalWeights.find(opt => opt.val === totalAllowed)?.val || ""}
+                        value={standardTotalWeights.find(opt => opt.val === totalAllowed) ? totalAllowed : (totalAllowed ? "custom" : "")}
                    >
-                       <option value="" disabled>Bitte wählen oder manuell eingeben...</option>
-                       {standardTotalWeights.map((opt) => (
-                           <option key={opt.val} value={opt.val}>
-                               {opt.label} ({opt.detail})
-                           </option>
-                       ))}
-                       <option value="custom">Eigener Wert (manuell unten)</option>
+                       <option value="" disabled>Bitte gesetzlichen Wert wählen...</option>
+                       <optgroup label="Allgemeine Kombinationen (§ 34 StVZO)">
+                           {standardTotalWeights.filter(opt => opt.group.includes('Allgemein')).map((opt) => (
+                               <option key={opt.val} value={opt.val}>{opt.detail} - {opt.label}</option>
+                           ))}
+                       </optgroup>
+                       <optgroup label="Kombinierter Verkehr">
+                           {standardTotalWeights.filter(opt => opt.group.includes('Kombiniert')).map((opt) => (
+                               <option key={opt.val} value={opt.val}>{opt.detail} - {opt.label}</option>
+                           ))}
+                       </optgroup>
+                       <optgroup label="Abweichende Gewichte">
+                           <option value="custom">Eigener Wert (manuell unten eingegeben)</option>
+                       </optgroup>
                    </select>
                 </div>
 
@@ -2086,8 +2150,6 @@ function OverloadCalculator({ onSwitch }) {
                 </div>
             </div>
         )}
-
-        {!result && <div className="bg-blue-50/50 p-3 rounded-xl flex gap-2 text-blue-700 text-xs border border-blue-100"><Info className="w-5 h-5 shrink-0" /><p>Bitte füllen Sie die Felder für eine Berechnung aus.</p></div>}
       </div>
 
       {result && (
@@ -2959,13 +3021,6 @@ function LashingCalculator() {
             </>
         ) : lashingType === 'pkw' ? (
             <div className="animate-in fade-in duration-300 pb-20">
-                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-start mb-3 shadow-sm break-inside-avoid">
-                    <Info className="w-5 h-5 shrink-0 mt-0.5 text-indigo-500" />
-                    <span className="text-xs font-bold text-indigo-800 leading-tight">
-                        Dokumentiere hier die Befestigung jedes einzelnen Fahrzeugs auf dem Autotransporter.
-                    </span>
-                </div>
-
                 {/* OBERE EBENE */}
                 <div className="mb-6">
                     <div className="flex items-center justify-between bg-slate-800 text-white p-3 rounded-xl mb-3 shadow-md">
@@ -3160,12 +3215,15 @@ function KnowledgeBaseView() {
       { id: 'ph2', label: '§ 24c StVG' },
       { id: 'ph3', label: 'Medikamentenprivileg' },
       { id: 'blut', label: 'Blutentnahme' },
+      { id: 'kcang', label: 'KCanG (Cannabis)' },
       { id: 'btm', label: 'BtM-Mengen' },
       { id: 'einziehung', label: 'Einziehung' },
-      { id: 'ed', label: 'ED-Delikte' },
       { id: 'lasi', label: 'Ladungssicherung' },
       { id: 'pkw', label: 'PKW-Transporter' },
-      { id: 'kz', label: 'Kennzeichen' }
+      { id: 'kz', label: 'Kennzeichen' },
+      { id: 'hu', label: 'Hauptuntersuchung' },
+      { id: 'verskennz', label: 'Versicherungskennzeichen' },
+      { id: 'juschg', label: 'Jugendschutz' }
   ];
 
   const activeTabLabel = tabs.find(t => t.id === view)?.label || 'Wissen';
@@ -3343,7 +3401,7 @@ function KnowledgeBaseView() {
                         <ul className="space-y-3 text-sm text-slate-700 font-medium mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
                             <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Falsche Dosierung:</strong> Dosierung wird nicht eingehalten oder Konsumvariante ist anders vorgegeben.</span></li>
                             <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Beikonsum:</strong> Sobald Beikonsum mit anderen Betäubungsmitteln vorliegt.</span></li>
-                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Alkohol:</strong> Sobald Alkohol konsumiert wird <em className="text-xs text-slate-500 block">(gilt nur bei Anlagensubstanzen, nicht THC)</em>.</span></li>
+                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Alkohol:</strong> Sobald Alkohol konsumiert wird. <em className="text-xs text-slate-500 block">(gilt nur bei Anlagensubstanzen, nicht THC)</em></span></li>
                         </ul>
 
                         <div className="bg-slate-800 text-white p-4 rounded-xl text-sm font-bold flex gap-3 items-center shadow-sm">
@@ -3390,9 +3448,54 @@ function KnowledgeBaseView() {
                 </div>
             )}
 
+            {/* KCANG (Cannabis) */}
+            {view === 'kcang' && (
+                 <div className="space-y-4 animate-in fade-in">
+                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Trees className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Konsumcannabis (KCanG)</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div className="flex flex-col bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3">Im öffentlichen Raum (Unterwegs)</span>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center"><span className="text-emerald-700 font-bold">Erlaubt (ab 18 J.)</span><span className="font-black">bis 25 g</span></div>
+                                    <div className="w-full h-px bg-slate-200/50"></div>
+                                    <div className="flex justify-between items-center"><span className="text-amber-600 font-bold">Ordnungswidrigkeit</span><span className="font-black">25 g bis 30 g</span></div>
+                                    <div className="w-full h-px bg-slate-200/50"></div>
+                                    <div className="flex justify-between items-center"><span className="text-red-600 font-bold">Straftat (§ 34 KCanG)</span><span className="font-black">über 30 g</span></div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-col bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3">Am Wohnsitz (Zuhause)</span>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center"><span className="text-emerald-700 font-bold">Erlaubt (ab 18 J.)</span><span className="font-black text-right leading-tight">bis 50 g<br/><span className="text-[10px] text-slate-500 font-normal">und max. 3 Pflanzen</span></span></div>
+                                    <div className="w-full h-px bg-slate-200/50"></div>
+                                    <div className="flex justify-between items-center"><span className="text-amber-600 font-bold">Ordnungswidrigkeit</span><span className="font-black">50 g bis 60 g</span></div>
+                                    <div className="w-full h-px bg-slate-200/50"></div>
+                                    <div className="flex justify-between items-center"><span className="text-red-600 font-bold">Straftat (§ 34 KCanG)</span><span className="font-black">über 60 g</span></div>
+                                </div>
+                            </div>
+
+                            <div className="mt-2 p-4 bg-red-50 border border-red-100 rounded-xl text-red-900 text-sm flex gap-3 shadow-sm">
+                                <AlertTriangle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+                                <div>
+                                    <strong className="text-red-950 block mb-1">"Nicht geringe Menge" (Cannabis):</strong>
+                                    Beginnt bei <strong>7,5 g THC (Wirkstoff!)</strong>. <br/>
+                                    <span className="text-[10px] opacity-80 block mt-1 leading-snug">(BGH Beschluss v. 18.04.2024. Entspricht bei z. B. 10 % Wirkstoffgehalt ca. 75 g Brutto-Marihuana).</span>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                 </div>
+            )}
+
             {/* BTM MENGEN */}
             {view === 'btm' && (
-                 <div className="space-y-4">
+                 <div className="space-y-4 animate-in fade-in">
                      <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
                             <AlertCircle className="w-5 h-5" />
@@ -3424,12 +3527,6 @@ function KnowledgeBaseView() {
                                 <div className="text-right"><span className="font-black text-teal-600 block">ab 3 g</span><span className="text-[10px] text-slate-400">bis 2024: 10 g</span></div>
                             </li>
                         </ul>
-                        
-                        <div className="bg-teal-50 p-3 rounded-xl space-y-2 text-xs text-teal-900 border border-teal-100">
-                            <div className="flex gap-2 items-start"><Info className="w-4 h-4 shrink-0 mt-0.5 opacity-70"/><span>Ab diesen Mengenangaben erfolgt eine Untersuchung auf den <strong>Wirkstoffgehalt</strong>.</span></div>
-                            <div className="flex gap-2 items-start"><Info className="w-4 h-4 shrink-0 mt-0.5 opacity-70"/><span><strong>Belehrung</strong> des Beschuldigten nach Verbrechen!</span></div>
-                            <div className="flex gap-2 items-start"><Info className="w-4 h-4 shrink-0 mt-0.5 opacity-70"/><span>Keine Folgemaßnahmen im Standardfall notwendig.</span></div>
-                        </div>
                      </div>
                  </div>
             )}
@@ -3453,39 +3550,6 @@ function KnowledgeBaseView() {
                         </ul>
                     </div>
                 </div>
-            )}
-
-            {/* ED-DELIKTE */}
-            {view === 'ed' && (
-                 <div className="space-y-4">
-                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Fingerprint className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">ED-Delikte (Erkennungsdienst)</h3>
-                        </div>
-                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">ED-Delikte sind u.a.:</p>
-                        <ul className="space-y-1.5 text-sm text-slate-700 font-medium mb-6">
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Besonders schwerer Fall des Diebstahls</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>5 oder mehr Fälle Diebstahl</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Raubdelikte</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Gefährliche / schwere KV</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Illegaler Handel / Schmuggel von BtM / illegale Einfuhr</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Verstoß gegen das WaffG</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 shrink-0"></div>Fälschungsdelikte</li>
-                        </ul>
-
-                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <p className="text-xs text-slate-500 font-bold uppercase mb-3 border-b border-slate-200 pb-2">Eine ED-Behandlung muss neu gemacht werden, wenn:</p>
-                            <ol className="space-y-2 text-sm text-slate-700 list-decimal list-inside font-medium">
-                                <li>Mehr als 5 Jahre her (Fingerabdrücke)</li>
-                                <li>ED-Material weist Qualitätsmängel auf</li>
-                                <li>Fingerglieder fehlen oder sind vernarbt</li>
-                                <li>Die letzte ED-Behandlung im Alter von unter 18 Jahren erfolgte und mehr als 1 Jahr zurückliegt</li>
-                                <li>Wenn sich das Aussehen der Person verändert hat</li>
-                            </ol>
-                        </div>
-                     </div>
-                 </div>
             )}
 
             {/* LASI WISSEN */}
@@ -3948,6 +4012,263 @@ function KnowledgeBaseView() {
                     </div>
                 </div>
             )}
+
+            {/* HAUPTUNTERSUCHUNG (HU) */}
+            {view === 'hu' && (
+                <div className="space-y-4 animate-in fade-in">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Search className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Hauptuntersuchung (HU)</h3>
+                        </div>
+
+                        {/* Plaketten-Farben (2025 - 2028) */}
+                        <div className="flex justify-between items-center mb-6 px-2">
+                            <div className="flex flex-col items-center gap-1.5">
+                                <div className="w-10 h-10 rounded-full bg-orange-500 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
+                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
+                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">25</div>
+                                </div>
+                                <span className="text-[10px] font-bold text-slate-500">2025</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5">
+                                <div className="w-10 h-10 rounded-full bg-sky-400 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
+                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
+                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">26</div>
+                                </div>
+                                <span className="text-[10px] font-bold text-slate-800">2026</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5">
+                                <div className="w-10 h-10 rounded-full bg-yellow-400 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
+                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
+                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">27</div>
+                                </div>
+                                <span className="text-[10px] font-bold text-slate-500">2027</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5">
+                                <div className="w-10 h-10 rounded-full bg-red-500 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
+                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
+                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">28</div>
+                                </div>
+                                <span className="text-[10px] font-bold text-slate-500">2028</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-sm text-slate-700 leading-relaxed">
+                            <p className="mb-2">Am <strong>oberen Rand</strong> der Plakette (in der Mitte auf "12 Uhr") steht die Zahl des Monats, in dem die HU fällig ist. Um dies auch aus größeren Distanzen ablesen zu können, ist links und rechts der Zahl 12 eine schwarze Markierung angebracht.</p>
+                            <p>Die <strong>Zahl in der Mitte</strong> zeigt das Jahr, in welchem die HU fällig ist. Zur besseren Erkennbarkeit lässt sich das Jahr auch zusätzlich an der Farbe ablesen.</p>
+                        </div>
+
+                        <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Tatbestände (HU-Fristüberschreitung)</h4>
+                        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
+                                    <tr>
+                                        <th className="px-3 py-2">TBNR</th>
+                                        <th className="px-3 py-2">Überschreitung</th>
+                                        <th className="px-3 py-2 text-right">Folge</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 text-slate-700">
+                                    <tr>
+                                        <td className="px-3 py-2 font-mono text-xs">329113</td>
+                                        <td className="px-3 py-2 text-xs">mehr als <strong>2 Monate</strong> bis zu 4 Monate</td>
+                                        <td className="px-3 py-2 text-right font-black text-red-600">15 €</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="px-3 py-2 font-mono text-xs">329119</td>
+                                        <td className="px-3 py-2 text-xs">mehr als <strong>4 Monate</strong> bis zu 8 Monate</td>
+                                        <td className="px-3 py-2 text-right font-black text-red-600">25 €</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="px-3 py-2 font-mono text-xs">329610</td>
+                                        <td className="px-3 py-2 text-xs">mehr als <strong>8 Monate</strong></td>
+                                        <td className="px-3 py-2 text-right">
+                                            <div className="font-black text-red-600">60 €</div>
+                                            <div className="text-[10px] font-bold text-amber-500 uppercase">1 Pkt.</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* VERSICHERUNGSKENNZEICHEN */}
+            {view === 'verskennz' && (
+                <div className="space-y-4 animate-in fade-in">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Shield className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Versicherungskennzeichen</h3>
+                        </div>
+
+                        <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6 text-sm text-teal-900 leading-relaxed">
+                            <strong>Gültigkeitszeitraum:</strong> Die Versicherungskennzeichen (für Mofas, E-Scooter, S-Pedelecs etc.) gelten immer vom <strong>01. März</strong> bis zum Ende des Monats Februar des Folgejahres. Die Farben wiederholen sich alle drei Jahre.
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                <div>
+                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2025</div>
+                                    <div className="font-black text-slate-700">Grün</div>
+                                </div>
+                                <div className="w-12 h-14 rounded bg-green-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                    <span className="text-xs">ABC</span>
+                                    <span className="text-xs">123</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                <div>
+                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2026</div>
+                                    <div className="font-black text-slate-700">Schwarz</div>
+                                </div>
+                                <div className="w-12 h-14 rounded bg-slate-900 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                    <span className="text-xs">XYZ</span>
+                                    <span className="text-xs">789</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                <div>
+                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2027</div>
+                                    <div className="font-black text-slate-700">Blau</div>
+                                </div>
+                                <div className="w-12 h-14 rounded bg-blue-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                    <span className="text-xs">DEF</span>
+                                    <span className="text-xs">456</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                <div>
+                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2028</div>
+                                    <div className="font-black text-slate-700">Grün</div>
+                                </div>
+                                <div className="w-12 h-14 rounded bg-green-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                    <span className="text-xs">GHI</span>
+                                    <span className="text-xs">012</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-sm">
+                            <div className="font-black text-red-800 mb-2 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Rechtsfolgen</div>
+                            <p className="text-red-900 text-xs leading-relaxed mb-2">Fahren mit abgelaufenem (falsche Farbe) oder ohne Versicherungskennzeichen erfüllt in der Regel den <strong>Straftatbestand des Pflichtversicherungsgesetzes (§ 6 PflVG)</strong>.</p>
+                            <p className="text-red-900 text-xs leading-relaxed">Ist das Kennzeichen vorhanden und gültig, aber nur <strong>nicht oder falsch angebracht</strong>, liegt eine Ordnungswidrigkeit vor (TBNR 827100 = 10 €).</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* JUGENDSCHUTZ */}
+            {view === 'juschg' && (
+                <div className="space-y-4 animate-in fade-in">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <Users className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Jugendschutzgesetz (JuSchG)</h3>
+                        </div>
+                        
+                        <div className="mb-4 text-xs text-slate-500 font-medium">
+                            Die Tabelle gilt für Jugendliche <strong>ohne Begleitung</strong> einer personensorgeberechtigten (Eltern) oder erziehungsbeauftragten Person.
+                        </div>
+
+                        <div className="space-y-3">
+                            {/* Alkohol */}
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-200 pb-2">Alkohol & Tabak</h4>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-start text-sm">
+                                        <div className="flex-1">
+                                            <span className="font-bold text-slate-700 block">Bier, Wein, Sekt</span>
+                                            <span className="text-[10px] text-slate-400">§ 9 JuSchG</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 16 verboten</span>
+                                            <div className="text-[9px] text-slate-500 mt-0.5">Ausnahme: Ab 14 mit Eltern</div>
+                                            <div className="text-[10px] font-bold text-emerald-600 mt-1">Ab 16 erlaubt</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
+                                        <div className="flex-1">
+                                            <span className="font-bold text-slate-700 block">Spirituosen / Harter Alkohol</span>
+                                            <span className="text-[10px] text-slate-400">Mischgetränke etc.</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 18 verboten</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
+                                        <div className="flex-1">
+                                            <span className="font-bold text-slate-700 block">Rauchen & E-Zigaretten</span>
+                                            <span className="text-[10px] text-slate-400">§ 10 JuSchG (auch nikotinfrei)</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 18 verboten</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Aufenthalt */}
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-200 pb-2">Aufenthalt</h4>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-start text-sm">
+                                        <div className="flex-1">
+                                            <span className="font-bold text-slate-700 block">Gaststätten</span>
+                                            <span className="text-[10px] text-slate-400">§ 4 JuSchG</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 16 verboten</span>
+                                            <div className="text-[10px] font-bold text-amber-600 mt-1">16-17 Jahre: bis 24 Uhr</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
+                                        <div className="flex-1">
+                                            <span className="font-bold text-slate-700 block">Disco / Tanzveranstaltung</span>
+                                            <span className="text-[10px] text-slate-400">§ 5 JuSchG</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 16 verboten</span>
+                                            <div className="text-[10px] font-bold text-amber-600 mt-1">16-17 Jahre: bis 24 Uhr</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
+                                        <div className="flex-1">
+                                            <span className="font-bold text-slate-700 block">Nachtclubs & Spielhallen</span>
+                                            <span className="text-[10px] text-slate-400">§§ 4, 6 JuSchG</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 18 verboten</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Medien */}
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-200 pb-2">Kino & Medien</h4>
+                                <p className="text-xs text-slate-700 leading-relaxed">
+                                    Kino (§ 11) sowie Filme und Spiele (§ 12) sind streng an die <strong>Altersfreigabe (FSK/USK)</strong> gebunden. 
+                                </p>
+                                <p className="text-[10px] text-slate-500 mt-2">
+                                    Ausnahme: "Filme ab 12 Jahren" dürfen im Kino auch von Kindern ab 6 Jahren in Begleitung der Eltern (personensorgeberechtigt) angesehen werden.
+                                </p>
+                                <div className="mt-3 flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
+                                    <span className="text-xs font-bold text-slate-700">Kino Aufenthaltsdauer:</span>
+                                    <div className="text-[10px] text-right">
+                                        <div><strong className="text-amber-600">Unter 14:</strong> bis 20 Uhr</div>
+                                        <div><strong className="text-amber-600">Unter 16:</strong> bis 22 Uhr</div>
+                                        <div><strong className="text-amber-600">Unter 18:</strong> bis 24 Uhr</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            )}
       </div>
       <AppVersionFooter />
     </div>
@@ -4071,41 +4392,89 @@ function InfoView() {
   );
 }
 
+// --- DASHBOARD VIEW ---
+const DashboardView = ({ onSelect }) => {
+    const dateTime = useDateTime();
+    const tiles = [
+        { id: 'lashing', title: 'Ladungssicherung', icon: Truck, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Niederzurren • Diagonalzurren • PKW-Transporter' },
+        { id: 'weight', title: 'Gewichte & Holz', icon: Scale, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Überladung • Holzgewicht' },
+        { id: 'speed', title: 'Geschwindigkeit', icon: Gauge, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Laser • Hinterherfahren' },
+        { id: 'accident', title: 'Unfallrechner', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', desc: 'Bremsspur • Driftspur' },
+        { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
+        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '§ 24a/c StVG • BtM • Blut • KZ • LaSi • HU • VersKz • JuSchG' }
+    ];
+
+    return (
+        <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+            <div className="bg-slate-800/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg no-print transition-colors duration-300">
+                <div>
+                    <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
+                        <ShieldCheck className="w-6 h-6 shrink-0 text-indigo-400" /> Dashboard
+                    </h1>
+                    <p className="text-slate-400 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8">
+                        <Clock className="w-3 h-3" /> {dateTime}
+                    </p>
+                </div>
+                <HeaderLogo />
+            </div>
+            <div className="p-4 animate-in fade-in zoom-in-95 duration-300 pb-20">
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                    {tiles.map(tile => (
+                        <button 
+                            key={tile.id} 
+                            onClick={() => onSelect(tile.id)} 
+                            className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:shadow-md hover:border-indigo-200 transition-all active:scale-95 group"
+                        >
+                            <div className={`p-3 rounded-2xl ${tile.bg} mb-3 shadow-inner group-hover:scale-110 transition-transform`}>
+                                <tile.icon className={`w-7 h-7 ${tile.color}`} />
+                            </div>
+                            <h3 className="font-bold text-slate-800 text-[13px] mb-1 leading-tight">{tile.title}</h3>
+                            {tile.desc && <p className="text-[10px] text-slate-500 font-medium leading-snug">{tile.desc}</p>}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- MAIN APP COMPONENT ---
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('lashing');
+  const [activeTab, setActiveTab] = useState('home');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
   useEffect(() => { window.scrollTo(0, 0); }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100">
-      <PrintStyles />
-      <div className="flex-1 pb-24 z-10 relative">
-        {activeTab === 'weight' ? <WeightModule /> : 
-         activeTab === 'speed' ? <SpeedCalculator /> : 
-         activeTab === 'accident' ? <AccidentCalculator /> :
-         activeTab === 'age' ? <AgeCalculator /> :
-         activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
-         activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print">
-        <div className="max-w-md mx-auto flex justify-around p-2">
-          {[
-            { id: 'lashing', icon: LashingStrapIcon, label: 'Zurrgurte', color: 'text-indigo-600' },
-            { id: 'weight', icon: Scale, label: 'Gewichte', color: 'text-blue-600' },
-            { id: 'speed', icon: Gauge, label: 'Geschw.', color: 'text-amber-600' },
-            { id: 'accident', icon: AlertTriangle, label: 'Unfall', color: 'text-red-600' },
-            { id: 'age', icon: Calendar, label: 'Alter', color: 'text-purple-600' },
-            { id: 'knowledge', icon: BookOpen, label: 'Wissen', color: 'text-teal-600' }, 
-            { id: 'info', icon: FileText, label: 'Infos', color: 'text-slate-600' }
-          ].map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 px-0.5 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-              <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? tab.color : ''}`} />
-              <span className={`text-[9px] font-bold ${activeTab === tab.id ? 'text-slate-800' : ''}`}>{tab.label}</span>
-            </button>
-          ))}
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode) }}>
+      <div className={isDarkMode ? 'dark' : ''}>
+        <style>{darkThemeCSS}</style>
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100 transition-colors duration-300">
+          <PrintStyles />
+          <div className="flex-1 pb-24 z-10 relative">
+            {activeTab === 'home' ? <DashboardView onSelect={setActiveTab} /> :
+             activeTab === 'weight' ? <WeightModule /> : 
+             activeTab === 'speed' ? <SpeedCalculator /> : 
+             activeTab === 'accident' ? <AccidentCalculator /> :
+             activeTab === 'age' ? <AgeCalculator /> :
+             activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
+             activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
+          </div>
+          <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print transition-colors duration-300">
+            <div className="max-w-md mx-auto flex justify-evenly items-center p-2">
+              <button onClick={() => setActiveTab('home')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'home' ? 'text-indigo-600 bg-indigo-50 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <Home className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">Home</span>
+              </button>
+              <button onClick={() => setActiveTab('info')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'info' ? 'text-slate-800 bg-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                <FileText className="w-6 h-6" />
+                <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">Infos</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </ThemeContext.Provider>
   );
 }
