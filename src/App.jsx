@@ -6,7 +6,7 @@ import {
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Wand2,
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
   List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
-  Menu, Sun, Moon, Home, Search, Shield, Users
+  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard
 } from 'lucide-react';
 
 // --- THEME CONTEXT & STYLES ---
@@ -4693,6 +4693,274 @@ function InfoView() {
   );
 }
 
+// --- DRIVER LICENSE MODULE (FÜHRERSCHEIN) ---
+const FEV_CLASSES = [
+  { c: 'AM', t: 'Kleinkrafträder', d: 'Zweirädrige/dreirädrige Kleinkrafträder, max. 45 km/h, max. 50 ccm Hubraum bzw. max. 4 kW Nutzleistung. Auch leichte vierrädrige Kfz.' },
+  { c: 'A1', t: 'Leichtkrafträder', d: 'Krafträder bis 125 ccm, max. 11 kW, Verhältnis Leistung/Gewicht max. 0,1 kW/kg. Dreirädrige Kfz bis 15 kW.' },
+  { c: 'A2', t: 'Krafträder (beschränkt)', d: 'Krafträder bis 35 kW, Verhältnis Leistung/Gewicht max. 0,2 kW/kg (darf nicht von Fahrzeug mit mehr als doppelter Leistung abgeleitet sein).' },
+  { c: 'A', t: 'Krafträder (unbeschränkt)', d: 'Schwere Krafträder über 35 kW oder Verhältnis Leistung/Gewicht über 0,2 kW/kg.' },
+  { c: 'B', t: 'Kraftfahrzeuge (bis 3.500 kg)', d: 'Kfz bis 3.500 kg (max. 8 Pers. außer Fahrer). Anhänger bis 750 kg ODER Anhänger > 750 kg, wenn zGM der Kombination max. 3.500 kg.' },
+  { c: 'B96', t: 'Fahrzeugkombination (bis 4.250 kg)', d: 'Erweiterung: Kombination aus Zugfahrzeug Klasse B und Anhänger > 750 kg zGM, zGM der Kombination über 3.500 kg aber max. 4.250 kg.' },
+  { c: 'BE', t: 'Fahrzeugkombination (bis 7.000 kg)', d: 'Zugfahrzeug Klasse B + Anhänger über 750 kg zGM, wobei die zGM des Anhängers maximal 3.500 kg betragen darf (Gesamtzug max. 7.000 kg).' },
+  { c: 'C1', t: 'Mittelschwere LKW (bis 7.500 kg)', d: 'Kfz über 3.500 kg bis max. 7.500 kg zGM (max. 8 Pers.). Anhänger bis max. 750 kg.' },
+  { c: 'C1E', t: 'Fahrzeugkombination C1E', d: 'Zugfahrzeug C1 + Anhänger > 750 kg ODER Zugfahrzeug B + Anhänger > 3.500 kg. Die zGM der Fahrzeugkombination darf 12.000 kg NICHT übersteigen.' },
+  { c: 'C', t: 'Schwere LKW', d: 'Kfz über 3.500 kg zGM (nach oben unbegrenzt). Anhänger bis max. 750 kg.' },
+  { c: 'CE', t: 'Fahrzeugkombination CE', d: 'Zugfahrzeug Klasse C + Anhänger über 750 kg zGM (Keine Gewichtsobergrenze).' },
+  { c: 'D1', t: 'Busse (bis 16 Fahrgäste)', d: 'Kfz zur Personenbeförderung (mehr als 8, max. 16 Pers. außer dem Fahrer). Länge max. 8 Meter. Anhänger bis 750 kg.' },
+  { c: 'D1E', t: 'Fahrzeugkombination D1E', d: 'Zugfahrzeug Klasse D1 + Anhänger über 750 kg.' },
+  { c: 'D', t: 'Busse (über 16 Fahrgäste)', d: 'Kfz zur Personenbeförderung mit mehr als 8 Personen (unbegrenzt). Anhänger bis 750 kg.' },
+  { c: 'DE', t: 'Fahrzeugkombination DE', d: 'Zugfahrzeug Klasse D + Anhänger über 750 kg.' },
+  { c: 'L', t: 'Zugmaschinen (bis 40 km/h)', d: 'Zugmaschinen bis 40 km/h (mit Anhänger max. 25 km/h). Selbstfahrende Arbeitsmaschinen/Stapler bis 25 km/h.' },
+  { c: 'T', t: 'Zugmaschinen (bis 60 km/h)', d: 'Zugmaschinen bis 60 km/h. Selbstfahrende Arbeitsmaschinen/Stapler bis 40 km/h (jeweils für Land-/Forstwirtschaft).' }
+];
+
+const FEV_KEYS = [
+  { k: '01', t: 'Korrektur des Sehvermögens und/oder Augenschutz', d: 'Übergeordnete Schlüsselzahl für Sehhilfen' },
+  { k: '01.01', t: 'Brille', d: 'Korrektur des Sehvermögens durch Brille' },
+  { k: '01.02', t: 'Kontaktlinse(n)', d: 'Korrektur des Sehvermögens durch Kontaktlinse(n)' },
+  { k: '01.05', t: 'Augenschutz', d: 'Korrektur des Sehvermögens durch Augenschutz' },
+  { k: '01.06', t: 'Brille oder Kontaktlinsen', d: 'Korrektur des Sehvermögens durch Brille oder Kontaktlinsen' },
+  { k: '01.07', t: 'Spezifische optische Hilfe', d: 'Korrektur des Sehvermögens durch spezifische optische Hilfe' },
+  { k: '02', t: 'Hörhilfe/Kommunikationshilfe', d: 'Hörhilfe / Kommunikationshilfe' },
+  { k: '03', t: 'Prothese/Orthese der Gliedmaßen', d: 'Übergeordnete Schlüsselzahl für Prothesen/Orthesen' },
+  { k: '03.01', t: 'Prothese/Orthese der oberen Gliedmaßen', d: 'Prothese/Orthese der oberen Gliedmaßen' },
+  { k: '03.02', t: 'Prothese/Orthese der unteren Gliedmaßen', d: 'Prothese/Orthese der unteren Gliedmaßen' },
+  { k: '10', t: 'Angepasste Schaltung', d: 'Übergeordnete Schlüsselzahl für angepasste Schaltung' },
+  { k: '10.02', t: 'Automatische Fahrstufenwahl', d: 'Keine Kupplung / Automatische Fahrstufenwahl' },
+  { k: '10.04', t: 'Angepasste Schalteinrichtung', d: 'Angepasste Schalteinrichtung' },
+  { k: '15', t: 'Angepasste Kupplung', d: 'Übergeordnete Schlüsselzahl für angepasste Kupplung' },
+  { k: '15.01', t: 'Angepasstes Kupplungspedal', d: 'Angepasstes Kupplungspedal' },
+  { k: '15.02', t: 'Handkupplung', d: 'Handkupplung' },
+  { k: '15.03', t: 'Automatische Kupplung', d: 'Automatische Kupplung' },
+  { k: '15.04', t: 'Verhinderung der Blockierung/Betätigung des Kupplungspedals', d: 'Maßnahme zur Verhinderung der Blockierung/Betätigung des Kupplungspedals' },
+  { k: '20', t: 'Angepasste Bremsanlage', d: 'Übergeordnete Schlüsselzahl für Bremsanlage' },
+  { k: '20.01', t: 'Angepasstes Bremspedal', d: 'Angepasstes Bremspedal' },
+  { k: '20.03', t: 'Bremspedal für den linken Fuß', d: 'Bremspedal für den linken Fuß' },
+  { k: '20.04', t: 'Bremspedal als Fußraste', d: 'Bremspedal als Fußraste' },
+  { k: '20.05', t: 'Bremse (Kipppedal)', d: 'Bremse (Kipppedal)' },
+  { k: '20.06', t: 'Angepasste Handbremse', d: 'Angepasste Handbremse' },
+  { k: '20.07', t: 'Bremsbetätigung mit maximaler Kraft von ... N', d: 'Bremsbetätigung mit max. Kraft' },
+  { k: '20.09', t: 'Angepasste Feststellbremse', d: 'Angepasste Feststellbremse' },
+  { k: '20.12', t: 'Maßnahme zur Verhinderung der Betätigung des Bremspedals', d: 'Maßnahme zur Verhinderung der Blockierung/Betätigung' },
+  { k: '20.13', t: 'Kniebremse', d: 'Kniebremse' },
+  { k: '20.14', t: 'Bremsanlage, unterstützt durch externe Energie', d: 'Bremsanlage, unterstützt durch externe Energie' },
+  { k: '25', t: 'Angepasste Beschleunigungsanlage', d: 'Übergeordnete Schlüsselzahl für Gas' },
+  { k: '25.01', t: 'Angepasstes Gaspedal', d: 'Angepasstes Gaspedal' },
+  { k: '25.03', t: 'Gaspedal (Kipppedal)', d: 'Gaspedal (Kipppedal)' },
+  { k: '25.04', t: 'Handgas', d: 'Handgas' },
+  { k: '25.05', t: 'Kniegas', d: 'Kniegas' },
+  { k: '25.06', t: 'Gasbetätigung, unterstützt durch externe Energie', d: 'Gasbetätigung, unterstützt durch externe Energie' },
+  { k: '25.08', t: 'Gaspedal auf der linken Seite', d: 'Gaspedal auf der linken Seite' },
+  { k: '25.09', t: 'Maßnahme zur Verhinderung der Betätigung des Gaspedals', d: 'Maßnahme zur Verhinderung der Blockierung/Betätigung' },
+  { k: '31', t: 'Anpassungen und Sicherungen der Pedale', d: 'Übergeordnete Schlüsselzahl Pedale' },
+  { k: '31.01', t: 'Zusätzlicher Satz Parallelpedale', d: 'Zusätzlicher Satz Parallelpedale' },
+  { k: '31.02', t: 'Pedale auf gleicher (oder fast gleicher) Ebene', d: 'Pedale auf gleicher (oder fast gleicher) Ebene' },
+  { k: '31.03', t: 'Verhinderung der Betätigung von Gas- und Bremspedal', d: 'Maßnahme zur Verhinderung der Blockierung/Betätigung von Gas- und Bremspedal' },
+  { k: '31.04', t: 'Angehobener Boden', d: 'Angehobener Boden' },
+  { k: '32', t: 'Kombinierte Gas- und Bremsanlage', d: 'Übergeordnete Schlüsselzahl kombinierte Anlage' },
+  { k: '32.01', t: 'Gas und Bremse als kombiniertes System für eine Hand', d: 'Gas und Bremse als kombiniertes System für eine Hand' },
+  { k: '32.02', t: 'Gas und Bremse als kombiniertes System (externe Kraft)', d: 'Betätigt durch externe Kraft' },
+  { k: '33', t: 'Kombinierte Betriebsbremse, Beschleunigung und Lenkung', d: 'Übergeordnete Schlüsselzahl für kombinierte Systeme' },
+  { k: '33.01', t: 'Kombiniertes System, externe Kraft mit einer Hand', d: 'Betätigt durch externe Kraft mit einer Hand' },
+  { k: '33.02', t: 'Kombiniertes System, externe Kraft mit beiden Händen', d: 'Betätigt durch externe Kraft mit beiden Händen' },
+  { k: '35', t: 'Angepasste Bedienvorrichtungen', d: 'Übergeordnete Schlüsselzahl (Licht, Scheibenwischer, Hupe etc.)' },
+  { k: '35.02', t: 'Bedienvorrichtungen (ohne Loslassen der Lenkeinrichtung)', d: 'Können ohne Loslassen der Lenkeinrichtung betätigt werden' },
+  { k: '35.03', t: 'Bedienvorrichtungen (linke Hand)', d: 'Können mit der linken Hand betätigt werden' },
+  { k: '35.04', t: 'Bedienvorrichtungen (rechte Hand)', d: 'Können mit der rechten Hand betätigt werden' },
+  { k: '35.05', t: 'Bedienvorrichtungen (eine Hand)', d: 'Können mit einer Hand betätigt werden' },
+  { k: '40', t: 'Angepasste Lenkung', d: 'Übergeordnete Schlüsselzahl für Lenkung' },
+  { k: '40.01', t: 'Lenkung mit maximaler Kraft von ... N', d: 'Lenkung mit maximaler Kraft von ... N' },
+  { k: '40.05', t: 'Angepasstes Lenkrad', d: 'Angepasstes Lenkrad' },
+  { k: '40.06', t: 'Angepasste Lenkradposition', d: 'Angepasste Lenkradposition' },
+  { k: '40.09', t: 'Fußlenkung', d: 'Fußlenkung' },
+  { k: '40.11', t: 'Lenkradknauf', d: 'Lenkradknauf' },
+  { k: '40.14', t: 'Einarmig betätigtes alternatives Lenksystem', d: 'Einarmig betätigtes alternatives Lenksystem' },
+  { k: '40.15', t: 'Zweiarmig betätigtes alternatives Lenksystem', d: 'Zweiarmig betätigtes alternatives Lenksystem' },
+  { k: '42', t: 'Angepasste Rückspiegel', d: 'Übergeordnete Schlüsselzahl für Rückspiegel' },
+  { k: '42.01', t: 'Angepasster Außenrückspiegel', d: 'Angepasster Außenrückspiegel' },
+  { k: '42.03', t: 'Zusätzlicher Innenrückspiegel', d: 'Zusätzlicher Innenrückspiegel' },
+  { k: '42.05', t: 'Toter-Winkel-Spiegel', d: 'Toter-Winkel-Spiegel' },
+  { k: '43', t: 'Angepasster Fahrersitz', d: 'Übergeordnete Schlüsselzahl für Fahrersitz' },
+  { k: '43.01', t: 'In der Höhe angepasster Fahrersitz', d: 'In der Höhe angepasster Fahrersitz' },
+  { k: '43.02', t: 'Sitz an die Körperform angepasst', d: 'Sitz an die Körperform angepasst' },
+  { k: '43.03', t: 'Fahrersitz mit Armlehne', d: 'Fahrersitz mit Armlehne' },
+  { k: '43.04', t: 'Fahrersitz mit Trennwand', d: 'Fahrersitz mit Trennwand' },
+  { k: '43.06', t: 'Angepasster Sicherheitsgurt', d: 'Angepasster Sicherheitsgurt' },
+  { k: '44', t: 'Anpassungen des Kraftrades', d: 'Übergeordnete Schlüsselzahl für Krafträder' },
+  { k: '44.01', t: 'Einzeln gesteuerte Bremsen', d: 'Einzeln gesteuerte Bremsen' },
+  { k: '44.02', t: 'Angepasste Handbremse', d: 'Angepasste Handbremse (Vorderrad)' },
+  { k: '44.03', t: 'Angepasste Fußbremse', d: 'Angepasste Fußbremse (Hinterrad)' },
+  { k: '44.04', t: 'Angepasster Beschleunigungsgriff', d: 'Angepasster Beschleunigungsgriff' },
+  { k: '44.08', t: 'Sitzhöhe angepasst', d: 'Sitzhöhe so angepasst, dass beide Füße gleichzeitig den Boden erreichen' },
+  { k: '44.09', t: 'Angepasste Kraftradbedienung', d: 'Angepasste Kraftradbedienung' },
+  { k: '44.11', t: 'Angepasste Fußraste', d: 'Angepasste Fußraste' },
+  { k: '44.12', t: 'Angepasster Handgriff', d: 'Angepasster Handgriff' },
+  { k: '45', t: 'Kraftrad nur mit Beiwagen', d: 'Nur in Verbindung mit Beiwagen' },
+  { k: '46', t: 'Nur dreirädrige Kraftfahrzeuge', d: 'Nur für dreirädrige Kraftfahrzeuge' },
+  { k: '47', t: 'Beschränkt auf mehr als zwei Räder', d: 'Keine zweirädrigen Fahrzeuge' },
+  { k: '50', t: 'Bestimmtes Fahrzeug / Fahrgestellnummer', d: 'Beschränkt auf ein bestimmtes Fahrzeug/Fahrgestellnummer' },
+  { k: '51', t: 'Bestimmtes Kennzeichen', d: 'Beschränkt auf ein bestimmtes amtliches Kennzeichen' },
+  { k: '61', t: 'Fahrten bei Tag', d: 'Beschränkt auf Fahrten bei Tag (z.B. eine Stunde nach Sonnenaufgang und eine Stunde vor Sonnenuntergang)' },
+  { k: '62', t: 'Umkreis ... km', d: 'Beschränkt auf Fahrten in einem Umkreis von ... km um den Wohnort' },
+  { k: '63', t: 'Ohne Beifahrer', d: 'Fahren ohne Beifahrer' },
+  { k: '64', t: 'Tempolimit', d: 'Beschränkt auf Fahrten mit einer Geschwindigkeit von max. ... km/h' },
+  { k: '65', t: 'Nur in Begleitung', d: 'Fahren nur in Begleitung (z.B. Begleitetes Fahren ab 17)' },
+  { k: '66', t: 'Ohne Anhänger', d: 'Ohne Anhänger' },
+  { k: '67', t: 'Keine Autobahn', d: 'Fahren auf Autobahnen nicht erlaubt' },
+  { k: '68', t: 'Kein Alkohol', d: 'Kein Alkohol' },
+  { k: '69', t: 'Alkohol-Interlock', d: 'Beschränkt auf Fahrzeuge mit einer alkoholempfindlichen Wegfahrsperre' },
+  { k: '70', t: 'Umtausch des Führerscheins', d: 'Umtausch des Führerscheins Nr. ... ausgestellt durch ... (EU-/Drittland)' },
+  { k: '71', t: 'Duplikat des Führerscheins', d: 'Duplikat des Führerscheins Nr. ...' },
+  { k: '73', t: 'Beschränkt auf Klasse B (drei-/vierrädrig)', d: 'Beschränkt auf Fahrzeuge der Klasse B von der Art eines dreirädrigen oder vierrädrigen Kraftfahrzeugs' },
+  { k: '78', t: 'Automatikgetriebe', d: 'Nur Fahrzeuge mit Automatikgetriebe' },
+  { k: '79', t: 'Spezifikationen (Besonderheiten in Klammern)', d: 'Beschränkung auf Fahrzeuge, die den in Klammern angegebenen Spezifikationen entsprechen' },
+  { k: '79.01', t: 'Nur zweirädrige Fahrzeuge mit Beiwagen', d: 'Nur zweirädrige Fahrzeuge mit Beiwagen' },
+  { k: '79.02', t: 'Nur dreirädrige oder leichte vierrädrige Kfz', d: 'Nur dreirädrige Fahrzeuge oder leichte vierrädrige Kraftfahrzeuge der Klasse AM' },
+  { k: '79.03', t: 'Nur dreirädrige Fahrzeuge', d: 'Nur dreirädrige Fahrzeuge' },
+  { k: '79.04', t: 'Dreirädrige Fahrzeuge mit Anhänger (bis 750 kg)', d: 'Nur dreirädrige Fahrzeuge mit einem Anhänger mit einer zGM von höchstens 750 kg' },
+  { k: '79.05', t: 'Klasse A1 (Leistung/Gewicht > 0,1 kW/kg)', d: 'Krafträder der Klasse A1 mit einem Leistungsgewicht von mehr als 0,1 kW/kg' },
+  { k: '79.06', t: 'Klasse BE (Anhänger über 3.500 kg)', d: 'Fahrzeuge der Klasse BE, sofern die zGM des Anhängers 3.500 kg übersteigt' },
+  { k: '80', t: 'Alter dreirädrige Kfz (<24)', d: 'Nur für Inhaber einer Fahrerlaubnis für dreirädrige Kraftfahrzeuge der Klasse A, die das 24. Lebensjahr noch nicht vollendet haben' },
+  { k: '81', t: 'Alter zweirädrige Kfz (<21)', d: 'Nur für Inhaber einer Fahrerlaubnis für zweirädrige Kraftfahrzeuge der Klasse A, die das 21. Lebensjahr noch nicht vollendet haben' },
+  { k: '95', t: 'Berufskraftfahrer (BKrFQG)', d: 'Kraftfahrer, der Inhaber eines Befähigungsnachweises ist (Berufskraftfahrerqualifikationsgesetz)' },
+  { k: '96', t: 'Klasse B96 (Gespanne bis 4.250 kg)', d: 'Fahrzeuge der Klasse B mit einem Anhänger über 750 kg zGM, wobei die zGM der Kombination 3.500 kg übersteigt, aber nicht mehr als 4.250 kg beträgt' },
+  { k: '97', t: 'Keine Berechtigung für Klasse C1 (Erweiterung)', d: 'Nicht berechtigt zum Führen von Fahrzeugen der Klasse C1, die in den Geltungsbereich der Verordnung (EWG) Nr. 3821/85 fallen' },
+  { k: '104', t: 'Gültiges ärztliches Attest mitführen', d: 'Muss ein gültiges ärztliches Attest mitführen' },
+  { k: '171', t: 'Klasse C1 auch gültig für Kraftfahrzeuge der Klasse D', d: 'Klasse C1, auch gültig für Kraftfahrzeuge der Klasse D bis 7.500 kg zGM, jedoch ohne Fahrgäste' },
+  { k: '172', t: 'Klasse C auch gültig für Kraftfahrzeuge der Klasse D', d: 'Klasse C, auch gültig für Kraftfahrzeuge der Klasse D, jedoch ohne Fahrgäste' },
+  { k: '173', t: '(Entfallen) Klasse C1 auch für Klasse D', d: 'Klasse C1, auch gültig für Kraftfahrzeuge der Klasse D bis 7.500 kg zGM (Entfallen)', o: true },
+  { k: '174', t: 'Klasse L (gültig auch zum Führen von Zugmaschinen bis 40 km/h)', d: 'Klasse L, gültig auch zum Führen von Zugmaschinen mit einer durch die Bauart bestimmten Höchstgeschwindigkeit von nicht mehr als 40 km/h' },
+  { k: '175', t: 'Klasse L (Kfz bis 25 km/h)', d: 'Klasse L, auch gültig zum Führen von Kraftfahrzeugen mit einer durch die Bauart bestimmten Höchstgeschwindigkeit von nicht mehr als 25 km/h' },
+  { k: '176', t: '(Entfallen) Klasse L auch für Leichtkrafträder', d: 'Klasse L, auch gültig zum Führen von Krafträdern mit Hubraum bis 125 cm³ und max 11 kW (Entfallen)', o: true },
+  { k: '177', t: '(Entfallen) Klasse L auch für Krafträder', d: 'Klasse L, auch gültig zum Führen von Krafträdern ohne Leistungsbeschränkung (Entfallen)', o: true },
+  { k: '178', t: 'Klasse D/D1 (Einschränkung Fahrten)', d: 'Klasse D oder D1, nur für Fahrten im Linienverkehr' },
+  { k: '179', t: 'Klasse D1 (Einschränkung Fahrten)', d: 'Klasse D1, nur für Fahrten im Linienverkehr' },
+  { k: '180', t: '(Entfallen) Klasse T nur für Klasse S (alt)', d: 'Klasse T, jedoch nur gültig für Klasse S (alt) (Entfallen)', o: true },
+  { k: '181', t: 'Klasse T (nur Klasse S alt)', d: 'Klasse T, nur gültig für Kraftfahrzeuge der Klasse S (alt)' },
+  { k: '182', t: 'Klasse AM (Erweiterung alter Klasse M)', d: 'Klasse AM, auch für Fahrzeuge der bisherigen Klasse M (dreirädrige Leichtkraftfahrzeuge)' },
+  { k: '183', t: '(Entfallen) Klasse AM (dreirädrig)', d: 'Klasse AM, jedoch nur gültig für dreirädrige Leichtkraftfahrzeuge (Entfallen)', o: true },
+  { k: '184', t: '(Entfallen) Klasse AM (vierrädrig)', d: 'Klasse AM, jedoch nur gültig für vierrädrige Leichtkraftfahrzeuge (Entfallen)', o: true },
+  { k: '185', t: '(Entfallen) Klasse C auch für Klasse D (max. 8 Fahrgäste)', d: 'Klasse C, auch gültig für Klasse D, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '186', t: '(Entfallen) Klasse B auch für Klasse D (max. 8 Fahrgäste)', d: 'Klasse B, auch gültig für Klasse D, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '187', t: '(Entfallen) Klasse C1 auch für Klasse D1 (max. 8 Fahrgäste)', d: 'Klasse C1, auch gültig für Klasse D1, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '188', t: '(Entfallen) Klasse C auch für Klasse D (max. 8 Fahrgäste)', d: 'Klasse C, auch gültig für Klasse D, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '189', t: '(Entfallen) Klasse B auch für Klasse D (max. 8 Fahrgäste)', d: 'Klasse B, auch gültig für Klasse D, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '190', t: '(Entfallen) Klasse C1 auch für Klasse D (max. 8 Fahrgäste)', d: 'Klasse C1, auch gültig für Klasse D, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '191', t: '(Entfallen) Klasse C auch für Klasse D (max. 8 Fahrgäste)', d: 'Klasse C, auch gültig für Klasse D, jedoch beschränkt auf Fahrten ohne Fahrgäste oder max. 8 Fahrgäste (Entfallen)', o: true },
+  { k: '192', t: '(Entfallen) Klasse B (Gespanne bis 4.250 kg)', d: 'Berechtigt abweichend zum Führen von Fahrzeugen Klasse B mit Anhänger > 750 kg zGM, zGM der Kombination bis 4.250 kg (Vorläufer B96 - Entfallen)', o: true },
+  { k: '193', t: '(Entfallen) Klasse B (Gespanne)', d: 'Entfallen', o: true },
+  { k: '194', t: '(Entfallen) Klasse B (Carsharing)', d: 'Entfallen', o: true },
+  { k: '195', t: 'Klasse AM (Auflage im Inland)', d: 'Auflage zu der Klasse AM: Bis zur Vollendung des 16. LJ nur im Inland.' },
+  { k: '196', t: 'Klasse B196', d: 'Im Inland Krafträder (auch mit Beiwagen) mit einem Hubraum von bis zu 125 cm³, eine Motorleistung von nicht mehr als 11 kW, bei denen das Verhältnis der Leistung zum Gewicht 0,1 kW/kg nicht übersteigt' },
+  { k: '197', t: 'Prüfung auf Automatik, Schaltkompetenz nachgewiesen', d: 'Die Prüfung wurde auf einem Kraftfahrzeug mit Automatikgetriebe abgelegt und eine praktische Ausbildung zum Führen von Fahrzeugen der Klasse B mit Schaltgetriebe wurde absolviert (§ 17a FeV)' }
+];
+
+function DriverLicenseModule() {
+  const [subTab, setSubTab] = useState('keys'); // 'keys', 'classes'
+  const dateTime = useDateTime();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchChange = (e) => {
+    // Erlaubt nur Zahlen und Punkte
+    const val = e.target.value.replace(/[^0-9.]/g, '');
+    setSearchQuery(val);
+  };
+
+  // Gefilterte Keys werden NUR berechnet, wenn auch ein Suchbegriff vorhanden ist
+  const filteredKeys = searchQuery 
+    ? FEV_KEYS.filter(k => k.k.startsWith(searchQuery))
+    : [];
+
+  return (
+    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+      <div className="bg-sky-700/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-sky-900/10 no-print">
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><CreditCard className="w-6 h-6 shrink-0" /> Führerschein</h1>
+          <p className="text-sky-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" /> {dateTime}</p>
+        </div>
+        <HeaderLogo />
+      </div>
+
+      <div className="p-2 space-y-2 pb-24 no-print">
+        {/* Navigation */}
+        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-200 mb-2 gap-1 overflow-x-auto custom-scrollbar">
+            <button onClick={() => { setSubTab('keys'); setSearchQuery(''); }} className={`flex-1 min-w-[90px] py-2.5 rounded-lg transition-all flex flex-col items-center gap-1 ${subTab === 'keys' ? 'bg-sky-50 text-sky-800 shadow-sm ring-1 ring-sky-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}>
+                <Search className="w-5 h-5" /><span className="text-[10px] font-bold uppercase tracking-wider">Schlüsselzahlen</span>
+            </button>
+            <button onClick={() => setSubTab('classes')} className={`flex-1 min-w-[90px] py-2.5 rounded-lg transition-all flex flex-col items-center gap-1 ${subTab === 'classes' ? 'bg-sky-50 text-sky-800 shadow-sm ring-1 ring-sky-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}>
+                <BookOpen className="w-5 h-5" /><span className="text-[10px] font-bold uppercase tracking-wider">Klassen (§ 6 FeV)</span>
+            </button>
+        </div>
+
+        {subTab === 'keys' && (
+          <div className="animate-in fade-in duration-300">
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 mb-3 sticky top-[80px] z-10">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <input 
+                  type="text" 
+                  inputMode="decimal"
+                  placeholder="Suche nach Schlüsselzahl (z. B. 01.01)..." 
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-sky-600 focus:outline-none placeholder:text-slate-400"
+                />
+                {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 p-0.5 rounded-full hover:bg-slate-200 transition-colors"><X className="w-4 h-4 text-slate-500" /></button>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {!searchQuery ? (
+                 <div className="text-center p-8 mt-4 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-400 text-sm flex flex-col items-center gap-3">
+                     <Server className="w-8 h-8 opacity-40 text-sky-600" />
+                     <div className="space-y-1">
+                         <p className="text-slate-700 font-bold uppercase tracking-wide text-xs">Fahrerlaubnis-Register bereit</p>
+                         <p className="text-xs">Bitte geben Sie die zu überprüfende<br/>Schlüsselzahl in das Suchfeld ein.</p>
+                     </div>
+                 </div>
+              ) : filteredKeys.length > 0 ? (
+                 filteredKeys.map((item) => (
+                   <div key={item.k} className={`bg-white p-4 rounded-xl shadow-sm flex flex-col animate-in fade-in zoom-in-95 duration-200 border-y border-r border-l-4 ${item.o ? 'border-r-red-100 border-y-red-100 border-l-red-600 bg-red-50/20' : 'border-r-slate-200 border-y-slate-200 border-l-slate-700'}`}>
+                     <div className="flex items-center gap-3 mb-2 pb-2 border-b border-slate-100 flex-wrap">
+                       <span className={`font-mono font-bold text-sm px-2 py-0.5 rounded shadow-sm shrink-0 border ${item.o ? 'bg-red-50 text-red-800 border-red-200' : 'bg-slate-100 text-slate-800 border-slate-300'}`}>{item.k}</span>
+                       <span className={`font-bold text-sm tracking-wide ${item.o ? 'text-red-800' : 'text-slate-800'}`}>{item.t}</span>
+                       {item.o && (
+                         <span className="ml-auto bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm tracking-widest shrink-0">
+                           Außer Kraft / Entfallen
+                         </span>
+                       )}
+                     </div>
+                     <span className={`text-xs leading-relaxed text-justify ${item.o ? 'text-red-900 font-medium' : 'text-slate-600'}`}>{item.d}</span>
+                   </div>
+                 ))
+              ) : (
+                 <div className="text-center p-6 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-500 text-sm font-medium">Kein Eintrag im Register gefunden.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {subTab === 'classes' && (
+          <div className="animate-in fade-in duration-300 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            {FEV_CLASSES.map((cls, idx) => (
+              <div key={cls.c} className={`p-4 flex gap-4 ${idx !== FEV_CLASSES.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                <div className="w-12 h-12 shrink-0 bg-slate-800 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-sm">
+                  {cls.c}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">{cls.t}</h3>
+                  <p className="text-xs text-slate-600 mt-1.5 leading-relaxed text-justify">{cls.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <AppVersionFooter />
+    </div>
+  );
+}
+
 // --- DASHBOARD VIEW ---
 const DashboardView = ({ onSelect }) => {
     const dateTime = useDateTime();
@@ -4702,7 +4970,8 @@ const DashboardView = ({ onSelect }) => {
         { id: 'speed', title: 'Geschwindigkeit', icon: Gauge, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Laser • Hinterherfahren' },
         { id: 'accident', title: 'Unfallrechner', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', desc: 'Bremsspur • Driftspur' },
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
-        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '' }
+        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '' },
+        { id: 'license', title: 'Führerschein', icon: CreditCard, color: 'text-sky-500', bg: 'bg-sky-50', desc: 'Schlüsselzahlen • Klassen' }
     ];
 
     return (
@@ -4760,6 +5029,7 @@ export default function App() {
              activeTab === 'accident' ? <AccidentCalculator /> :
              activeTab === 'age' ? <AgeCalculator /> :
              activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
+             activeTab === 'license' ? <DriverLicenseModule /> : 
              activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
           </div>
           <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print transition-colors duration-300">
