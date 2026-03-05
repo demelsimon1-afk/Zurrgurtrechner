@@ -37,6 +37,12 @@ const darkThemeCSS = `
   /* Bottom Nav dark mode */
   .dark .fixed.bottom-0.bg-white\\/95 { background-color: rgba(15, 23, 42, 0.95) !important; border-color: #334155 !important; }
   .dark .bg-slate-100 { background-color: #1e293b !important; }
+
+  /* Custom Scrollbar for better UX */
+  .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
 `;
 
 // --- GLOBAL STYLES FOR PRINTING ---
@@ -432,6 +438,32 @@ const InputWithIcon = ({ icon: Icon, label, value, onChange, placeholder, type="
       <input type={type} inputMode={type === 'number' ? 'decimal' : 'text'} className={`block w-full pl-10 pr-3 py-2.5 text-base border rounded-xl transition-all shadow-sm ${disabled ? 'bg-slate-100 border-slate-200 text-slate-400' : 'bg-white border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 font-medium'}`} placeholder={placeholder} value={value} onChange={onChange} onBlur={onBlur} disabled={disabled} />
     </div>
   </div>
+);
+
+// Einheitliches Design für BKat-Einträge & Tatbestände
+const BkatRow = ({ title, fines }) => (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 border-b border-slate-200/60 last:border-0 gap-2">
+        <span className="text-xs font-bold text-slate-700 leading-tight flex-1">{title}</span>
+        <div className="flex flex-row flex-wrap gap-1.5 shrink-0">
+            {fines.map((fine, idx) => (
+                <div key={idx} className="flex flex-col bg-white border border-slate-200 text-slate-600 rounded shadow-sm overflow-hidden">
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-1">
+                        {fine.role && <span className="font-bold text-slate-400 uppercase">{fine.role}</span>}
+                        <span>{fine.tbnr}</span>
+                        <span>➔ <strong className={`${fine.cost === 'Straftat' ? 'text-purple-600' : 'text-red-600'}`}>{fine.cost}</strong></span>
+                        {fine.points && fine.points !== '' && fine.points !== '-' && (
+                            <span className="text-[9px] font-bold text-amber-500 uppercase ml-0.5">{fine.points}</span>
+                        )}
+                    </div>
+                    {fine.note && (
+                        <div className="bg-slate-50 px-2 py-1 text-[9px] text-slate-500 border-t border-slate-100 leading-tight max-w-[200px] whitespace-normal">
+                            {fine.note}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    </div>
 );
 
 const useDateTime = () => {
@@ -2660,7 +2692,7 @@ function LashingCalculator() {
       <div className="p-2 space-y-2 no-print">
         
         {/* Toggle Niederzurren / Diagonalzurren / PKW */}
-        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 gap-1 overflow-x-auto">
+        <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 gap-1 overflow-x-auto custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button onClick={() => setLashingType('nieder')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'nieder' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <LashingStrapIcon className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase">Niederzurren</span>
@@ -3111,46 +3143,21 @@ function LashingCalculator() {
             </button>
             
             <div className={showFines ? 'block' : 'hidden print-visible'}>
-              {fineGroups.map((group, gIdx) => (
-                  <div key={gIdx} className="mt-4 first:mt-2 animate-in slide-in-from-top-2">
-                      {group.title && (
-                          <div className="text-xs font-black uppercase text-slate-500 tracking-wider mb-2 px-1">{group.title}</div>
-                      )}
-                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                        <table className="w-full text-left text-sm">
-                          <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
-                            <tr>
-                              <th className="px-3 py-2 font-black tracking-wide">Verantwortlich</th>
-                              <th className="px-3 py-2 font-black tracking-wide">TBNR</th>
-                              <th className="px-3 py-2 text-right font-black tracking-wide">Folge</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
-                            {group.items.map((fine, fIdx) => (
-                              <tr key={fIdx} className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-3 py-2.5">
-                                  <div className="flex items-start gap-2">
-                                      <div className="mt-0.5">{fine.role === 'Fahrer' ? <User className="w-4 h-4 text-indigo-500"/> : <Briefcase className="w-4 h-4 text-slate-500"/>}</div>
-                                      <div>
-                                          <span className={`block font-bold ${fine.role === 'Fahrer' ? 'text-indigo-700' : 'text-slate-700'}`}>{fine.role}</span>
-                                          {fine.note && <span className="block text-[10px] text-slate-400 leading-tight mt-0.5">{fine.note}</span>}
-                                      </div>
-                                  </div>
-                                </td>
-                                <td className="px-3 py-2.5 font-mono text-slate-500 text-xs font-bold align-top">
-                                  <div className="mt-0.5">{fine.code}</div>
-                                </td>
-                                <td className="px-3 py-2.5 text-right align-top">
-                                  <div className="font-black text-slate-800 mt-0.5">{fine.cost}</div>
-                                  {fine.points && <div className="text-[10px] font-bold text-red-500">{fine.points}</div>}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                  </div>
-              ))}
+                <div className="bg-white p-2 sm:p-3 rounded-xl border border-slate-200">
+                    {fineGroups.map((group, gIdx) => (
+                        <BkatRow 
+                            key={gIdx} 
+                            title={group.title} 
+                            fines={group.items.map(item => ({ 
+                                role: item.role, 
+                                tbnr: item.code, 
+                                cost: item.cost, 
+                                points: item.points, 
+                                note: item.note 
+                            }))} 
+                        />
+                    ))}
+                </div>
             </div>
           </div>
         )}
@@ -3204,58 +3211,107 @@ const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
     );
 };
 
+const FahrtzweckeDropdown = ({ purposes }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    return (
+        <div className="bg-slate-50 border border-slate-200 p-2 sm:p-3 rounded-xl flex flex-col gap-3 shadow-sm mb-4">
+            <button onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-full text-left px-1">
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center shrink-0">
+                        <Info className="w-4 h-4 text-teal-600" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-700 text-xs uppercase">Erlaubte Fahrtzwecke</h4>
+                        <div className="text-[10px] text-slate-500 font-medium mt-0.5">{isOpen ? 'Details ausblenden' : 'Details einblenden'}</div>
+                    </div>
+                </div>
+                <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-200">
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400"/> : <ChevronDown className="w-4 h-4 text-slate-400"/>}
+                </div>
+            </button>
+            
+            {isOpen && (
+                <div className="space-y-4 pt-3 border-t border-slate-200 animate-in fade-in">
+                    {purposes.includes('probe') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Probefahrt</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Es muss ein <strong>wirkliches Kaufinteresse</strong> bestehen. Der Fokus muss immer auf der Erprobung des Fahrzeugs liegen.</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Eine Probefahrt kann <strong>mehrere Tage</strong> dauern (z.B. bei Wohnmobilen oder LKW). Ein PKW darf in der Regel <strong>nur 1 Tag</strong> ausgeliehen werden (VGH München).</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span className="text-red-800"><strong>NICHT erlaubt:</strong> Reine Alltagsfahrten, wie z.B. eine bloße Essensabholung!</span></li>
+                            </ul>
+                        </div>
+                    )}
+                    {purposes.includes('ueberfuehrung') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Überführungsfahrt</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrt des Käufers nach dem Kauf an einen Wohnort (auch Fahrten ins Ausland).</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zwischen verschiedenen Autohäusern.</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zum Tanken und zur Außenreinigung, sofern sie <strong>anlässlich</strong> von Probe-/Überführungsfahrten stattfinden.</span></li>
+                            </ul>
+                        </div>
+                    )}
+                    {purposes.includes('reparatur') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Reparatur- oder Wartungsfahrt</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zur Beibehaltung der technischen Einsatzfähigkeit (Beseitigung von technischen Mängeln).</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Die generelle Instandhaltung des Fahrzeugs.</span></li>
+                            </ul>
+                        </div>
+                    )}
+                    {purposes.includes('brauchtum') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Brauchtumspflege</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Teilnahme an Veranstaltungen, die der Darstellung von Oldtimer-Fahrzeugen und der Pflege des kraftfahrzeugtechnischen Kulturgutes dienen.</span></li>
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 function KnowledgeBaseView() {
   const dateTime = useDateTime();
-  const [view, setView] = useState('ph1'); // Startet jetzt standardmäßig mit § 24a StVG
+  const [view, setView] = useState('overview'); // Startet jetzt standardmäßig mit der Übersicht
   const [kzView, setKzView] = useState('kurzzeit'); // State für die Sonderkennzeichen
+  const [alkDroView, setAlkDroView] = useState('ph1'); // State für Alkohol/Drogen Untermenü
+  const [kcangView, setKcangView] = useState('besitz'); // State für KCanG Untermenü
+  const [lasiAblegereife, setLasiAblegereife] = useState('gurte'); // State für LaSi Ablegereife Auswahl
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
+  useEffect(() => {
+      window.scrollTo(0, 0);
+  }, [view, kzView, alkDroView, kcangView, lasiAblegereife]);
+
   const tabs = [
-      { id: 'ph1', label: '§ 24a StVG' },
-      { id: 'ph2', label: '§ 24c StVG' },
-      { id: 'ph3', label: 'Medikamentenprivileg' },
-      { id: 'blut', label: 'Blutentnahme' },
-      { id: 'kcang', label: 'KCanG (Cannabis)' },
-      { id: 'btm', label: 'BtM-Mengen' },
-      { id: 'einziehung', label: 'Einziehung' },
-      { id: 'lasi', label: 'Ladungssicherung' },
-      { id: 'pkw', label: 'PKW-Transporter' },
-      { id: 'kz', label: 'Kennzeichen' },
-      { id: 'hu', label: 'Hauptuntersuchung' },
-      { id: 'verskennz', label: 'Versicherungskennzeichen' },
-      { id: 'juschg', label: 'Jugendschutz' }
+      { id: 'alk_dro', label: 'Fahren u. Alkohol/Drogen', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
+      { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
+      { id: 'kcang', label: 'KCanG (Cannabis)', icon: Trees, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+      { id: 'btm', label: 'BtM-Mengen', icon: AlertCircle, color: 'text-purple-500', bg: 'bg-purple-50' },
+      { id: 'einziehung', label: 'Einziehung', icon: ScaleLaw, color: 'text-amber-500', bg: 'bg-amber-50' },
+      { id: 'lasi', label: 'Ladungssicherung', icon: LashingStrapIcon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+      { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
+      { id: 'kz', label: 'Kennzeichen', icon: FileText, color: 'text-cyan-500', bg: 'bg-cyan-50' },
+      { id: 'hu', label: 'Hauptuntersuchung', icon: Search, color: 'text-teal-500', bg: 'bg-teal-50' },
+      { id: 'juschg', label: 'Jugendschutz', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' }
   ];
-
-  const activeTabLabel = tabs.find(t => t.id === view)?.label || 'Wissen';
-
-  // Hilfskomponente für die BKat-Darstellung im Handbuch (Optimiert: Nebeneinander)
-  const BkatRow = ({ title, fahrerTbnr, fahrerCost, halterTbnr, halterCost }) => (
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 border-b border-slate-200/60 last:border-0 gap-2">
-          <span className="text-xs font-bold text-slate-700 leading-tight">{title}</span>
-          <div className="flex flex-row flex-wrap gap-1.5 shrink-0">
-              {fahrerTbnr && (
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded shadow-sm">
-                      <span className="font-bold text-slate-400 uppercase">Fahrer</span>
-                      <span>{fahrerTbnr} ➔ <strong className="text-red-600">{fahrerCost}</strong></span>
-                  </div>
-              )}
-              {halterTbnr && (
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded shadow-sm">
-                      <span className="font-bold text-slate-400 uppercase">Halter</span>
-                      <span>{halterTbnr} ➔ <strong className="text-red-600">{halterCost}</strong></span>
-                  </div>
-              )}
-          </div>
-      </div>
-  );
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen relative">
       <div className="bg-teal-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-30 shadow-lg shadow-teal-900/10 no-print">
         <div className="flex items-center gap-3">
-            <button onClick={() => setIsMenuOpen(true)} className="p-2 -ml-2 bg-teal-700/50 hover:bg-teal-700 rounded-xl transition-colors border border-teal-500/30 flex items-center justify-center shadow-sm">
-                <Menu className="w-6 h-6" />
-            </button>
+            {view !== 'overview' && (
+                <button onClick={() => setIsMenuOpen(true)} className="p-2 -ml-2 bg-teal-700/50 hover:bg-teal-700 rounded-xl transition-colors border border-teal-500/30 flex items-center justify-center shadow-sm">
+                    <Menu className="w-6 h-6" />
+                </button>
+            )}
             <div>
                 <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">Handbuch</h1>
                 <p className="text-teal-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5"><Clock className="w-3 h-3" />{dateTime}</p>
@@ -3269,18 +3325,32 @@ function KnowledgeBaseView() {
          <div className="fixed inset-0 z-[100] flex no-print">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={() => setIsMenuOpen(false)}></div>
             <div className="relative w-[260px] max-w-[85%] bg-slate-50 h-full shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
-               <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-white shadow-sm z-10">
+               <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-white shadow-sm z-10 shrink-0">
                   <span className="font-black text-slate-700 uppercase tracking-wide flex items-center gap-2"><BookOpen className="w-5 h-5 text-teal-600"/> Kategorien</span>
                   <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-600 hover:bg-slate-200 hover:text-red-500 transition-colors"><X className="w-4 h-4"/></button>
                </div>
-               <div className="flex-1 overflow-y-auto p-3 space-y-2">
+               <div className="flex-1 overflow-y-auto overscroll-contain p-3 space-y-2 pb-24 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                   
+                   <button
+                       onClick={() => { setView('overview'); setIsMenuOpen(false); }}
+                       className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all flex items-center gap-3 ${view === 'overview' ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+                   >
+                       <div className={`p-1.5 rounded-lg ${view === 'overview' ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}><Home className="w-4 h-4" /></div>
+                       Übersicht
+                   </button>
+                   
+                   <div className="h-px bg-slate-200 w-full my-2"></div>
+                   
                    {tabs.map(tab => (
                       <button
                          key={tab.id}
                          onClick={() => { setView(tab.id); setIsMenuOpen(false); }}
                          className={`w-full text-left px-4 py-3.5 text-sm font-bold rounded-xl transition-all flex items-center justify-between ${view === tab.id ? 'bg-teal-600 text-white shadow-md transform scale-[1.02]' : 'bg-white border border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-teal-50'}`}
                       >
-                         {tab.label}
+                         <div className="flex items-center gap-3">
+                             <tab.icon className={`w-4 h-4 ${view === tab.id ? 'text-teal-200' : tab.color}`} />
+                             {tab.label}
+                         </div>
                          {view === tab.id && <ChevronRight className="w-4 h-4 text-teal-200" />}
                       </button>
                    ))}
@@ -3289,125 +3359,154 @@ function KnowledgeBaseView() {
          </div>
       )}
 
-      {/* QUICK CATEGORY DISPLAY (Clickable to open menu) */}
-      <div className="px-2 pt-2 pb-1 no-print">
-          <button onClick={() => setIsMenuOpen(true)} className="w-full bg-teal-50 border border-teal-200 text-teal-800 px-3 py-2.5 rounded-xl text-xs font-black uppercase flex items-center justify-between shadow-sm hover:bg-teal-100 transition-colors">
-              <span className="flex items-center gap-2"><List className="w-4 h-4 text-teal-600"/> Thema: {activeTabLabel}</span>
-              <span className="text-[10px] bg-teal-200/50 px-2 py-1 rounded text-teal-700">Ändern</span>
-          </button>
-      </div>
-
-      <div className="p-2 animate-in fade-in duration-300 pb-20 no-print">
+      <div className="p-2 animate-in fade-in duration-300 pb-20 no-print mt-2">
             
-            {/* § 24a StVG (ehemals ph1) */}
-            {view === 'ph1' && (
-                <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <ScaleLaw className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">§ 24a StVG (0,5 Promille / Drogen)</h3>
-                        </div>
-                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Tatvarianten:</p>
-                        <ul className="space-y-3 text-sm text-slate-700 font-medium">
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(1)</div>
-                                <div className="pt-1">mind. <strong>0,25 mg/l</strong> Alkohol im Atem oder mind. <strong>0,5 ‰</strong> Alkohol im Blut</div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(1a)</div>
-                                <div className="pt-1"><strong>3,5 ng/ml</strong> oder mehr THC im Blutserum</div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(2)</div>
-                                <div className="pt-1">
-                                    Wirkung einer <strong>Anlagensubstanz</strong>:
-                                    <ul className="mt-2 space-y-1 ml-1 border-l-2 border-teal-100 pl-3">
-                                        <li>Heroin = 10 ng/ml</li>
-                                        <li>Morphin = 10 ng/ml</li>
-                                        <li>Cocain = 75 ng/ml</li>
-                                        <li>Amphetamin = 25 ng/ml</li>
-                                        <li>Methamphetamin = 25 ng/ml</li>
-                                    </ul>
-                                    <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs mt-3 flex gap-2 shadow-sm">
-                                        <Info className="w-5 h-5 shrink-0 text-amber-500" />
-                                        <span>Die Wirkung kann jedoch auch schon <strong>unterhalb des Grenzwerts</strong> vorliegen, wenn eine Ausfallerscheinung hinzukommt.<br/><span className="text-[10px] opacity-70 block mt-1">(OLG Celle, Beschluss v. 30. 3. 2009 – 322 Ss Bs 57/09)</span></span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li className="flex gap-3">
-                                <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(2a)</div>
-                                <div className="pt-1"><strong>3,5 ng/ml THC + Alkoholische Getränke</strong> während der Fahrt konsumieren oder vor der Fahrt konsumieren (mind. jedoch 0,1 mg/l oder 0,2 ‰)</div>
-                            </li>
-                        </ul>
-                    </div>
+            {/* ÜBERSICHT (DASHBOARD-STYLE) */}
+            {view === 'overview' && (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setView(tab.id)}
+                            className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:shadow-md hover:border-teal-200 transition-all active:scale-95 group"
+                        >
+                            <div className={`p-3 rounded-2xl ${tab.bg} mb-3 shadow-inner group-hover:scale-110 transition-transform`}>
+                                <tab.icon className={`w-7 h-7 ${tab.color}`} />
+                            </div>
+                            <h3 className="font-bold text-slate-800 text-[13px] leading-tight">{tab.label}</h3>
+                        </button>
+                    ))}
                 </div>
             )}
 
-            {/* § 24c StVG (ehemals ph2) */}
-            {view === 'ph2' && (
+            {/* FAHREN UNTER ALKOHOL/DROGEN (Zusammengefasster Reiter) */}
+            {view === 'alk_dro' && (
                 <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <ScaleLaw className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">§ 24c StVG (Alkoholverbot Fahranfänger)</h3>
-                        </div>
-                        <p className="text-xs text-slate-400 font-bold uppercase mb-3">Tatvarianten / Voraussetzungen:</p>
-                        <div className="space-y-3 text-sm text-slate-700 font-medium bg-slate-50 p-4 rounded-xl border border-slate-100">
-                            <div className="flex items-start gap-3">
-                                <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">A</div>
-                                <div className="pt-0.5">In der <strong>Probezeit</strong> bzw. <strong>vor Vollendung des 21. Lebensjahrs</strong></div>
-                            </div>
-                            <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
-                            <div className="flex justify-center text-teal-600 font-black text-xs uppercase tracking-widest">+ UND +</div>
-                            <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
-                            <div className="flex items-start gap-3 w-full">
-                                <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">B</div>
-                                <div className="flex-1">
-                                    <div className="space-y-2.5 w-full">
-                                        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm leading-snug">
-                                            Unter der Wirkung von <strong>Alkohol</strong> <span className="text-xs text-slate-500 font-normal">(mind. 0,1 mg/l / 0,2 ‰)</span><br/>
-                                            oder <strong>THC</strong> <span className="text-xs text-slate-500 font-normal">(mind. 1,0 ng/ml)</span> stehen.
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-px bg-slate-200 flex-1"></div>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">ODER</span>
-                                            <div className="h-px bg-slate-200 flex-1"></div>
-                                        </div>
-                                        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm leading-snug">
-                                            Während der Fahrt alkoholische Getränke oder THC <strong>konsumieren</strong>.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {/* Sub-Navigation */}
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {[
+                            { id: 'ph1', label: '§ 24a StVG' },
+                            { id: 'ph2', label: '§ 24c StVG' },
+                            { id: 'ph3', label: 'Medikamentenprivileg' }
+                        ].map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={() => setAlkDroView(sub.id)}
+                                className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all border ${alkDroView === sub.id ? 'bg-teal-600 text-white border-teal-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {sub.label}
+                            </button>
+                        ))}
                     </div>
-                </div>
-            )}
 
-            {/* Medikamentenprivileg (ehemals ph3) */}
-            {view === 'ph3' && (
-                <div className="space-y-4">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Syringe className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Medikamentenprivileg</h3>
-                        </div>
                         
-                        <div className="bg-teal-50 border border-teal-200 text-teal-900 p-4 rounded-xl text-sm mb-5 leading-relaxed">
-                            <strong>§ 24a und 24c StVG greifen nicht</strong>, wenn die Anlagesubstanz ärztlich verordnet wurde und <strong>bestimmungsgemäß</strong> eingenommen wurde.
-                        </div>
+                        {/* § 24a StVG */}
+                        {alkDroView === 'ph1' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                                    <ScaleLaw className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">§ 24a StVG (0,5 Promille / Drogen)</h3>
+                                </div>
+                                <p className="text-xs text-slate-400 font-bold uppercase mb-3">Tatvarianten:</p>
+                                <ul className="space-y-3 text-sm text-slate-700 font-medium">
+                                    <li className="flex gap-3">
+                                        <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(1)</div>
+                                        <div className="pt-1">mind. <strong>0,25 mg/l</strong> Alkohol im Atem oder mind. <strong>0,5 ‰</strong> Alkohol im Blut</div>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(1a)</div>
+                                        <div className="pt-1"><strong>3,5 ng/ml</strong> oder mehr THC im Blutserum</div>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(2)</div>
+                                        <div className="pt-1">
+                                            Wirkung einer <strong>Anlagensubstanz</strong>:
+                                            <ul className="mt-2 space-y-1 ml-1 border-l-2 border-teal-100 pl-3">
+                                                <li>Heroin = 10 ng/ml</li>
+                                                <li>Morphin = 10 ng/ml</li>
+                                                <li>Cocain = 75 ng/ml</li>
+                                                <li>Amphetamin = 25 ng/ml</li>
+                                                <li>Methamphetamin = 25 ng/ml</li>
+                                            </ul>
+                                            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs mt-3 flex gap-2 shadow-sm">
+                                                <Info className="w-5 h-5 shrink-0 text-amber-500" />
+                                                <span>Die Wirkung kann jedoch auch schon <strong>unterhalb des Grenzwerts</strong> vorliegen, wenn eine Ausfallerscheinung hinzukommt.<br/><span className="text-[10px] opacity-70 block mt-1">(OLG Celle, Beschluss v. 30. 3. 2009 – 322 Ss Bs 57/09)</span></span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <div className="w-6 h-6 rounded bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">(2a)</div>
+                                        <div className="pt-1"><strong>3,5 ng/ml THC + Alkoholische Getränke</strong> während der Fahrt konsumieren oder vor der Fahrt konsumieren (mind. jedoch 0,1 mg/l oder 0,2 ‰)</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
 
-                        <h4 className="font-black text-slate-800 text-sm mb-3 text-red-600">Keine bestimmungsgemäße Einnahme bei:</h4>
-                        <ul className="space-y-3 text-sm text-slate-700 font-medium mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Falsche Dosierung:</strong> Dosierung wird nicht eingehalten oder Konsumvariante ist anders vorgegeben.</span></li>
-                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Beikonsum:</strong> Sobald Beikonsum mit anderen Betäubungsmitteln vorliegt.</span></li>
-                            <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Alkohol:</strong> Sobald Alkohol konsumiert wird. <em className="text-xs text-slate-500 block">(gilt nur bei Anlagensubstanzen, nicht THC)</em></span></li>
-                        </ul>
+                        {/* § 24c StVG */}
+                        {alkDroView === 'ph2' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                                    <ScaleLaw className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">§ 24c StVG (Alkoholverbot Fahranfänger)</h3>
+                                </div>
+                                <p className="text-xs text-slate-400 font-bold uppercase mb-3">Tatvarianten / Voraussetzungen:</p>
+                                <div className="space-y-3 text-sm text-slate-700 font-medium bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">A</div>
+                                        <div className="pt-0.5">In der <strong>Probezeit</strong> bzw. <strong>vor Vollendung des 21. Lebensjahrs</strong></div>
+                                    </div>
+                                    <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
+                                    <div className="flex justify-center text-teal-600 font-black text-xs uppercase tracking-widest">+ UND +</div>
+                                    <div className="flex justify-center"><div className="w-px h-4 bg-slate-300"></div></div>
+                                    <div className="flex items-start gap-3 w-full">
+                                        <div className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0 font-black text-xs mt-0.5">B</div>
+                                        <div className="flex-1">
+                                            <div className="space-y-2.5 w-full">
+                                                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm leading-snug">
+                                                    Unter der Wirkung von <strong>Alkohol</strong> <span className="text-xs text-slate-500 font-normal">(mind. 0,1 mg/l / 0,2 ‰)</span><br/>
+                                                    oder <strong>THC</strong> <span className="text-xs text-slate-500 font-normal">(mind. 1,0 ng/ml)</span> stehen.
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-px bg-slate-200 flex-1"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">ODER</span>
+                                                    <div className="h-px bg-slate-200 flex-1"></div>
+                                                </div>
+                                                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm leading-snug">
+                                                    Während der Fahrt alkoholische Getränke oder THC <strong>konsumieren</strong>.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                        <div className="bg-slate-800 text-white p-4 rounded-xl text-sm font-bold flex gap-3 items-center shadow-sm">
-                            <AlertTriangle className="w-8 h-8 shrink-0 text-amber-400"/>
-                            <span>Wichtig: Das Medikamentenprivileg befreit <u>nicht</u> von den Strafvorschriften der §§ 316, 315c StGB!</span>
-                        </div>
+                        {/* Medikamentenprivileg */}
+                        {alkDroView === 'ph3' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                                    <Syringe className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Medikamentenprivileg</h3>
+                                </div>
+                                
+                                <div className="bg-teal-50 border border-teal-200 text-teal-900 p-4 rounded-xl text-sm mb-5 leading-relaxed">
+                                    <strong>§ 24a und 24c StVG greifen nicht</strong>, wenn die Anlagesubstanz ärztlich verordnet wurde und <strong>bestimmungsgemäß</strong> eingenommen wurde.
+                                </div>
+
+                                <h4 className="font-black text-slate-800 text-sm mb-3 text-red-600">Keine bestimmungsgemäße Einnahme bei:</h4>
+                                <ul className="space-y-3 text-sm text-slate-700 font-medium mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Falsche Dosierung:</strong> Dosierung wird nicht eingehalten oder Konsumvariante ist anders vorgegeben.</span></li>
+                                    <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Beikonsum:</strong> Sobald Beikonsum mit anderen Betäubungsmitteln vorliegt.</span></li>
+                                    <li className="flex gap-3 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span><strong>Alkohol:</strong> Sobald Alkohol konsumiert wird. <em className="text-xs text-slate-500 block">(gilt nur bei Anlagensubstanzen, nicht THC)</em></span></li>
+                                </ul>
+
+                                <div className="bg-slate-800 text-white p-4 rounded-xl text-sm font-bold flex gap-3 items-center shadow-sm">
+                                    <AlertTriangle className="w-8 h-8 shrink-0 text-amber-400"/>
+                                    <span>Wichtig: Das Medikamentenprivileg befreit <u>nicht</u> von den Strafvorschriften der §§ 316, 315c StGB!</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -3451,45 +3550,249 @@ function KnowledgeBaseView() {
             {/* KCANG (Cannabis) */}
             {view === 'kcang' && (
                  <div className="space-y-4 animate-in fade-in">
-                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Trees className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Konsumcannabis (KCanG)</h3>
-                        </div>
-                        
-                        <div className="space-y-4">
-                            <div className="flex flex-col bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3">Im öffentlichen Raum (Unterwegs)</span>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between items-center"><span className="text-emerald-700 font-bold">Erlaubt (ab 18 J.)</span><span className="font-black">bis 25 g</span></div>
-                                    <div className="w-full h-px bg-slate-200/50"></div>
-                                    <div className="flex justify-between items-center"><span className="text-amber-600 font-bold">Ordnungswidrigkeit</span><span className="font-black">25 g bis 30 g</span></div>
-                                    <div className="w-full h-px bg-slate-200/50"></div>
-                                    <div className="flex justify-between items-center"><span className="text-red-600 font-bold">Straftat (§ 34 KCanG)</span><span className="font-black">über 30 g</span></div>
-                                </div>
-                            </div>
-                            
-                            <div className="flex flex-col bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3">Am Wohnsitz (Zuhause)</span>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between items-center"><span className="text-emerald-700 font-bold">Erlaubt (ab 18 J.)</span><span className="font-black text-right leading-tight">bis 50 g<br/><span className="text-[10px] text-slate-500 font-normal">und max. 3 Pflanzen</span></span></div>
-                                    <div className="w-full h-px bg-slate-200/50"></div>
-                                    <div className="flex justify-between items-center"><span className="text-amber-600 font-bold">Ordnungswidrigkeit</span><span className="font-black">50 g bis 60 g</span></div>
-                                    <div className="w-full h-px bg-slate-200/50"></div>
-                                    <div className="flex justify-between items-center"><span className="text-red-600 font-bold">Straftat (§ 34 KCanG)</span><span className="font-black">über 60 g</span></div>
-                                </div>
-                            </div>
+                    
+                    {/* Sub-Navigation */}
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {[
+                            { id: 'besitz', label: 'Besitz (Erlaubt)' },
+                            { id: 'strafbar', label: 'Strafbarer Besitz' },
+                            { id: 'anbau', label: 'Privater Anbau' },
+                            { id: 'konsum', label: 'Konsumverbote' },
+                        ].map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={() => setKcangView(sub.id)}
+                                className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all border ${kcangView === sub.id ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {sub.label}
+                            </button>
+                        ))}
+                    </div>
 
-                            <div className="mt-2 p-4 bg-red-50 border border-red-100 rounded-xl text-red-900 text-sm flex gap-3 shadow-sm">
-                                <AlertTriangle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
-                                <div>
-                                    <strong className="text-red-950 block mb-1">"Nicht geringe Menge" (Cannabis):</strong>
-                                    Beginnt bei <strong>7,5 g THC (Wirkstoff!)</strong>. <br/>
-                                    <span className="text-[10px] opacity-80 block mt-1 leading-snug">(BGH Beschluss v. 18.04.2024. Entspricht bei z. B. 10 % Wirkstoffgehalt ca. 75 g Brutto-Marihuana).</span>
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
+                        
+                        {/* 1. BESITZ (Allgemein) */}
+                        {kcangView === 'besitz' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-emerald-700 pb-2 border-b border-slate-50">
+                                    <Trees className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Grundsätzliche Besitzregelungen (§ 3 KCanG)</h3>
+                                </div>
+                                
+                                <div className="bg-red-50 border border-red-200 p-3 rounded-xl mb-5 flex gap-3 shadow-sm items-start">
+                                    <ShieldAlert className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+                                    <p className="text-xs font-medium text-red-900 leading-relaxed">
+                                        <strong className="text-red-700">Achtung:</strong> Der Besitz, Anbau, die Herstellung sowie der Erwerb von Cannabis bleiben nach § 2 KCanG <strong className="text-red-700 uppercase">grundsätzlich verboten</strong>.
+                                    </p>
+                                </div>
+
+                                <p className="text-xs text-slate-600 font-bold mb-3">Hiervon gelten für Erwachsene (ab 18 Jahren) folgende <span className="text-emerald-600 uppercase tracking-wide">streng reglementierte Ausnahmen</span> für den reinen Eigenkonsum:</p>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col items-center text-center">
+                                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mb-2"><MapPin className="w-5 h-5 text-slate-400" /></div>
+                                        <h4 className="font-black text-slate-700 text-sm mb-1">Im öffentlichen Raum</h4>
+                                        <span className="text-[10px] text-slate-500 mb-3">(Mitführen unterwegs)</span>
+                                        <div className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-lg font-black text-sm border border-emerald-200 w-full">
+                                            Besitz bis zu 25 Gramm
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col items-center text-center">
+                                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mb-2"><Home className="w-5 h-5 text-slate-400" /></div>
+                                        <h4 className="font-black text-slate-700 text-sm mb-1">Am Wohnsitz</h4>
+                                        <span className="text-[10px] text-slate-500 mb-3">(bzw. gewöhnlicher Aufenthalt)</span>
+                                        <div className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-lg font-black text-sm border border-emerald-200 w-full flex flex-col gap-1">
+                                            <span>Besitz von bis zu 3 Pflanzen</span>
+                                            <span className="text-xs font-bold text-emerald-600">und</span>
+                                            <span>bis zu 50 Gramm</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                     </div>
+                        )}
+
+                        {/* 2. STRAFBARER BESITZ */}
+                        {kcangView === 'strafbar' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-emerald-700 pb-2 border-b border-slate-50">
+                                    <AlertTriangle className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Mengenüberschreitung (Besitz)</h3>
+                                </div>
+                                
+                                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-4 bg-slate-50 inline-block px-2 py-1 rounded">Rechtliche Einstufung bei Erwachsenen</p>
+
+                                <div className="space-y-4">
+                                    {/* Strafmaß Info */}
+                                    <div className="bg-slate-800 text-white p-3 rounded-xl text-xs font-medium leading-relaxed shadow-sm">
+                                        Wird die zulässige Höchstmenge überschritten, greifen gestaffelte Sanktionen. Ab <strong className="text-red-400">30g</strong> (öffentlich) bzw. <strong className="text-red-400">60g</strong> (privat) handelt es sich um eine Straftat (Freiheitsstrafe bis zu 3 Jahre oder Geldstrafe).
+                                    </div>
+
+                                    {/* Unterwegs */}
+                                    <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
+                                        <div className="font-black text-slate-700 text-sm mb-2 flex items-center gap-2"><MapPin className="w-4 h-4 text-slate-400"/> Unterwegs (Draußen)</div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between bg-amber-50 border border-amber-200 p-2.5 rounded-lg">
+                                                <div className="flex flex-col"><span className="text-amber-800 font-bold text-xs uppercase">Ordnungswidrigkeit</span><span className="text-[10px] text-amber-600 font-mono font-bold">§ 36 (1) Nr. 1a KCanG</span></div>
+                                                <span className="font-black text-amber-700 text-sm">25,01 g - 30 g</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-red-50 border border-red-200 p-2.5 rounded-lg">
+                                                <div className="flex flex-col"><span className="text-red-800 font-bold text-xs uppercase">Straftat</span><span className="text-[10px] text-red-600 font-mono font-bold">§ 34 (1) Nr. 1a KCanG</span></div>
+                                                <span className="font-black text-red-700 text-sm">über 30 Gramm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Zuhause */}
+                                    <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
+                                        <div className="font-black text-slate-700 text-sm mb-2 flex items-center gap-2"><Home className="w-4 h-4 text-slate-400"/> Am Wohnsitz</div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between bg-amber-50 border border-amber-200 p-2.5 rounded-lg">
+                                                <div className="flex flex-col"><span className="text-amber-800 font-bold text-xs uppercase">Ordnungswidrigkeit</span><span className="text-[10px] text-amber-600 font-mono font-bold">§ 36 (1) Nr. 1b KCanG</span></div>
+                                                <span className="font-black text-amber-700 text-sm">50,01 g - 60 g</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-red-50 border border-red-200 p-2.5 rounded-lg">
+                                                <div className="flex flex-col"><span className="text-red-800 font-bold text-xs uppercase">Straftat</span><span className="text-[10px] text-red-600 font-mono font-bold">§ 34 (1) Nr. 1b KCanG</span></div>
+                                                <span className="font-black text-red-700 text-sm">über 60 Gramm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Pflanzen */}
+                                    <div className="bg-red-50 border border-red-200 p-3 rounded-xl flex justify-between items-center shadow-sm">
+                                        <div className="flex flex-col"><span className="text-red-800 font-black uppercase text-xs">Pflanzenbestand (Straftat)</span><span className="text-[10px] text-red-600 font-mono font-bold mt-0.5">§ 34 (1) Nr. 1c KCanG</span></div>
+                                        <span className="font-black text-red-700 text-sm text-right">mehr als 3 Pflanzen</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 3. PRIVATER ANBAU */}
+                        {kcangView === 'anbau' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-emerald-700 pb-2 border-b border-slate-50">
+                                    <Trees className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Privater Eigenanbau (§ 9 KCanG)</h3>
+                                </div>
+
+                                <div className="bg-red-50 border border-red-200 p-3 rounded-xl mb-4 flex gap-3 shadow-sm items-start">
+                                    <ShieldAlert className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+                                    <p className="text-[11px] font-medium text-red-900 leading-relaxed">
+                                        <strong className="text-red-700">Achtung:</strong> Der Anbau, die Herstellung und die Weitergabe von Cannabis sind <strong className="text-red-700 uppercase">grundsätzlich untersagt</strong>. Für den privaten Bereich gibt es jedoch strikte Ausnahmen.
+                                    </p>
+                                </div>
+
+                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-4 text-sm">
+                                    <div className="font-black text-slate-800 mb-3 text-xs uppercase tracking-wide">Regelungen für Erwachsene am eigenen Wohnsitz:</div>
+                                    <ul className="space-y-2 font-medium text-slate-700">
+                                        <li className="flex justify-between items-center bg-white p-2 rounded border border-slate-100"><span className="text-xs">Lebende Pflanzen:</span> <strong className="text-emerald-700">bis zu 3 Pflanzen</strong></li>
+                                        <li className="flex justify-between items-center bg-white p-2 rounded border border-slate-100"><span className="text-xs">Ertrag (getrocknet):</span> <strong className="text-emerald-700">bis zu 50 Gramm</strong></li>
+                                    </ul>
+                                    <div className="text-center mt-3 font-black text-emerald-600 uppercase tracking-widest text-xs">... Ausschließlich zum Eigenkonsum bestimmt!</div>
+                                </div>
+
+                                <div className="bg-yellow-50 border border-yellow-300 p-3 rounded-xl mb-4 text-[11px] text-yellow-900 font-medium leading-relaxed shadow-sm flex gap-2">
+                                    <Info className="w-4 h-4 shrink-0 text-yellow-600 mt-0.5" />
+                                    <p>
+                                        <strong>Schutzmaßnahmen:</strong> Das geerntete Cannabis darf keinesfalls an Dritte weitergegeben werden (auch nicht unentgeltlich). Zudem sind Pflanzen und Ertrag zwingend <span className="underline decoration-yellow-400">vor dem Zugriff durch Kinder, Jugendliche und unbefugte Dritte zu schützen</span>.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <h4 className="font-black text-slate-700 text-sm mb-2 mt-4 flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-slate-400"/> Strafen bei Überschreitung</h4>
+                                    
+                                    {/* Pflanzen */}
+                                    <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
+                                        <div className="font-black text-slate-700 text-sm mb-2 flex items-center gap-2"><Trees className="w-4 h-4 text-slate-400"/> Pflanzenbestand</div>
+                                        <div className="flex items-center justify-between bg-red-50 border border-red-200 p-2.5 rounded-lg">
+                                            <div className="flex flex-col"><span className="text-red-800 font-bold text-xs uppercase">Straftat</span><span className="text-[10px] text-red-600 font-mono font-bold mt-0.5">§ 34 (1) Nr. 1c KCanG</span></div>
+                                            <span className="font-black text-red-700 text-sm text-right">mehr als 3 Pflanzen</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Lagerung / Ertrag (entspricht Wohnsitz) */}
+                                    <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
+                                        <div className="font-black text-slate-700 text-sm mb-2 flex items-center gap-2"><Home className="w-4 h-4 text-slate-400"/> Ertrag / Lagerung am Wohnsitz</div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between bg-amber-50 border border-amber-200 p-2.5 rounded-lg">
+                                                <div className="flex flex-col"><span className="text-amber-800 font-bold text-xs uppercase">Ordnungswidrigkeit</span><span className="text-[10px] text-amber-600 font-mono font-bold">§ 36 (1) Nr. 1b KCanG</span></div>
+                                                <span className="font-black text-amber-700 text-sm">50,01 g - 60 g</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-red-50 border border-red-200 p-2.5 rounded-lg">
+                                                <div className="flex flex-col"><span className="text-red-800 font-bold text-xs uppercase">Straftat</span><span className="text-[10px] text-red-600 font-mono font-bold">§ 34 (1) Nr. 1b KCanG</span></div>
+                                                <span className="font-black text-red-700 text-sm">über 60 Gramm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 4. KONSUMVERBOTE */}
+                        {kcangView === 'konsum' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-emerald-700 pb-2 border-b border-slate-50">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Öffentlicher Konsum & Jugendschutz</h3>
+                                </div>
+
+                                <div className="space-y-4 text-sm text-slate-700 font-medium">
+                                    
+                                    {/* Gegenwart */}
+                                    <div className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                        <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5"><X className="w-4 h-4"/></div>
+                                        <div className="w-full">
+                                            <div>Der Konsum in unmittelbarer Gegenwart von <strong>Personen unter 18 Jahren</strong> ist strikt <span className="text-red-600 font-bold uppercase">untersagt</span>.</div>
+                                            <div className="mt-2 pt-2 border-t border-slate-200 flex justify-between items-center">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase">Ordnungswidrigkeit</span>
+                                                <span className="text-[10px] text-red-600 font-mono font-bold">§ 36 (1) Nr. 4 KCanG</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 100m Regel */}
+                                    <div className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                        <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5"><X className="w-4 h-4"/></div>
+                                        <div className="w-full">
+                                            <div>Zudem ist der Konsum in und an <strong>folgenden Orten</strong> <span className="text-red-600 font-bold uppercase">verboten</span>:</div>
+                                            <ul className="list-disc list-inside mt-2 space-y-1 text-xs">
+                                                <li>in Schulen und auf Kinderspielplätzen</li>
+                                                <li>in Kinder- und Jugendeinrichtungen</li>
+                                                <li>in öffentlich zugänglichen Sportstätten</li>
+                                            </ul>
+                                            <div className="mt-3 bg-red-50 border border-red-200 text-red-800 p-2.5 rounded-lg text-xs font-bold flex items-center gap-2">
+                                                <MapPin className="w-4 h-4 shrink-0" />
+                                                Das Verbot erstreckt sich auch auf die Sichtweite dieser Einrichtungen (in der Regel bis zu 100 Meter Abstand vom Eingangsbereich).
+                                            </div>
+                                            <div className="mt-3 pt-2 border-t border-slate-200 flex justify-between items-center">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase">Ordnungswidrigkeit</span>
+                                                <span className="text-[10px] text-red-600 font-mono font-bold">§ 36 (1) Nr. 4 KCanG</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Fußgängerzonen */}
+                                    <div className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                        <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5"><Clock className="w-4 h-4"/></div>
+                                        <div className="w-full">
+                                            <div className="text-xs pt-1">In Fußgängerzonen ist der Cannabis-Konsum <strong>zwischen 07:00 und 20:00 Uhr</strong> nicht gestattet!</div>
+                                            <div className="mt-2.5 pt-2 border-t border-slate-200 flex justify-between items-center">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase">Ordnungswidrigkeit</span>
+                                                <span className="text-[10px] text-red-600 font-mono font-bold">§ 36 (1) Nr. 4 KCanG</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Allgemeines Rauchverbot */}
+                                    <div className="bg-slate-800 text-white p-3.5 rounded-xl text-center text-xs font-bold shadow-sm mt-2">
+                                        Darüber hinaus gelten die allgemeinen Nichtraucherschutzgesetze der Länder unverändert fort.
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
+                        
+                    </div>
                  </div>
             )}
 
@@ -3573,84 +3876,102 @@ function KnowledgeBaseView() {
                             <AlertTriangle className="w-5 h-5" />
                             <h3 className="font-black uppercase tracking-wide text-xs">Ablegereife</h3>
                         </div>
+
+                        <div className="mb-4 relative">
+                            <select 
+                                value={lasiAblegereife}
+                                onChange={(e) => setLasiAblegereife(e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm cursor-pointer"
+                            >
+                                <option value="gurte">1. Zurrgurte (VDI 2700 Blatt 3.1)</option>
+                                <option value="ketten">2. Zurrketten (VDI 2700 Blatt 3.1)</option>
+                                <option value="rutsch">3. Rutschhemmendes Material (Blatt 15)</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                        </div>
                         
                         {/* 1. Zurrgurte */}
-                        <div className="mb-5">
-                            <h4 className="font-black text-slate-800 text-sm mb-2">1. Zurrgurte <span className="text-xs text-slate-400 font-normal">(VDI 2700 Blatt 3.1)</span></h4>
-                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
-                                <div>
-                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Gewebegurtband:</strong>
-                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                        <li>Einschnitte größer als 10 %</li>
-                                        <li>Verformungen</li>
-                                    </ul>
-                                </div>
-                                <div className="border-t border-slate-200 pt-2">
-                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Endbeschlagteil:</strong>
-                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                        <li>Verformung</li>
-                                        <li>Risse</li>
-                                        <li>Rost</li>
-                                    </ul>
-                                </div>
-                                <div className="border-t border-slate-200 pt-2">
-                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Etikett:</strong>
-                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                        <li>fehlt</li>
-                                        <li>unleserlich</li>
-                                        <li>CE Kennzeichnung vorhanden</li>
-                                        <li>Belastbarkeit in kg angegeben</li>
-                                    </ul>
-                                    <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs text-slate-700 font-medium">
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-blue-500 shrink-0 shadow-sm border border-blue-600/20"></div>PES (Polyester) = blaues Etikett</div>
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-emerald-500 shrink-0 shadow-sm border border-emerald-600/20"></div>PA (Polyamid) = grünes Etikett</div>
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#8B4513] shrink-0 shadow-sm border border-black/20"></div>PP (Polypropylen) = braunes Etikett</div>
+                        {lasiAblegereife === 'gurte' && (
+                            <div className="animate-in fade-in">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
+                                    <div>
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Gewebegurtband:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Einschnitte größer als 10 %</li>
+                                            <li>Verformungen</li>
+                                        </ul>
+                                    </div>
+                                    <div className="border-t border-slate-200 pt-2">
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Endbeschlagteil:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Verformung</li>
+                                            <li>Risse</li>
+                                            <li>Rost</li>
+                                        </ul>
+                                    </div>
+                                    <div className="border-t border-slate-200 pt-2">
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Etikett:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>fehlt</li>
+                                            <li>unleserlich</li>
+                                            <li>CE Kennzeichnung vorhanden</li>
+                                            <li>Belastbarkeit in kg angegeben</li>
+                                        </ul>
+                                        <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs text-slate-700 font-medium">
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-blue-500 shrink-0 shadow-sm border border-blue-600/20"></div>PES (Polyester) = blaues Etikett</div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-emerald-500 shrink-0 shadow-sm border border-emerald-600/20"></div>PA (Polyamid) = grünes Etikett</div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#8B4513] shrink-0 shadow-sm border border-black/20"></div>PP (Polypropylen) = braunes Etikett</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* 2. Zurrketten */}
-                        <div className="mb-5">
-                            <h4 className="font-black text-slate-800 text-sm mb-2">2. Zurrketten <span className="text-xs text-slate-400 font-normal">(VDI 2700 Blatt 3.1)</span></h4>
-                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
-                                <div>
-                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Rundstahlkette:</strong>
-                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                        <li>Oberflächenrisse</li>
-                                        <li>Dehnung von mehr als 3 %</li>
-                                        <li>Verformungen</li>
-                                        <li>Verschleiß von mehr als 10 % der Nenndicke</li>
-                                    </ul>
-                                </div>
-                                <div className="border-t border-slate-200 pt-2">
-                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Verbindungsstellen / Spannelemente:</strong>
-                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                        <li>Verformungen</li>
-                                        <li>Risse</li>
-                                        <li>viel Rost</li>
-                                        <li className="leading-snug">Sicherung des Zurrhakens darf fehlen, wenn die Tiefe der Nut mind. dem 5-fachen Wert der Nenndicke der Rundstahlkette entspricht</li>
-                                    </ul>
+                        {lasiAblegereife === 'ketten' && (
+                            <div className="animate-in fade-in">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
+                                    <div>
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Rundstahlkette:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Oberflächenrisse</li>
+                                            <li>Dehnung von mehr als 3 %</li>
+                                            <li>Verformungen</li>
+                                            <li>Verschleiß von mehr als 10 % der Nenndicke</li>
+                                        </ul>
+                                    </div>
+                                    <div className="border-t border-slate-200 pt-2">
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Verbindungsstellen / Spannelemente:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Verformungen</li>
+                                            <li>Risse</li>
+                                            <li>viel Rost</li>
+                                            <li className="leading-snug">Sicherung des Zurrhakens darf fehlen, wenn die Tiefe der Nut mind. dem 5-fachen Wert der Nenndicke der Rundstahlkette entspricht</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* 3. Rutschhemmendes Material */}
-                        <div>
-                            <h4 className="font-black text-slate-800 text-sm mb-2">3. Rutschhemmendes Material <span className="text-xs text-slate-400 font-normal block sm:inline mt-0.5 sm:mt-0">(Ablegereife VDI 2700 Blatt 15)</span></h4>
-                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                    <li>Abrieb auf der Oberfläche</li>
-                                    <li>aufgequollene Stellen</li>
-                                    <li>ausgebrochene Materialien</li>
-                                    <li>bleibende Druckstellen oder Verformungen</li>
-                                    <li>Risse</li>
-                                    <li>Schäden durch Kontakt mit aggressiven Stoffen</li>
-                                    <li>Verschmutzung die Funktion beeinträchtigt</li>
-                                    <li>Versprödung</li>
-                                </ul>
+                        {lasiAblegereife === 'rutsch' && (
+                            <div className="animate-in fade-in">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>Abrieb auf der Oberfläche</li>
+                                        <li>aufgequollene Stellen</li>
+                                        <li>ausgebrochene Materialien</li>
+                                        <li>bleibende Druckstellen oder Verformungen</li>
+                                        <li>Risse</li>
+                                        <li>Schäden durch Kontakt mit aggressiven Stoffen</li>
+                                        <li>Verschmutzung die Funktion beeinträchtigt</li>
+                                        <li>Versprödung</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -3766,13 +4087,13 @@ function KnowledgeBaseView() {
             {view === 'kz' && (
                 <div className="space-y-4">
                     {/* Sub-Navigation */}
-                    <div className="flex overflow-x-auto gap-2 pb-2 no-scrollbar">
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
                         {[
                             { id: 'kurzzeit', label: 'Kurzzeit (§ 42 FZV)' },
                             { id: 'ausfuhr', label: 'Ausfuhr (§ 45 FZV)' },
                             { id: 'rote', label: 'Rote (§ 41 FZV)' },
                             { id: 'oldtimer', label: 'Oldtimer (§ 43 FZV)' },
-                            { id: 'zwecke', label: 'Fahrtzwecke' },
+                            { id: 'verskennz', label: 'Versicherungskennzeichen' },
                         ].map(sub => (
                             <button
                                 key={sub.id}
@@ -3794,15 +4115,7 @@ function KnowledgeBaseView() {
                                     <h3 className="font-black uppercase tracking-wide text-xs">Kurzzeitkennzeichen (§ 42 FZV)</h3>
                                 </div>
 
-                                {/* Erlaubte Fahrtzwecke */}
-                                <div className="mb-4">
-                                    <h4 className="font-bold text-[10px] uppercase text-slate-400 mb-2">Erlaubte Fahrtzwecke</h4>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">1. Probefahrt</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">2. Überführungsfahrt</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">3. Reparatur-/Wartung</span>
-                                    </div>
-                                </div>
+                                <FahrtzweckeDropdown purposes={['probe', 'ueberfuehrung', 'reparatur']} />
 
                                 <div className="flex items-start gap-3 bg-teal-50 p-3 rounded-xl border border-teal-100 mb-4 text-xs text-teal-900 font-medium shadow-sm">
                                     <Info className="w-5 h-5 shrink-0 text-teal-600 mt-0.5" />
@@ -3820,12 +4133,12 @@ function KnowledgeBaseView() {
                                 
                                 <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Häufige Tatbestände (BKat)</h4>
                                 <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
-                                    <BkatRow title="Kennzeichen falsch angebracht" fahrerTbnr="842100" fahrerCost="10 €" halterTbnr="842000" halterCost="10 €" />
-                                    <BkatRow title="Fahrzeugschein nicht mitgeführt" fahrerTbnr="842124" fahrerCost="20 €" />
-                                    <BkatRow title="Fahren ohne Fahrtzweck" fahrerTbnr="842106" fahrerCost="50 €" />
-                                    <BkatRow title="Kennzeichen an anderem Fahrzeug" fahrerTbnr="842112" fahrerCost="50 €" />
-                                    <BkatRow title="Datum abgelaufen" fahrerTbnr="842118" fahrerCost="50 €" />
-                                    <BkatRow title="Ohne Kennzeichen gefahren" fahrerTbnr="842506" fahrerCost="60 €" halterTbnr="842500" halterCost="60 €" />
+                                    <BkatRow title="Kennzeichen falsch angebracht" fines={[{ role: 'Fahrer', tbnr: '842100', cost: '10 €' }, { role: 'Halter', tbnr: '842000', cost: '10 €' }]} />
+                                    <BkatRow title="Fahrzeugschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '842124', cost: '20 €' }]} />
+                                    <BkatRow title="Fahren ohne Fahrtzweck" fines={[{ role: 'Fahrer', tbnr: '842106', cost: '50 €' }]} />
+                                    <BkatRow title="Kennzeichen an anderem Fahrzeug" fines={[{ role: 'Fahrer', tbnr: '842112', cost: '50 €' }]} />
+                                    <BkatRow title="Datum abgelaufen" fines={[{ role: 'Fahrer', tbnr: '842118', cost: '50 €' }]} />
+                                    <BkatRow title="Ohne Kennzeichen gefahren" fines={[{ role: 'Fahrer', tbnr: '842506', cost: '60 €' }, { role: 'Halter', tbnr: '842500', cost: '60 €' }]} />
                                 </div>
                             </div>
                         )}
@@ -3838,13 +4151,7 @@ function KnowledgeBaseView() {
                                     <h3 className="font-black uppercase tracking-wide text-xs">Ausfuhrkennzeichen (§ 45 FZV)</h3>
                                 </div>
 
-                                {/* Erlaubte Fahrtzwecke */}
-                                <div className="mb-4">
-                                    <h4 className="font-bold text-[10px] uppercase text-slate-400 mb-2">Erlaubter Fahrtzweck</h4>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">Überführungsfahrt (z.B. ins Ausland)</span>
-                                    </div>
-                                </div>
+                                <FahrtzweckeDropdown purposes={['ueberfuehrung']} />
 
                                 <div className="flex items-start gap-3 bg-red-50 p-3 rounded-xl border border-red-100 mb-4 text-xs text-red-900 font-medium shadow-sm">
                                     <AlertTriangle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
@@ -3862,8 +4169,8 @@ function KnowledgeBaseView() {
                                 
                                 <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Häufige Tatbestände (BKat)</h4>
                                 <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
-                                    <BkatRow title="Kennzeichen falsch angebracht" fahrerTbnr="845100" fahrerCost="10 €" />
-                                    <BkatRow title="Fahren ohne Zulassung (Gültigkeit abgelaufen)" fahrerTbnr="803600" fahrerCost="70 €" halterTbnr="803500" halterCost="70 €" />
+                                    <BkatRow title="Kennzeichen falsch angebracht" fines={[{ role: 'Fahrer', tbnr: '845100', cost: '10 €' }]} />
+                                    <BkatRow title="Gültigkeit abgelaufen (Keine Zulassung)" fines={[{ role: 'Fahrer', tbnr: '803600', cost: '70 €' }, { role: 'Halter', tbnr: '803500', cost: '70 €' }]} />
                                 </div>
                             </div>
                         )}
@@ -3876,15 +4183,7 @@ function KnowledgeBaseView() {
                                     <h3 className="font-black uppercase tracking-wide text-xs">Rote Kennzeichen (§ 41 FZV)</h3>
                                 </div>
 
-                                {/* Erlaubte Fahrtzwecke */}
-                                <div className="mb-4">
-                                    <h4 className="font-bold text-[10px] uppercase text-slate-400 mb-2">Erlaubte Fahrtzwecke</h4>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">1. Probefahrt</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">2. Überführungsfahrt</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">3. Reparatur-/Wartung</span>
-                                    </div>
-                                </div>
+                                <FahrtzweckeDropdown purposes={['probe', 'ueberfuehrung', 'reparatur']} />
 
                                 <div className="flex items-start gap-3 bg-teal-50 p-3 rounded-xl border border-teal-100 mb-3 text-xs text-teal-900 font-medium shadow-sm">
                                     <Info className="w-5 h-5 shrink-0 text-teal-600 mt-0.5" />
@@ -3908,11 +4207,11 @@ function KnowledgeBaseView() {
                                 
                                 <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Häufige Tatbestände (BKat)</h4>
                                 <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
-                                    <BkatRow title="Kennzeichen falsch angebracht" fahrerTbnr="841124" fahrerCost="10 €" halterTbnr="841006" halterCost="10 €" />
-                                    <BkatRow title="Mitführpflicht (Fahrzeugscheinheft)" fahrerTbnr="841118" fahrerCost="10 €" />
-                                    <BkatRow title="Ausfüllpflicht (Fahrzeugscheinheft)" halterTbnr="841106" halterCost="10 €" />
-                                    <BkatRow title="Aufzeichnung im Betrieb fehlt" halterTbnr="841112" halterCost="25 €" />
-                                    <BkatRow title="Fahren ohne Zulassung (Kein Fahrtzweck)" fahrerTbnr="803600" fahrerCost="70 €" halterTbnr="803500" halterCost="70 €" />
+                                    <BkatRow title="Kennzeichen falsch angebracht" fines={[{ role: 'Fahrer', tbnr: '841124', cost: '10 €' }, { role: 'Halter', tbnr: '841006', cost: '10 €' }]} />
+                                    <BkatRow title="Mitführpflicht (Fahrzeugscheinheft)" fines={[{ role: 'Fahrer', tbnr: '841118', cost: '10 €' }]} />
+                                    <BkatRow title="Ausfüllpflicht (Fahrzeugscheinheft)" fines={[{ role: 'Halter', tbnr: '841106', cost: '10 €' }]} />
+                                    <BkatRow title="Aufzeichnung im Betrieb fehlt" fines={[{ role: 'Halter', tbnr: '841112', cost: '25 €' }]} />
+                                    <BkatRow title="Kein Fahrtzweck (Keine Zulassung)" fines={[{ role: 'Fahrer', tbnr: '803600', cost: '70 €' }, { role: 'Halter', tbnr: '803500', cost: '70 €' }]} />
                                 </div>
                             </div>
                         )}
@@ -3925,16 +4224,7 @@ function KnowledgeBaseView() {
                                     <h3 className="font-black uppercase tracking-wide text-xs">Rote Oldtimerkennzeichen (§ 43 FZV)</h3>
                                 </div>
 
-                                {/* Erlaubte Fahrtzwecke */}
-                                <div className="mb-4">
-                                    <h4 className="font-bold text-[10px] uppercase text-slate-400 mb-2">Erlaubte Fahrtzwecke</h4>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">1. Probefahrt</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">2. Überführungsfahrt</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">3. Reparatur-/Wartung</span>
-                                        <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-xs font-bold shadow-sm">4. Brauchtumspflege</span>
-                                    </div>
-                                </div>
+                                <FahrtzweckeDropdown purposes={['probe', 'ueberfuehrung', 'reparatur', 'brauchtum']} />
 
                                 <div className="flex items-start gap-3 bg-teal-50 p-3 rounded-xl border border-teal-100 mb-3 text-xs text-teal-900 font-medium shadow-sm">
                                     <Info className="w-5 h-5 shrink-0 text-teal-600 mt-0.5" />
@@ -3957,55 +4247,74 @@ function KnowledgeBaseView() {
                                 
                                 <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Häufige Tatbestände (BKat)</h4>
                                 <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
-                                    <BkatRow title="Kennzeichen falsch angebracht" fahrerTbnr="843100" fahrerCost="10 €" halterTbnr="843000" halterCost="10 €" />
-                                    <BkatRow title="Mitführpflicht (Fahrzeugscheinheft)" fahrerTbnr="843112" fahrerCost="10 €" />
-                                    <BkatRow title="Ausfüllpflicht (Fahrzeugscheinheft)" halterTbnr="843112" halterCost="10 €" />
-                                    <BkatRow title="Fahren ohne Zulassung (Kein Fahrtzweck)" fahrerTbnr="803600" fahrerCost="70 €" halterTbnr="803500" halterCost="70 €" />
+                                    <BkatRow title="Kennzeichen falsch angebracht" fines={[{ role: 'Fahrer', tbnr: '843100', cost: '10 €' }, { role: 'Halter', tbnr: '843000', cost: '10 €' }]} />
+                                    <BkatRow title="Mitführpflicht (Fahrzeugscheinheft)" fines={[{ role: 'Fahrer', tbnr: '843112', cost: '10 €' }]} />
+                                    <BkatRow title="Ausfüllpflicht (Fahrzeugscheinheft)" fines={[{ role: 'Halter', tbnr: '843112', cost: '10 €' }]} />
+                                    <BkatRow title="Kein Fahrtzweck (Keine Zulassung)" fines={[{ role: 'Fahrer', tbnr: '803600', cost: '70 €' }, { role: 'Halter', tbnr: '803500', cost: '70 €' }]} />
                                 </div>
                             </div>
                         )}
 
-                        {/* 5. Erlaubte Fahrtzwecke */}
-                        {kzView === 'zwecke' && (
-                            <div className="space-y-4 animate-in fade-in">
+                        {/* 5. Versicherungskennzeichen */}
+                        {kzView === 'verskennz' && (
+                            <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                                    <Info className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">Erlaubte Fahrtzwecke</h3>
+                                    <Shield className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Versicherungskennzeichen</h3>
                                 </div>
-                                
-                                <div className="space-y-4">
-                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                        <h4 className="font-black text-slate-800 text-sm mb-2">1. Probefahrt</h4>
-                                        <ul className="space-y-2 text-xs text-slate-700 font-medium">
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div><span>Es muss ein <strong>wirkliches Kaufinteresse</strong> bestehen. Der Fokus muss immer auf der Erprobung des Fahrzeugs liegen.</span></li>
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div><span>Eine Probefahrt kann <strong>mehrere Tage</strong> dauern (z.B. bei Wohnmobilen oder LKW). Ein PKW darf in der Regel <strong>nur 1 Tag</strong> ausgeliehen werden (VGH München).</span></li>
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1 shrink-0"></div><span className="text-red-800"><strong>NICHT erlaubt:</strong> Reine Alltagsfahrten, wie z.B. eine bloße Essensabholung!</span></li>
-                                        </ul>
-                                    </div>
 
-                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                        <h4 className="font-black text-slate-800 text-sm mb-2">2. Überführungsfahrt</h4>
-                                        <ul className="space-y-2 text-xs text-slate-700 font-medium">
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div>Fahrt des Käufers nach dem Kauf an einen Wohnort (auch Fahrten ins Ausland).</li>
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div>Fahrten zwischen verschiedenen Autohäusern.</li>
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div>Fahrten zum Tanken und zur Außenreinigung, sofern sie <strong>anlässlich</strong> von Probe-/Überführungsfahrten stattfinden.</li>
-                                        </ul>
-                                    </div>
+                                <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6 text-sm text-teal-900 leading-relaxed">
+                                    <strong>Gültigkeitszeitraum:</strong> Die Versicherungskennzeichen (für Mofas, E-Scooter, S-Pedelecs etc.) gelten immer vom <strong>01. März</strong> bis zum Ende des Monats Februar des Folgejahres. Die Farben wiederholen sich alle drei Jahre.
+                                </div>
 
-                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                        <h4 className="font-black text-slate-800 text-sm mb-2">3. Reparatur- oder Wartungsfahrt</h4>
-                                        <ul className="space-y-2 text-xs text-slate-700 font-medium">
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div>Fahrten zur Beibehaltung der technischen Einsatzfähigkeit (Beseitigung von technischen Mängeln).</li>
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div>Die generelle Instandhaltung des Fahrzeugs.</li>
-                                        </ul>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                        <div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2026</div>
+                                            <div className="font-black text-slate-700">Schwarz</div>
+                                        </div>
+                                        <div className="w-12 h-14 rounded bg-slate-900 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                            <span className="text-xs">XYZ</span>
+                                            <span className="text-xs">789</span>
+                                        </div>
                                     </div>
-                                    
-                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                        <h4 className="font-black text-slate-800 text-sm mb-2">4. Brauchtumspflege</h4>
-                                        <ul className="space-y-2 text-xs text-slate-700 font-medium">
-                                            <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1 shrink-0"></div><span>Ist <strong>nur</strong> bei der Nutzung von <strong>Roten Oldtimerkennzeichen (07er)</strong> zulässig!</span></li>
-                                        </ul>
+                                    <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                        <div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2027</div>
+                                            <div className="font-black text-slate-700">Blau</div>
+                                        </div>
+                                        <div className="w-12 h-14 rounded bg-blue-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                            <span className="text-xs">DEF</span>
+                                            <span className="text-xs">456</span>
+                                        </div>
                                     </div>
+                                    <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                        <div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2028</div>
+                                            <div className="font-black text-slate-700">Grün</div>
+                                        </div>
+                                        <div className="w-12 h-14 rounded bg-green-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                            <span className="text-xs">GHI</span>
+                                            <span className="text-xs">012</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                        <div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2029</div>
+                                            <div className="font-black text-slate-700">Schwarz</div>
+                                        </div>
+                                        <div className="w-12 h-14 rounded bg-slate-900 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
+                                            <span className="text-xs">JKL</span>
+                                            <span className="text-xs">345</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Tatbestände & Rechtsfolgen</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
+                                    <BkatRow title="Ohne Versicherungsschutz gefahren" fines={[{ role: 'Fahrer', tbnr: '§ 6 (1) PflVG', cost: 'Straftat' }, { role: 'Halter', tbnr: '§ 6 (4) PflVG', cost: 'Straftat' }]} />
+                                    <BkatRow title="Bescheinigung nicht mitgeführt" fines={[{ tbnr: '852100', cost: '10 €' }]} />
+                                    <BkatRow title="Kennzeichen nicht richtig angebracht" fines={[{ tbnr: '853100', cost: '10 €' }]} />
                                 </div>
                             </div>
                         )}
@@ -4055,106 +4364,14 @@ function KnowledgeBaseView() {
                         </div>
 
                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-sm text-slate-700 leading-relaxed">
-                            <p className="mb-2">Am <strong>oberen Rand</strong> der Plakette (in der Mitte auf "12 Uhr") steht die Zahl des Monats, in dem die HU fällig ist. Um dies auch aus größeren Distanzen ablesen zu können, ist links und rechts der Zahl 12 eine schwarze Markierung angebracht.</p>
-                            <p>Die <strong>Zahl in der Mitte</strong> zeigt das Jahr, in welchem die HU fällig ist. Zur besseren Erkennbarkeit lässt sich das Jahr auch zusätzlich an der Farbe ablesen.</p>
+                            <p>Am <strong>oberen Rand</strong> der Plakette (in der Mitte auf "12 Uhr") steht die Zahl des Monats, in dem die HU fällig ist. Um dies auch aus größeren Distanzen ablesen zu können, ist links und rechts der Zahl 12 eine schwarze Markierung angebracht.</p>
                         </div>
 
                         <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Tatbestände (HU-Fristüberschreitung)</h4>
-                        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-400 font-bold uppercase">
-                                    <tr>
-                                        <th className="px-3 py-2">TBNR</th>
-                                        <th className="px-3 py-2">Überschreitung</th>
-                                        <th className="px-3 py-2 text-right">Folge</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-slate-700">
-                                    <tr>
-                                        <td className="px-3 py-2 font-mono text-xs">329113</td>
-                                        <td className="px-3 py-2 text-xs">mehr als <strong>2 Monate</strong> bis zu 4 Monate</td>
-                                        <td className="px-3 py-2 text-right font-black text-red-600">15 €</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-3 py-2 font-mono text-xs">329119</td>
-                                        <td className="px-3 py-2 text-xs">mehr als <strong>4 Monate</strong> bis zu 8 Monate</td>
-                                        <td className="px-3 py-2 text-right font-black text-red-600">25 €</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-3 py-2 font-mono text-xs">329610</td>
-                                        <td className="px-3 py-2 text-xs">mehr als <strong>8 Monate</strong></td>
-                                        <td className="px-3 py-2 text-right">
-                                            <div className="font-black text-red-600">60 €</div>
-                                            <div className="text-[10px] font-bold text-amber-500 uppercase">1 Pkt.</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* VERSICHERUNGSKENNZEICHEN */}
-            {view === 'verskennz' && (
-                <div className="space-y-4 animate-in fade-in">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Shield className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Versicherungskennzeichen</h3>
-                        </div>
-
-                        <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6 text-sm text-teal-900 leading-relaxed">
-                            <strong>Gültigkeitszeitraum:</strong> Die Versicherungskennzeichen (für Mofas, E-Scooter, S-Pedelecs etc.) gelten immer vom <strong>01. März</strong> bis zum Ende des Monats Februar des Folgejahres. Die Farben wiederholen sich alle drei Jahre.
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
-                                <div>
-                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2025</div>
-                                    <div className="font-black text-slate-700">Grün</div>
-                                </div>
-                                <div className="w-12 h-14 rounded bg-green-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
-                                    <span className="text-xs">ABC</span>
-                                    <span className="text-xs">123</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
-                                <div>
-                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2026</div>
-                                    <div className="font-black text-slate-700">Schwarz</div>
-                                </div>
-                                <div className="w-12 h-14 rounded bg-slate-900 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
-                                    <span className="text-xs">XYZ</span>
-                                    <span className="text-xs">789</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
-                                <div>
-                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2027</div>
-                                    <div className="font-black text-slate-700">Blau</div>
-                                </div>
-                                <div className="w-12 h-14 rounded bg-blue-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
-                                    <span className="text-xs">DEF</span>
-                                    <span className="text-xs">456</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
-                                <div>
-                                    <div className="text-xs text-slate-400 font-bold uppercase mb-0.5">ab März 2028</div>
-                                    <div className="font-black text-slate-700">Grün</div>
-                                </div>
-                                <div className="w-12 h-14 rounded bg-green-600 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-white font-mono font-bold leading-none py-1">
-                                    <span className="text-xs">GHI</span>
-                                    <span className="text-xs">012</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-sm">
-                            <div className="font-black text-red-800 mb-2 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Rechtsfolgen</div>
-                            <p className="text-red-900 text-xs leading-relaxed mb-2">Fahren mit abgelaufenem (falsche Farbe) oder ohne Versicherungskennzeichen erfüllt in der Regel den <strong>Straftatbestand des Pflichtversicherungsgesetzes (§ 6 PflVG)</strong>.</p>
-                            <p className="text-red-900 text-xs leading-relaxed">Ist das Kennzeichen vorhanden und gültig, aber nur <strong>nicht oder falsch angebracht</strong>, liegt eine Ordnungswidrigkeit vor (TBNR 827100 = 10 €).</p>
+                        <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
+                            <BkatRow title="mehr als 2 Monate bis zu 4 Monate" fines={[{ tbnr: '329113', cost: '15 €' }]} />
+                            <BkatRow title="mehr als 4 Monate bis zu 8 Monate" fines={[{ tbnr: '329119', cost: '25 €' }]} />
+                            <BkatRow title="mehr als 8 Monate" fines={[{ tbnr: '329610', cost: '60 €', points: '1 Pkt.' }]} />
                         </div>
                     </div>
                 </div>
@@ -4163,109 +4380,193 @@ function KnowledgeBaseView() {
             {/* JUGENDSCHUTZ */}
             {view === 'juschg' && (
                 <div className="space-y-4 animate-in fade-in">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Users className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Jugendschutzgesetz (JuSchG)</h3>
-                        </div>
+                    <div className="bg-white p-1.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                         
-                        <div className="mb-4 text-xs text-slate-500 font-medium">
-                            Die Tabelle gilt für Jugendliche <strong>ohne Begleitung</strong> einer personensorgeberechtigten (Eltern) oder erziehungsbeauftragten Person.
-                        </div>
-
-                        <div className="space-y-3">
-                            {/* Alkohol */}
-                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-200 pb-2">Alkohol & Tabak</h4>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-start text-sm">
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 block">Bier, Wein, Sekt</span>
-                                            <span className="text-[10px] text-slate-400">§ 9 JuSchG</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 16 verboten</span>
-                                            <div className="text-[9px] text-slate-500 mt-0.5">Ausnahme: Ab 14 mit Eltern</div>
-                                            <div className="text-[10px] font-bold text-emerald-600 mt-1">Ab 16 erlaubt</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 block">Spirituosen / Harter Alkohol</span>
-                                            <span className="text-[10px] text-slate-400">Mischgetränke etc.</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 18 verboten</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 block">Rauchen & E-Zigaretten</span>
-                                            <span className="text-[10px] text-slate-400">§ 10 JuSchG (auch nikotinfrei)</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 18 verboten</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div className="flex justify-between items-start mb-3 px-1 pt-1">
+                            <div className="text-[9px] sm:text-[10px] text-slate-500 font-bold leading-tight max-w-[50%]">
+                                (Dieses Gesetz gilt nicht für<br/>verheiratete Jugendliche)
                             </div>
-
-                            {/* Aufenthalt */}
-                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-200 pb-2">Aufenthalt</h4>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-start text-sm">
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 block">Gaststätten</span>
-                                            <span className="text-[10px] text-slate-400">§ 4 JuSchG</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 16 verboten</span>
-                                            <div className="text-[10px] font-bold text-amber-600 mt-1">16-17 Jahre: bis 24 Uhr</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 block">Disco / Tanzveranstaltung</span>
-                                            <span className="text-[10px] text-slate-400">§ 5 JuSchG</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 16 verboten</span>
-                                            <div className="text-[10px] font-bold text-amber-600 mt-1">16-17 Jahre: bis 24 Uhr</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-start text-sm pt-2 border-t border-slate-100">
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 block">Nachtclubs & Spielhallen</span>
-                                            <span className="text-[10px] text-slate-400">§§ 4, 6 JuSchG</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">Unter 18 verboten</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Medien */}
-                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-200 pb-2">Kino & Medien</h4>
-                                <p className="text-xs text-slate-700 leading-relaxed">
-                                    Kino (§ 11) sowie Filme und Spiele (§ 12) sind streng an die <strong>Altersfreigabe (FSK/USK)</strong> gebunden. 
-                                </p>
-                                <p className="text-[10px] text-slate-500 mt-2">
-                                    Ausnahme: "Filme ab 12 Jahren" dürfen im Kino auch von Kindern ab 6 Jahren in Begleitung der Eltern (personensorgeberechtigt) angesehen werden.
-                                </p>
-                                <div className="mt-3 flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
-                                    <span className="text-xs font-bold text-slate-700">Kino Aufenthaltsdauer:</span>
-                                    <div className="text-[10px] text-right">
-                                        <div><strong className="text-amber-600">Unter 14:</strong> bis 20 Uhr</div>
-                                        <div><strong className="text-amber-600">Unter 16:</strong> bis 22 Uhr</div>
-                                        <div><strong className="text-amber-600">Unter 18:</strong> bis 24 Uhr</div>
-                                    </div>
-                                </div>
+                            <div className="flex flex-col gap-1 text-[9px] sm:text-[10px] font-bold text-slate-600">
+                                <span className="flex items-center gap-1.5">
+                                    <div className="w-3 h-3 bg-emerald-500 rounded-sm shadow-inner"></div> erlaubt
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <div className="w-3 h-3 bg-red-500 rounded-sm shadow-inner"></div> nicht erlaubt
+                                </span>
                             </div>
                         </div>
 
+                        <div className="w-full">
+                            <table className="w-full text-left border-collapse border border-slate-200 table-fixed">
+                                <thead>
+                                    <tr className="bg-slate-800 text-white">
+                                        <th className="p-1.5 sm:p-3 text-[7.5px] sm:text-[10px] font-medium leading-tight sm:leading-relaxed border-b border-r border-slate-700 w-[46%] text-slate-300 align-middle">
+                                            
+                                        </th>
+                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-r border-slate-700 text-center leading-tight w-[18%] align-middle">
+                                            Kinder<br/>unter<br/>14 J.
+                                        </th>
+                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-r border-slate-700 text-center leading-tight w-[18%] align-middle">
+                                            Jugendl.<br/>unter<br/>16 J.
+                                        </th>
+                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-slate-700 text-center leading-tight w-[18%] align-middle">
+                                            Jugendl.<br/>unter<br/>18 J.
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="align-top">
+                                    
+                                    {/* § 4 Gaststätten */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 4</span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt in Gaststätten</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                    {/* § 4 Nachtbars */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 4</span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt in Nachtbars, Nachtclubs oder vergleichbaren Vergnügungsbetrieben</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 5 Disco */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 5</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit bei öffentlichen Tanzveranstaltungen, u. a. Disco</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Ausnahmegenehmigung durch zuständige Behörde möglich)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                    {/* § 5 Jugendhilfe */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 5</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit bei Tanzveranstaltungen von anerkannten Trägern der Jugendhilfe.</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">Bei künstl. Betätigung o. zur Brauchtumspflege</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>22 Uhr</span></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                    {/* § 6 & § 7 */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 leading-tight text-[9px] sm:text-[11px]">§ 6<br/>§ 7</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit in öffentlichen Spielhallen. Teiln. an Spielen mit Gewinnmöglichkeiten<br/>Anwesenheit bei jugendgefährdenden Veranstaltungen und in Betrieben</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Die zuständige Behörde kann Alters- und Zeitbegrenzungen sowie andere Auflagen anordnen.)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 8 */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 8</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt an jugendgefährdenden Orten</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Die zuständige Behörde kann Maßnahmen zur Gefahrenabwehr treffen.)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 9 Bier/Wein */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 9</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe/Verzehr von Bier, Wein, Schaumwein, Mischungen mit Bier, Wein o.ä.</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Ausnahme: Erlaubt bei 14- u. 15-Jährigen in Begleitung einer personensorgeberechtigten Person [Eltern])</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 9 Spirituosen */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5"></span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe / Verzehr von anderen alkoholischen Getränken oder Lebensmitteln z. B. Spirituosen</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 10 Rauchen */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 10</span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe/Konsum von Tabakwaren, E-Zigaretten/E-Shishas (auch nikotinfrei)</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 11 Kinobesuche */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 11</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Kinobesuche<br/>Nur bei Freigabe des Films und Vorspanns: "ohne Altersbeschr. / ab 6/12/16 Jahren"</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Kinder unter 6 Jahren nur mit einer erziehungsbeauftragten Person. Die Anwesenheit ist grundsätzlich an die Altersfreigabe gebunden! Ausnahme: „Filme ab 12 Jahren": Anwesenheit ab 6 Jahren in Begleitung einer personensorgeberechtigten Person [Eltern] gestattet.)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>20 Uhr</span></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>22 Uhr</span></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}
@@ -4287,7 +4588,7 @@ function InfoView() {
         <HeaderLogo />
       </div>
       <div className="p-3">
-          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1">
+          <div className="flex bg-slate-200 p-1 rounded-xl mb-4 no-print overflow-x-auto gap-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Impressum</button>
             <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Datenschutz</button>
             <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Haftung</button>
@@ -4401,7 +4702,7 @@ const DashboardView = ({ onSelect }) => {
         { id: 'speed', title: 'Geschwindigkeit', icon: Gauge, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Laser • Hinterherfahren' },
         { id: 'accident', title: 'Unfallrechner', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', desc: 'Bremsspur • Driftspur' },
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
-        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '§ 24a/c StVG • BtM • Blut • KZ • LaSi • HU • VersKz • JuSchG' }
+        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '' }
     ];
 
     return (
