@@ -4063,8 +4063,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                 </div>
             )}
 
-            {/* KENNZEICHEN */}
-            {view === 'kz' && (
+         {/* KENNZEICHEN */}
+         {view === 'kz' && (
                 <div className="space-y-4">
                     {/* Sub-Navigation */}
                     <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
