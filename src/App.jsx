@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, 
-  ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, ChevronDown, ChevronUp,
+  ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, ChevronDown, ChevronUp, ChevronLeft,
   Droplets, Weight, Gavel, User, Briefcase, FileText, X, Edit3, 
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Wand2,
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
   List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
-  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard
+  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed
 } from 'lucide-react';
 
 // --- THEME CONTEXT & STYLES ---
@@ -298,7 +298,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.0
+        RoadTool v. 2.1
     </div>
 );
 
@@ -2320,7 +2320,7 @@ function WeightModule() {
 }
 
 // --- LASHING CALCULATOR ---
-function LashingCalculator() {
+function LashingCalculator({ onOpenKnowledge }) {
   const [lashingType, setLashingType] = useState('nieder'); // Toggle zwischen 'nieder', 'diagonal', 'pkw'
 
   const [allowedWeight, setAllowedWeight] = useState('');
@@ -2706,6 +2706,23 @@ function LashingCalculator() {
                 <span className="text-[10px] font-bold uppercase">PKW-Transp.</span>
             </button>
         </div>
+
+        {/* --- WISSEN-LINK --- */}
+        {onOpenKnowledge && (
+            <button 
+                onClick={() => onOpenKnowledge(lashingType === 'pkw' ? 'pkw' : 'lasi')}
+                className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl mb-2 text-xs font-bold transition-all border shadow-sm ${
+                    lashingType === 'pkw' 
+                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 hover:border-rose-300' 
+                    : lashingType === 'diagonal'
+                    ? 'bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border-cyan-200 hover:border-cyan-300'
+                    : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 hover:border-indigo-300'
+                }`}
+            >
+                <BookOpen className="w-4 h-4" />
+                {lashingType === 'pkw' ? 'Wissensdatenbank: PKW-Transporter öffnen' : 'Wissensdatenbank: Ladungssicherung öffnen'}
+            </button>
+        )}
 
         {lashingType === 'nieder' ? (
         <>
@@ -3211,79 +3228,19 @@ const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
     );
 };
 
-const FahrtzweckeDropdown = ({ purposes }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    
-    return (
-        <div className="bg-slate-50 border border-slate-200 p-2 sm:p-3 rounded-xl flex flex-col gap-3 shadow-sm mb-4">
-            <button onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-full text-left px-1">
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center shrink-0">
-                        <Info className="w-4 h-4 text-teal-600" />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-slate-700 text-xs uppercase">Erlaubte Fahrtzwecke</h4>
-                        <div className="text-[10px] text-slate-500 font-medium mt-0.5">{isOpen ? 'Details ausblenden' : 'Details einblenden'}</div>
-                    </div>
-                </div>
-                <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-200">
-                    {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400"/> : <ChevronDown className="w-4 h-4 text-slate-400"/>}
-                </div>
-            </button>
-            
-            {isOpen && (
-                <div className="space-y-4 pt-3 border-t border-slate-200 animate-in fade-in">
-                    {purposes.includes('probe') && (
-                        <div className="space-y-2">
-                            <h5 className="font-black text-slate-800 text-sm">Probefahrt</h5>
-                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Es muss ein <strong>wirkliches Kaufinteresse</strong> bestehen. Der Fokus muss immer auf der Erprobung des Fahrzeugs liegen.</span></li>
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Eine Probefahrt kann <strong>mehrere Tage</strong> dauern (z.B. bei Wohnmobilen oder LKW). Ein PKW darf in der Regel <strong>nur 1 Tag</strong> ausgeliehen werden (VGH München).</span></li>
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span className="text-red-800"><strong>NICHT erlaubt:</strong> Reine Alltagsfahrten, wie z.B. eine bloße Essensabholung!</span></li>
-                            </ul>
-                        </div>
-                    )}
-                    {purposes.includes('ueberfuehrung') && (
-                        <div className="space-y-2">
-                            <h5 className="font-black text-slate-800 text-sm">Überführungsfahrt</h5>
-                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrt des Käufers nach dem Kauf an einen Wohnort (auch Fahrten ins Ausland).</span></li>
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zwischen verschiedenen Autohäusern.</span></li>
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zum Tanken und zur Außenreinigung, sofern sie <strong>anlässlich</strong> von Probe-/Überführungsfahrten stattfinden.</span></li>
-                            </ul>
-                        </div>
-                    )}
-                    {purposes.includes('reparatur') && (
-                        <div className="space-y-2">
-                            <h5 className="font-black text-slate-800 text-sm">Reparatur- oder Wartungsfahrt</h5>
-                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zur Beibehaltung der technischen Einsatzfähigkeit (Beseitigung von technischen Mängeln).</span></li>
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Die generelle Instandhaltung des Fahrzeugs.</span></li>
-                            </ul>
-                        </div>
-                    )}
-                    {purposes.includes('brauchtum') && (
-                        <div className="space-y-2">
-                            <h5 className="font-black text-slate-800 text-sm">Brauchtumspflege</h5>
-                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
-                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Teilnahme an Veranstaltungen, die der Darstellung von Oldtimer-Fahrzeugen und der Pflege des kraftfahrzeugtechnischen Kulturgutes dienen.</span></li>
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
-
-function KnowledgeBaseView() {
+function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const dateTime = useDateTime();
-  const [view, setView] = useState('overview'); // Startet jetzt standardmäßig mit der Übersicht
+  const [view, setView] = useState(initialView); // Startet jetzt standardmäßig mit der Übersicht
   const [kzView, setKzView] = useState('kurzzeit'); // State für die Sonderkennzeichen
   const [alkDroView, setAlkDroView] = useState('ph1'); // State für Alkohol/Drogen Untermenü
   const [kcangView, setKcangView] = useState('besitz'); // State für KCanG Untermenü
   const [lasiAblegereife, setLasiAblegereife] = useState('gurte'); // State für LaSi Ablegereife Auswahl
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [reifenExpanded, setReifenExpanded] = useState({ profil: true, winter: false, spikes: false }); // State für Reifen-Tatbestände
+
+  useEffect(() => {
+      if (initialView) setView(initialView);
+  }, [initialView]);
 
   // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
   useEffect(() => {
@@ -3291,16 +3248,17 @@ function KnowledgeBaseView() {
   }, [view, kzView, alkDroView, kcangView, lasiAblegereife]);
 
   const tabs = [
-      { id: 'alk_dro', label: 'Fahren u. Alkohol/Drogen', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
       { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
-      { id: 'kcang', label: 'KCanG (Cannabis)', icon: Trees, color: 'text-emerald-500', bg: 'bg-emerald-50' },
       { id: 'btm', label: 'BtM-Mengen', icon: AlertCircle, color: 'text-purple-500', bg: 'bg-purple-50' },
       { id: 'einziehung', label: 'Einziehung', icon: ScaleLaw, color: 'text-amber-500', bg: 'bg-amber-50' },
+      { id: 'alk_dro', label: 'Fahren u. Alkohol/Drogen', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
+      { id: 'hu', label: 'Hauptuntersuchung', icon: Search, color: 'text-teal-500', bg: 'bg-teal-50' },
+      { id: 'juschg', label: 'Jugendschutz', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
+      { id: 'kcang', label: 'KCanG (Cannabis)', icon: Trees, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+      { id: 'kz', label: 'Kennzeichen', icon: FileText, color: 'text-cyan-500', bg: 'bg-cyan-50' },
       { id: 'lasi', label: 'Ladungssicherung', icon: LashingStrapIcon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
-      { id: 'kz', label: 'Kennzeichen', icon: FileText, color: 'text-cyan-500', bg: 'bg-cyan-50' },
-      { id: 'hu', label: 'Hauptuntersuchung', icon: Search, color: 'text-teal-500', bg: 'bg-teal-50' },
-      { id: 'juschg', label: 'Jugendschutz', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' }
+      { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' }
   ];
 
   return (
@@ -3359,7 +3317,20 @@ function KnowledgeBaseView() {
          </div>
       )}
 
-      <div className="p-2 animate-in fade-in duration-300 pb-20 no-print mt-2">
+      {/* ZURÜCK BUTTON WENN AUS RECHNER GEÖFFNET */}
+      {onBack && (
+          <div className="p-2 pb-0 mt-2 no-print animate-in fade-in slide-in-from-top-2">
+              <button
+                  onClick={onBack}
+                  className="w-full flex items-center justify-center gap-2 bg-slate-800 text-white p-3 rounded-xl text-sm font-bold shadow-md hover:bg-slate-700 active:scale-95 transition-all"
+              >
+                  <ChevronLeft className="w-5 h-5" />
+                  Zurück zum vorherigen Rechner
+              </button>
+          </div>
+      )}
+
+      <div className={`p-2 animate-in fade-in duration-300 pb-20 no-print ${onBack ? 'mt-0' : 'mt-2'}`}>
             
             {/* ÜBERSICHT (DASHBOARD-STYLE) */}
             {view === 'overview' && (
@@ -3855,230 +3826,239 @@ function KnowledgeBaseView() {
                 </div>
             )}
 
-            {/* LASI WISSEN */}
-            {view === 'lasi' && (
-                <div className="space-y-4">
-                    {/* Allgemein */}
+                       {/* HAUPTUNTERSUCHUNG (HU) */}
+            {view === 'hu' && (
+                <div className="space-y-4 animate-in fade-in">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <LashingStrapIcon className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">LaSi - Allgemein</h3>
-                        </div>
-                        <ol className="space-y-3 text-sm text-slate-700 font-medium list-decimal list-inside">
-                            <li className="pl-1"><strong>Formschluss</strong> besteht bis zu einem Abstand von 3 cm in alle Richtungen außer hinten, dort maximal 30 cm.</li>
-                            <li className="pl-1 leading-relaxed"><strong>Rutschhemmendes Material</strong> kann nur bezüglich des Reibwerts angenommen werden, wenn die Ladung gänzlich durch das rutschhemmende Material vom Boden angehoben wird.</li>
-                        </ol>
-                    </div>
-
-                    {/* Ablegereife */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <AlertTriangle className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Ablegereife</h3>
+                            <Search className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Hauptuntersuchung (HU)</h3>
                         </div>
 
-                        <div className="mb-4 relative">
-                            <select 
-                                value={lasiAblegereife}
-                                onChange={(e) => setLasiAblegereife(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm cursor-pointer"
-                            >
-                                <option value="gurte">1. Zurrgurte (VDI 2700 Blatt 3.1)</option>
-                                <option value="ketten">2. Zurrketten (VDI 2700 Blatt 3.1)</option>
-                                <option value="rutsch">3. Rutschhemmendes Material (Blatt 15)</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
-                                <ChevronDown className="w-4 h-4" />
-                            </div>
+                        {/* Plaketten-Farben (2026 - 2032) */}
+                        <div className="flex overflow-x-auto gap-4 pb-4 mb-2 px-2 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                            {[
+                                { year: 2026, bg: 'bg-blue-400', short: '26' },
+                                { year: 2027, bg: 'bg-yellow-400', short: '27' },
+                                { year: 2028, bg: 'bg-[#8B4513]', short: '28' }, // Braun
+                                { year: 2029, bg: 'bg-pink-300', short: '29' },  // Rosa
+                                { year: 2030, bg: 'bg-green-500', short: '30' },
+                                { year: 2031, bg: 'bg-orange-500', short: '31' },
+                                { year: 2032, bg: 'bg-blue-400', short: '32' }
+                            ].map((plakette) => (
+                                <div key={plakette.year} className="flex flex-col items-center gap-1.5 shrink-0">
+                                    <div className={`w-10 h-10 rounded-full ${plakette.bg} border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative`}>
+                                        <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
+                                        <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">{plakette.short}</div>
+                                    </div>
+                                    <span className={`text-[10px] font-bold ${plakette.year === new Date().getFullYear() ? 'text-teal-600' : 'text-slate-500'}`}>{plakette.year}</span>
+                                </div>
+                            ))}
                         </div>
-                        
-                        {/* 1. Zurrgurte */}
-                        {lasiAblegereife === 'gurte' && (
-                            <div className="animate-in fade-in">
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
-                                    <div>
-                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Gewebegurtband:</strong>
-                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                            <li>Einschnitte größer als 10 %</li>
-                                            <li>Verformungen</li>
-                                        </ul>
-                                    </div>
-                                    <div className="border-t border-slate-200 pt-2">
-                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Endbeschlagteil:</strong>
-                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                            <li>Verformung</li>
-                                            <li>Risse</li>
-                                            <li>Rost</li>
-                                        </ul>
-                                    </div>
-                                    <div className="border-t border-slate-200 pt-2">
-                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Etikett:</strong>
-                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                            <li>fehlt</li>
-                                            <li>unleserlich</li>
-                                            <li>CE Kennzeichnung vorhanden</li>
-                                            <li>Belastbarkeit in kg angegeben</li>
-                                        </ul>
-                                        <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs text-slate-700 font-medium">
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-blue-500 shrink-0 shadow-sm border border-blue-600/20"></div>PES (Polyester) = blaues Etikett</div>
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-emerald-500 shrink-0 shadow-sm border border-emerald-600/20"></div>PA (Polyamid) = grünes Etikett</div>
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#8B4513] shrink-0 shadow-sm border border-black/20"></div>PP (Polypropylen) = braunes Etikett</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
-                        {/* 2. Zurrketten */}
-                        {lasiAblegereife === 'ketten' && (
-                            <div className="animate-in fade-in">
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
-                                    <div>
-                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Rundstahlkette:</strong>
-                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                            <li>Oberflächenrisse</li>
-                                            <li>Dehnung von mehr als 3 %</li>
-                                            <li>Verformungen</li>
-                                            <li>Verschleiß von mehr als 10 % der Nenndicke</li>
-                                        </ul>
-                                    </div>
-                                    <div className="border-t border-slate-200 pt-2">
-                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Verbindungsstellen / Spannelemente:</strong>
-                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                            <li>Verformungen</li>
-                                            <li>Risse</li>
-                                            <li>viel Rost</li>
-                                            <li className="leading-snug">Sicherung des Zurrhakens darf fehlen, wenn die Tiefe der Nut mind. dem 5-fachen Wert der Nenndicke der Rundstahlkette entspricht</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-sm text-slate-700 leading-relaxed">
+                            <p>Am <strong>oberen Rand</strong> der Plakette (in der Mitte auf "12 Uhr") steht die Zahl des Monats, in dem die HU fällig ist. Um dies auch aus größeren Distanzen ablesen zu können, ist links und rechts der Zahl 12 eine schwarze Markierung angebracht.</p>
+                        </div>
 
-                        {/* 3. Rutschhemmendes Material */}
-                        {lasiAblegereife === 'rutsch' && (
-                            <div className="animate-in fade-in">
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                                        <li>Abrieb auf der Oberfläche</li>
-                                        <li>aufgequollene Stellen</li>
-                                        <li>ausgebrochene Materialien</li>
-                                        <li>bleibende Druckstellen oder Verformungen</li>
-                                        <li>Risse</li>
-                                        <li>Schäden durch Kontakt mit aggressiven Stoffen</li>
-                                        <li>Verschmutzung die Funktion beeinträchtigt</li>
-                                        <li>Versprödung</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
+                        <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Tatbestände (HU-Fristüberschreitung)</h4>
+                        <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
+                            <BkatRow title="mehr als 2 Monate bis zu 4 Monate" fines={[{ tbnr: '329113', cost: '15 €' }]} />
+                            <BkatRow title="mehr als 4 Monate bis zu 8 Monate" fines={[{ tbnr: '329119', cost: '25 €' }]} />
+                            <BkatRow title="mehr als 8 Monate" fines={[{ tbnr: '329610', cost: '60 €', points: '1 Pkt.' }]} />
+                        </div>
                     </div>
                 </div>
             )}
-
-            {/* PKW TRANSPORTER */}
-            {view === 'pkw' && (
-                <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-6 text-teal-700 pb-2 border-b border-slate-50">
-                            <Car className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">PKW-Transporter (Verladung)</h3>
-                        </div>
-
-                        {/* NEUE REGELN INFO */}
-                        <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6">
-                            <h4 className="font-black text-teal-800 text-sm mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> Allgemeine Grundregeln</h4>
-                            <ul className="space-y-1.5 text-xs text-teal-900 font-medium list-disc list-inside">
-                                <li><strong>Es ist irrelevant</strong>, ob Fahrzeuge vorwärts oder rückwärts verladen werden. Die Achse in Fahrtrichtung ist ausschlaggebend.</li>
-                                <li>Die verwendeten Gurte müssen eine <strong>STF von mindestens 330 daN</strong> aufweisen.</li>
-                                <li>Die Radvorleger (Keile) müssen <strong>mindestens 12 cm hoch</strong> sein.</li>
-                            </ul>
-                        </div>
-
-                        <div className="space-y-8">
-                            
-                            {/* Bis 2.000 kg */}
-                            <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">1. Gewicht bis zu 2.000 kg</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
-                                    <div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Standard (VB 1)</div>
-                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: false, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Verladebild 2</div>
-                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Verladebild 3</div>
-                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'none' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
-                                    </div>
-                                </div>
-                                
-                                <div className="space-y-3">
-                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <strong className="text-slate-800">Standard (VB 1 - Diagonalsicherung):</strong> An der Achse in FR 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen FR (diagonal versetzt) 1 Gurt + <u>2 Vorleger (davor & dahinter)</u>.
-                                    </p>
-                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <strong className="text-slate-800">Verladebild 2:</strong> An der Achse in FR wird an <u>einem Reifen 1 Vorleger davor</u> angelegt (ohne Gurt). An der Achse gegen FR erhalten <strong>beide Reifen</strong> einen Gurt. Die <u>2 Vorleger (davor & dahinter)</u> kommen an den Reifen, der diagonal zum vorderen Vorleger liegt.
-                                    </p>
-                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <strong className="text-slate-800">Verladebild 3 (Achsweise):</strong> An der Achse in FR wird <strong>nichts</strong> gesichert. An der Achse gegen FR (Richtung Heck) erhalten <strong>beide Reifen</strong> jeweils 1 Gurt + <u>2 Vorleger (davor & dahinter)</u>.
-                                    </p>
-                                </div>
-
-                                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 font-medium shadow-sm mt-3">
-                                    <Info className="w-4 h-4 inline-block mr-1 mb-0.5" />
-                                    <strong>Hinweis:</strong> Verladebild 2 und 3 dürfen in der Regel nur Anwendung finden, wenn VB 1 technisch nicht machbar ist (z.B. erste Position über dem Fahrerhaus).
-                                </div>
+            {/* JUGENDSCHUTZ */}
+            {view === 'juschg' && (
+                <div className="space-y-4 animate-in fade-in">
+                    <div className="bg-white p-1.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        
+                        <div className="flex justify-between items-start mb-3 px-1 pt-1">
+                            <div className="text-[9px] sm:text-[10px] text-slate-500 font-bold leading-tight max-w-[50%]">
+                                (Dieses Gesetz gilt nicht für<br/>verheiratete Jugendliche)
                             </div>
-                            
-                            {/* 2.000 bis 3.000 kg */}
-                            <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">2. Gewicht von 2.000 bis 3.000 kg</h4>
-                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                    An der Achse in Fahrtrichtung: 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit 1 Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. <br/><span className="text-xs opacity-80">(Alternativ reicht es auch, <i>nur</i> die Achse gegen die Fahrtrichtung an beiden Rädern mit Gurt + 2 Vorlegern zu sichern).</span>
-                                </p>
-                            </div>
-                            
-                            {/* Letztes Fahrzeug */}
-                            <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">3. Letztes Fahrzeug</h4>
-                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                    An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
-                                </p>
-                            </div>
-
-                            {/* Ausnahme ohne Keile */}
-                            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mt-4">
-                                <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2"><Info className="w-5 h-5 text-indigo-500" /> Ausnahme ohne Keile (Bis 1.500 kg)</h4>
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                    Wenn ein Fahrzeug bauartbedingt <u>nicht</u> mit Keilen gesichert werden kann und <strong>maximal 1.500 kg</strong> wiegt, darf es alternativ auch an <strong>jedem der 4 Räder</strong> mit jeweils einem Gurt (ohne Radvorleger) gesichert werden.
-                                </p>
-                            </div>
-
-                            {/* Legende */}
-                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <h5 className="font-black text-slate-800 text-sm mb-3">Legende:</h5>
-                                <ul className="space-y-3 text-sm text-slate-700 font-bold flex flex-wrap gap-x-6 gap-y-2">
-                                    <li className="flex items-center gap-2">
-                                        <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
-                                        = Radkeil / Vorleger
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
-                                        = Autotransportgurt
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
-                                        = Rad
-                                    </li>
-                                </ul>
+                            <div className="flex flex-col gap-1 text-[9px] sm:text-[10px] font-bold text-slate-600">
+                                <span className="flex items-center gap-1.5">
+                                    <div className="w-3 h-3 bg-emerald-500 rounded-sm shadow-inner"></div> erlaubt
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <div className="w-3 h-3 bg-red-500 rounded-sm shadow-inner"></div> nicht erlaubt
+                                </span>
                             </div>
                         </div>
 
+                        <div className="w-full">
+                            <table className="w-full text-left border-collapse border border-slate-200 table-fixed">
+                                <thead>
+                                    <tr className="bg-slate-800 text-white">
+                                        <th className="p-1.5 sm:p-3 text-[7.5px] sm:text-[10px] font-medium leading-tight sm:leading-relaxed border-b border-r border-slate-700 w-[46%] text-slate-300 align-middle">
+                                            
+                                        </th>
+                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-r border-slate-700 text-center leading-tight w-[18%] align-middle">
+                                            Kinder<br/>unter<br/>14 J.
+                                        </th>
+                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-r border-slate-700 text-center leading-tight w-[18%] align-middle">
+                                            Jugendl.<br/>unter<br/>16 J.
+                                        </th>
+                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-slate-700 text-center leading-tight w-[18%] align-middle">
+                                            Jugendl.<br/>unter<br/>18 J.
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="align-top">
+                                    
+                                    {/* § 4 Gaststätten */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 4</span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt in Gaststätten</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                    {/* § 4 Nachtbars */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 4</span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt in Nachtbars, Nachtclubs oder vergleichbaren Vergnügungsbetrieben</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 5 Disco */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 5</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit bei öffentlichen Tanzveranstaltungen, u. a. Disco</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Ausnahmegenehmigung durch zuständige Behörde möglich)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                    {/* § 5 Jugendhilfe */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 5</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit bei Tanzveranstaltungen von anerkannten Trägern der Jugendhilfe.</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">Bei künstl. Betätigung o. zur Brauchtumspflege</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>22 Uhr</span></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                    {/* § 6 & § 7 */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 leading-tight text-[9px] sm:text-[11px]">§ 6<br/>§ 7</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit in öffentlichen Spielhallen. Teiln. an Spielen mit Gewinnmöglichkeiten<br/>Anwesenheit bei jugendgefährdenden Veranstaltungen und in Betrieben</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Die zuständige Behörde kann Alters- und Zeitbegrenzungen sowie andere Auflagen anordnen.)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 8 */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 8</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt an jugendgefährdenden Orten</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Die zuständige Behörde kann Maßnahmen zur Gefahrenabwehr treffen.)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 9 Bier/Wein */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 9</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe/Verzehr von Bier, Wein, Schaumwein, Mischungen mit Bier, Wein o.ä.</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Ausnahme: Erlaubt bei 14- u. 15-Jährigen in Begleitung einer personensorgeberechtigten Person [Eltern])</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 9 Spirituosen */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5"></span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe / Verzehr von anderen alkoholischen Getränken oder Lebensmitteln z. B. Spirituosen</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 10 Rauchen */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 10</span>
+                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe/Konsum von Tabakwaren, E-Zigaretten/E-Shishas (auch nikotinfrei)</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
+                                    </tr>
+
+                                    {/* § 11 Kinobesuche */}
+                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 11</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Kinobesuche<br/>Nur bei Freigabe des Films und Vorspanns: "ohne Altersbeschr. / ab 6/12/16 Jahren"</span>
+                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Kinder unter 6 Jahren nur mit einer erziehungsbeauftragten Person. Die Anwesenheit ist grundsätzlich an die Altersfreigabe gebunden! Ausnahme: „Filme ab 12 Jahren": Anwesenheit ab 6 Jahren in Begleitung einer personensorgeberechtigten Person [Eltern] gestattet.)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>20 Uhr</span></div></td>
+                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>22 Uhr</span></div></td>
+                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}
@@ -4322,253 +4302,338 @@ function KnowledgeBaseView() {
                 </div>
             )}
 
-            {/* HAUPTUNTERSUCHUNG (HU) */}
-            {view === 'hu' && (
-                <div className="space-y-4 animate-in fade-in">
+            {/* LASI WISSEN */}
+            {view === 'lasi' && (
+                <div className="space-y-4">
+                    {/* Allgemein */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
-                            <Search className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">Hauptuntersuchung (HU)</h3>
+                            <LashingStrapIcon className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">LaSi - Allgemein</h3>
+                        </div>
+                        <ol className="space-y-3 text-sm text-slate-700 font-medium list-decimal list-inside">
+                            <li className="pl-1"><strong>Formschluss</strong> besteht bis zu einem Abstand von 3 cm in alle Richtungen außer hinten, dort maximal 30 cm.</li>
+                            <li className="pl-1 leading-relaxed"><strong>Rutschhemmendes Material</strong> kann nur bezüglich des Reibwerts angenommen werden, wenn die Ladung gänzlich durch das rutschhemmende Material vom Boden angehoben wird.</li>
+                            <li className="pl-1 leading-relaxed">Wenn die Ladung aufgrund der Reibung bzw. dem Formschluss rechnerisch nicht durch Gurte gesichert werden muss, muss die Ladung dennoch <strong>mindestens durch einen Gurt niedergehalten</strong> werden.</li>
+                            <li className="pl-1 leading-relaxed">Ladung, die <strong>freistehend</strong> befördert wird, muss <strong>mindestens durch zwei Zurrgurte</strong> gesichert werden, auch wenn rechnerisch bereits ein Gurt die Ladung sichern würde.</li>
+                        </ol>
+                    </div>
+
+                    {/* Ablegereife */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <AlertTriangle className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Ablegereife</h3>
                         </div>
 
-                        {/* Plaketten-Farben (2025 - 2028) */}
-                        <div className="flex justify-between items-center mb-6 px-2">
-                            <div className="flex flex-col items-center gap-1.5">
-                                <div className="w-10 h-10 rounded-full bg-orange-500 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
-                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
-                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">25</div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-500">2025</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1.5">
-                                <div className="w-10 h-10 rounded-full bg-sky-400 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
-                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
-                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">26</div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-800">2026</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1.5">
-                                <div className="w-10 h-10 rounded-full bg-yellow-400 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
-                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
-                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">27</div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-500">2027</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1.5">
-                                <div className="w-10 h-10 rounded-full bg-red-500 border-2 border-slate-800 shadow-sm flex items-center justify-center font-bold text-slate-800 text-[10px] relative">
-                                    <div className="absolute top-0 w-2 h-2 bg-slate-800 rounded-b-sm"></div>
-                                    <div className="bg-white/80 w-5 h-5 rounded-full flex items-center justify-center z-10 border border-slate-800">28</div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-500">2028</span>
+                        <div className="mb-4 relative">
+                            <select 
+                                value={lasiAblegereife}
+                                onChange={(e) => setLasiAblegereife(e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm cursor-pointer"
+                            >
+                                <option value="gurte">1. Zurrgurte (VDI 2700 Blatt 3.1)</option>
+                                <option value="ketten">2. Zurrketten (VDI 2700 Blatt 3.1)</option>
+                                <option value="rutsch">3. Rutschhemmendes Material (Blatt 15)</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                                <ChevronDown className="w-4 h-4" />
                             </div>
                         </div>
+                        
+                        {/* 1. Zurrgurte */}
+                        {lasiAblegereife === 'gurte' && (
+                            <div className="animate-in fade-in">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
+                                    <div>
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Gewebegurtband:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Einschnitte größer als 10 %</li>
+                                            <li>Verformungen</li>
+                                        </ul>
+                                    </div>
+                                    <div className="border-t border-slate-200 pt-2">
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Endbeschlagteil:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Verformung</li>
+                                            <li>Risse</li>
+                                            <li>Rost</li>
+                                        </ul>
+                                    </div>
+                                    <div className="border-t border-slate-200 pt-2">
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Etikett:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>fehlt</li>
+                                            <li>unleserlich</li>
+                                            <li>CE Kennzeichnung vorhanden</li>
+                                            <li>Belastbarkeit in kg angegeben</li>
+                                        </ul>
+                                        <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs text-slate-700 font-medium">
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-blue-500 shrink-0 shadow-sm border border-blue-600/20"></div>PES (Polyester) = blaues Etikett</div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-emerald-500 shrink-0 shadow-sm border border-emerald-600/20"></div>PA (Polyamid) = grünes Etikett</div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#8B4513] shrink-0 shadow-sm border border-black/20"></div>PP (Polypropylen) = braunes Etikett</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-sm text-slate-700 leading-relaxed">
-                            <p>Am <strong>oberen Rand</strong> der Plakette (in der Mitte auf "12 Uhr") steht die Zahl des Monats, in dem die HU fällig ist. Um dies auch aus größeren Distanzen ablesen zu können, ist links und rechts der Zahl 12 eine schwarze Markierung angebracht.</p>
-                        </div>
+                        {/* 2. Zurrketten */}
+                        {lasiAblegereife === 'ketten' && (
+                            <div className="animate-in fade-in">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3">
+                                    <div>
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Rundstahlkette:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Oberflächenrisse</li>
+                                            <li>Dehnung von mehr als 3 %</li>
+                                            <li>Verformungen</li>
+                                            <li>Verschleiß von mehr als 10 % der Nenndicke</li>
+                                        </ul>
+                                    </div>
+                                    <div className="border-t border-slate-200 pt-2">
+                                        <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-1">Verbindungsstellen / Spannelemente:</strong>
+                                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                            <li>Verformungen</li>
+                                            <li>Risse</li>
+                                            <li>viel Rost</li>
+                                            <li className="leading-snug">Sicherung des Zurrhakens darf fehlen, wenn die Tiefe der Nut mind. dem 5-fachen Wert der Nenndicke der Rundstahlkette entspricht</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                        <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Tatbestände (HU-Fristüberschreitung)</h4>
-                        <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
-                            <BkatRow title="mehr als 2 Monate bis zu 4 Monate" fines={[{ tbnr: '329113', cost: '15 €' }]} />
-                            <BkatRow title="mehr als 4 Monate bis zu 8 Monate" fines={[{ tbnr: '329119', cost: '25 €' }]} />
-                            <BkatRow title="mehr als 8 Monate" fines={[{ tbnr: '329610', cost: '60 €', points: '1 Pkt.' }]} />
-                        </div>
+                        {/* 3. Rutschhemmendes Material */}
+                        {lasiAblegereife === 'rutsch' && (
+                            <div className="animate-in fade-in">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                    <strong className="text-xs text-teal-700 uppercase tracking-wide block mb-2">Rutschhemmendes Material:</strong>
+                                    <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
+                                        <li>ausgebrochene Materialien</li>
+                                        <li>bleibende Druckstellen oder Verformungen</li>
+                                        <li>Risse</li>
+                                        <li>Schäden durch Kontakt mit aggressiven Stoffen</li>
+                                        <li>Verschmutzung die Funktion beeinträchtigt</li>
+                                        <li>Versprödung</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
 
-            {/* JUGENDSCHUTZ */}
-            {view === 'juschg' && (
-                <div className="space-y-4 animate-in fade-in">
-                    <div className="bg-white p-1.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        
-                        <div className="flex justify-between items-start mb-3 px-1 pt-1">
-                            <div className="text-[9px] sm:text-[10px] text-slate-500 font-bold leading-tight max-w-[50%]">
-                                (Dieses Gesetz gilt nicht für<br/>verheiratete Jugendliche)
+            {/* PKW TRANSPORTER */}
+            {view === 'pkw' && (
+                <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-6 text-teal-700 pb-2 border-b border-slate-50">
+                            <Car className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">PKW-Transporter (Verladung)</h3>
+                        </div>
+
+                        {/* NEUE REGELN INFO */}
+                        <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6">
+                            <h4 className="font-black text-teal-800 text-sm mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> Allgemeine Grundregeln</h4>
+                            <ul className="space-y-1.5 text-xs text-teal-900 font-medium list-disc list-inside">
+                                <li><strong>Es ist irrelevant</strong>, ob Fahrzeuge vorwärts oder rückwärts verladen werden. Die Achse in Fahrtrichtung ist ausschlaggebend.</li>
+                                <li>Die verwendeten Gurte müssen eine <strong>STF von mindestens 330 daN</strong> aufweisen.</li>
+                                <li>Die Radvorleger (Keile) müssen <strong>mindestens 12 cm hoch</strong> sein.</li>
+                            </ul>
+                        </div>
+
+                        <div className="space-y-8">
+                            
+                            {/* Bis 2.000 kg */}
+                            <div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">1. Gewicht bis zu 2.000 kg</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                                    <div>
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Standard (VB 1)</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: false, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Verladebild 2</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Verladebild 3</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'none' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <strong className="text-slate-800">Standard (VB 1 - Diagonalsicherung):</strong> An der Achse in FR 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen FR (diagonal versetzt) 1 Gurt + <u>2 Vorleger (davor & dahinter)</u>.
+                                    </p>
+                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <strong className="text-slate-800">Verladebild 2:</strong> An der Achse in FR wird an <u>einem Reifen 1 Vorleger davor</u> angelegt (ohne Gurt). An der Achse gegen FR erhalten <strong>beide Reifen</strong> einen Gurt. Die <u>2 Vorleger (davor & dahinter)</u> kommen an den Reifen, der diagonal zum vorderen Vorleger liegt.
+                                    </p>
+                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <strong className="text-slate-800">Verladebild 3 (Achsweise):</strong> An der Achse in FR wird <strong>nichts</strong> gesichert. An der Achse gegen FR (Richtung Heck) erhalten <strong>beide Reifen</strong> jeweils 1 Gurt + <u>2 Vorleger (davor & dahinter)</u>.
+                                    </p>
+                                </div>
+
+                                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 font-medium shadow-sm mt-3">
+                                    <Info className="w-4 h-4 inline-block mr-1 mb-0.5" />
+                                    <strong>Hinweis:</strong> Verladebild 2 und 3 dürfen in der Regel nur Anwendung finden, wenn VB 1 technisch nicht machbar ist (z.B. erste Position über dem Fahrerhaus).
+                                </div>
                             </div>
-                            <div className="flex flex-col gap-1 text-[9px] sm:text-[10px] font-bold text-slate-600">
-                                <span className="flex items-center gap-1.5">
-                                    <div className="w-3 h-3 bg-emerald-500 rounded-sm shadow-inner"></div> erlaubt
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <div className="w-3 h-3 bg-red-500 rounded-sm shadow-inner"></div> nicht erlaubt
-                                </span>
+                            
+                            {/* 2.000 bis 3.000 kg */}
+                            <div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">2. Gewicht von 2.000 bis 3.000 kg</h4>
+                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    An der Achse in Fahrtrichtung: 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit 1 Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. <br/><span className="text-xs opacity-80">(Alternativ reicht es auch, <i>nur</i> die Achse gegen die Fahrtrichtung an beiden Rädern mit Gurt + 2 Vorlegern zu sichern).</span>
+                                </p>
+                            </div>
+                            
+                            {/* Letztes Fahrzeug */}
+                            <div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">3. Letztes Fahrzeug</h4>
+                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
+                                </p>
+                            </div>
+
+                            {/* Ausnahme ohne Keile */}
+                            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mt-4">
+                                <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2"><Info className="w-5 h-5 text-indigo-500" /> Ausnahme ohne Keile (Bis 1.500 kg)</h4>
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                                    Wenn ein Fahrzeug bauartbedingt <u>nicht</u> mit Keilen gesichert werden kann und <strong>maximal 1.500 kg</strong> wiegt, darf es alternativ auch an <strong>jedem der 4 Räder</strong> mit jeweils einem Gurt (ohne Radvorleger) gesichert werden.
+                                </p>
+                            </div>
+
+                            {/* Legende */}
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <h5 className="font-black text-slate-800 text-sm mb-3">Legende:</h5>
+                                <ul className="space-y-3 text-sm text-slate-700 font-bold flex flex-wrap gap-x-6 gap-y-2">
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
+                                        = Radkeil / Vorleger
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
+                                        = Autotransportgurt
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
+                                        = Rad
+                                    </li>
+                                </ul>
                             </div>
                         </div>
 
-                        <div className="w-full">
-                            <table className="w-full text-left border-collapse border border-slate-200 table-fixed">
-                                <thead>
-                                    <tr className="bg-slate-800 text-white">
-                                        <th className="p-1.5 sm:p-3 text-[7.5px] sm:text-[10px] font-medium leading-tight sm:leading-relaxed border-b border-r border-slate-700 w-[46%] text-slate-300 align-middle">
-                                            
-                                        </th>
-                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-r border-slate-700 text-center leading-tight w-[18%] align-middle">
-                                            Kinder<br/>unter<br/>14 J.
-                                        </th>
-                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-r border-slate-700 text-center leading-tight w-[18%] align-middle">
-                                            Jugendl.<br/>unter<br/>16 J.
-                                        </th>
-                                        <th className="p-1 sm:p-2 text-[8px] sm:text-[10px] font-black uppercase border-b border-slate-700 text-center leading-tight w-[18%] align-middle">
-                                            Jugendl.<br/>unter<br/>18 J.
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="align-top">
-                                    
-                                    {/* § 4 Gaststätten */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 4</span>
-                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt in Gaststätten</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
-                                    </tr>
-
-                                    {/* § 4 Nachtbars */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 4</span>
-                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt in Nachtbars, Nachtclubs oder vergleichbaren Vergnügungsbetrieben</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                    </tr>
-
-                                    {/* § 5 Disco */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 5</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit bei öffentlichen Tanzveranstaltungen, u. a. Disco</span>
-                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Ausnahmegenehmigung durch zuständige Behörde möglich)</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
-                                    </tr>
-
-                                    {/* § 5 Jugendhilfe */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 5</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit bei Tanzveranstaltungen von anerkannten Trägern der Jugendhilfe.</span>
-                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">Bei künstl. Betätigung o. zur Brauchtumspflege</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>22 Uhr</span></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
-                                    </tr>
-
-                                    {/* § 6 & § 7 */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 leading-tight text-[9px] sm:text-[11px]">§ 6<br/>§ 7</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Anwesenheit in öffentlichen Spielhallen. Teiln. an Spielen mit Gewinnmöglichkeiten<br/>Anwesenheit bei jugendgefährdenden Veranstaltungen und in Betrieben</span>
-                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Die zuständige Behörde kann Alters- und Zeitbegrenzungen sowie andere Auflagen anordnen.)</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                    </tr>
-
-                                    {/* § 8 */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 8</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Aufenthalt an jugendgefährdenden Orten</span>
-                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Die zuständige Behörde kann Maßnahmen zur Gefahrenabwehr treffen.)</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                    </tr>
-
-                                    {/* § 9 Bier/Wein */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 9</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe/Verzehr von Bier, Wein, Schaumwein, Mischungen mit Bier, Wein o.ä.</span>
-                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Ausnahme: Erlaubt bei 14- u. 15-Jährigen in Begleitung einer personensorgeberechtigten Person [Eltern])</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-emerald-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                    </tr>
-
-                                    {/* § 9 Spirituosen */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5"></span>
-                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe / Verzehr von anderen alkoholischen Getränken oder Lebensmitteln z. B. Spirituosen</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                    </tr>
-
-                                    {/* § 10 Rauchen */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 10</span>
-                                                <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Abgabe/Konsum von Tabakwaren, E-Zigaretten/E-Shishas (auch nikotinfrei)</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-red-500 w-full h-7 sm:h-8 rounded-sm shadow-inner mx-auto max-w-[32px] sm:max-w-[45px]"></div></td>
-                                    </tr>
-
-                                    {/* § 11 Kinobesuche */}
-                                    <tr className="border-b border-slate-200 hover:bg-slate-50">
-                                        <td className="p-1.5 sm:p-2 border-r border-slate-200 break-words">
-                                            <div className="flex gap-1.5 sm:gap-2">
-                                                <span className="font-bold text-slate-500 w-4 sm:w-6 shrink-0 mt-0.5 text-[9px] sm:text-[11px]">§ 11</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-700 text-[9px] sm:text-[11px] leading-tight">Kinobesuche<br/>Nur bei Freigabe des Films und Vorspanns: "ohne Altersbeschr. / ab 6/12/16 Jahren"</span>
-                                                    <span className="text-[7.5px] sm:text-[9px] text-slate-500 mt-0.5 leading-tight">(Kinder unter 6 Jahren nur mit einer erziehungsbeauftragten Person. Die Anwesenheit ist grundsätzlich an die Altersfreigabe gebunden! Ausnahme: „Filme ab 12 Jahren": Anwesenheit ab 6 Jahren in Begleitung einer personensorgeberechtigten Person [Eltern] gestattet.)</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>20 Uhr</span></div></td>
-                                        <td className="p-1 border-r border-slate-200 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>22 Uhr</span></div></td>
-                                        <td className="p-1 align-middle"><div className="bg-emerald-500 text-white font-bold text-[7.5px] sm:text-[9px] w-full h-7 sm:h-8 flex flex-col items-center justify-center rounded-sm mx-auto max-w-[32px] sm:max-w-[45px] shadow-inner leading-[1.1]"><span>bis</span><span>24 Uhr</span></div></td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
+            )}
+
+            {/* REIFEN */}
+            {view === 'reifen' && (
+                 <div className="space-y-4 animate-in fade-in">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                            <CircleDashed className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Reifen: Kennzeichnung & Vorschriften</h3>
+                        </div>
+
+                        <h4 className="font-bold text-slate-800 text-sm mb-3">Reifenkennzeichnung (Beispiel)</h4>
+                        <div className="bg-slate-800 text-white p-4 rounded-xl mb-4 text-center shadow-inner">
+                            <span className="text-2xl font-black font-mono tracking-widest text-teal-400 drop-shadow-md">205/55 R 16 91 V</span>
+                        </div>
+
+                        <div className="space-y-2 text-sm text-slate-700 font-medium mb-6">
+                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100"><span className="font-black text-slate-800 w-12 text-teal-600">205</span><span className="text-right">Reifenbreite in mm</span></div>
+                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100"><span className="font-black text-slate-800 w-12 text-teal-600">55</span><span className="text-right">Höhen-Breiten-Verhältnis in %</span></div>
+                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100"><span className="font-black text-slate-800 w-12 text-teal-600">R</span><span className="text-right">Radiale Bauart <span className="text-[10px] text-slate-400">(D = Diagonal)</span></span></div>
+                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100"><span className="font-black text-slate-800 w-12 text-teal-600">16</span><span className="text-right">Felgendurchmesser in Zoll</span></div>
+                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100"><span className="font-black text-slate-800 w-12 text-teal-600">91</span><span className="text-right">Tragfähigkeitsindex <span className="text-[10px] text-slate-400">(z.B. 91 = 615 kg)</span></span></div>
+                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100"><span className="font-black text-slate-800 w-12 text-teal-600">V</span><span className="text-right">Geschwindigkeitsindex <span className="text-[10px] text-slate-400">(z.B. V = 240 km/h)</span></span></div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col items-center text-center">
+                                <span className="font-black text-slate-700 text-sm mb-1 bg-white px-2 py-0.5 rounded shadow-sm">DOT 1423</span>
+                                <span className="text-[10px] text-slate-500 leading-tight">Herstellungsdatum:<br/>14. Kalenderwoche 2023</span>
+                            </div>
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col items-center text-center">
+                                <span className="font-black text-slate-700 text-sm mb-1 bg-white px-2 py-0.5 rounded shadow-sm">M+S / ⛰️❄️</span>
+                                <span className="text-[10px] text-slate-500 leading-tight">Winterreifen<br/>(Alpine-Symbol Pflicht ab 10/24)</span>
+                            </div>
+                        </div>
+
+                        <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Tatbestände (Auswahl)</h4>
+                        <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
+                            
+                            {/* 1. Profil */}
+                            <div className="mb-2 pb-2 border-b border-slate-200 last:border-0">
+                                <button 
+                                    onClick={() => setReifenExpanded(p => ({ ...p, profil: !p.profil }))}
+                                    className="flex items-center justify-between w-full text-left outline-none"
+                                >
+                                    <div className="text-[10px] font-bold text-slate-600 uppercase flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-slate-400"/> Mangelhafte Profil- und Einschnitttiefe</div>
+                                    {reifenExpanded.profil ? <ChevronUp className="w-4 h-4 text-slate-400"/> : <ChevronDown className="w-4 h-4 text-slate-400"/>}
+                                </button>
+                                {reifenExpanded.profil && (
+                                    <div className="mt-2 animate-in fade-in">
+                                        <div className="flex gap-2 mb-3 pb-3 border-b border-slate-100/60">
+                                            <div className="flex-1 bg-white p-2 rounded-lg border border-slate-200 shadow-sm text-center">
+                                                <span className="block text-[9px] text-slate-400 font-bold uppercase mb-0.5">Mofa</span>
+                                                <span className="font-black text-slate-700 text-xs">mind. 1,0 mm</span>
+                                            </div>
+                                            <div className="flex-1 bg-white p-2 rounded-lg border border-slate-200 shadow-sm text-center">
+                                                <span className="block text-[9px] text-slate-400 font-bold uppercase mb-0.5">Kfz / Anhänger</span>
+                                                <span className="font-black text-slate-700 text-xs">mind. 1,6 mm</span>
+                                            </div>
+                                        </div>
+                                        <BkatRow title="Fahrer (Mofa)" fines={[{ tbnr: '336100', cost: '25,00 €' }]} />
+                                        <BkatRow title="Fahrer (Kfz / Anhänger)" fines={[{ tbnr: '336606', cost: '60,00 €' }]} />
+                                        <BkatRow title="Halter (Selbst geführt)" fines={[{ tbnr: '336618', cost: '75,00 €' }]} />
+                                        <BkatRow title="Halter (Mofa zugelassen)" fines={[{ tbnr: '331118', cost: '35,00 €' }]} />
+                                        <BkatRow title="Halter (Kfz/Anhänger zugelassen)" fines={[{ tbnr: '331690', cost: '75,00 €' }]} />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 2. Winterreifen */}
+                            <div className="mb-2 pb-2 border-b border-slate-200 last:border-0">
+                                <button 
+                                    onClick={() => setReifenExpanded(p => ({ ...p, winter: !p.winter }))}
+                                    className="flex items-center justify-between w-full text-left outline-none"
+                                >
+                                    <div className="text-[10px] font-bold text-slate-600 uppercase flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-slate-400"/> Verstoß gegen Winterreifenpflicht (bei Glätte)</div>
+                                    {reifenExpanded.winter ? <ChevronUp className="w-4 h-4 text-slate-400"/> : <ChevronDown className="w-4 h-4 text-slate-400"/>}
+                                </button>
+                                {reifenExpanded.winter && (
+                                    <div className="mt-2 animate-in fade-in">
+                                        <BkatRow title="Fahrer" fines={[{ tbnr: '102706', cost: '60,00 €' }]} />
+                                        <BkatRow title="Halter (Zulassen)" fines={[{ tbnr: '331638', cost: '75,00 €' }]} />
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* 3. Spikes */}
+                            <div className="mb-1">
+                                <button 
+                                    onClick={() => setReifenExpanded(p => ({ ...p, spikes: !p.spikes }))}
+                                    className="flex items-center justify-between w-full text-left outline-none"
+                                >
+                                    <div className="text-[10px] font-bold text-slate-600 uppercase flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-slate-400"/> Unzulässige Nutzung von Reifen mit Spikes</div>
+                                    {reifenExpanded.spikes ? <ChevronUp className="w-4 h-4 text-slate-400"/> : <ChevronDown className="w-4 h-4 text-slate-400"/>}
+                                </button>
+                                {reifenExpanded.spikes && (
+                                    <div className="mt-2 animate-in fade-in">
+                                        <BkatRow title="Fahrer" fines={[{ tbnr: '336500', cost: '50,00 €' }]} />
+                                        <BkatRow title="Halter (Zulassen)" fines={[{ tbnr: '331512', cost: '75,00 €' }]} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                 </div>
             )}
       </div>
       <AppVersionFooter />
@@ -4965,13 +5030,13 @@ function DriverLicenseModule() {
 const DashboardView = ({ onSelect }) => {
     const dateTime = useDateTime();
     const tiles = [
-        { id: 'lashing', title: 'Ladungssicherung', icon: Truck, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Niederzurren • Diagonalzurren • PKW-Transporter' },
-        { id: 'weight', title: 'Gewichte & Holz', icon: Scale, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Überladung • Holzgewicht' },
-        { id: 'speed', title: 'Geschwindigkeit', icon: Gauge, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Laser • Hinterherfahren' },
-        { id: 'accident', title: 'Unfallrechner', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', desc: 'Bremsspur • Driftspur' },
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
-        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '' },
-        { id: 'license', title: 'Führerschein', icon: CreditCard, color: 'text-sky-500', bg: 'bg-sky-50', desc: 'Schlüsselzahlen • Klassen' }
+        { id: 'license', title: 'Führerschein', icon: CreditCard, color: 'text-sky-500', bg: 'bg-sky-50', desc: 'Schlüsselzahlen • Klassen' },
+        { id: 'speed', title: 'Geschwindigkeit', icon: Gauge, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Laser • Hinterherfahren' },
+        { id: 'weight', title: 'Gewichte & Holz', icon: Scale, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Überladung • Holzgewicht' },
+        { id: 'lashing', title: 'Ladungssicherung', icon: Truck, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Niederzurren • Diagonalzurren • PKW-Transporter' },
+        { id: 'accident', title: 'Unfallrechner', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', desc: 'Bremsspur • Driftspur' },
+        { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '' }
     ];
 
     return (
@@ -5012,7 +5077,20 @@ const DashboardView = ({ onSelect }) => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
+  const [knowledgeView, setKnowledgeView] = useState('overview');
+  const [returnTab, setReturnTab] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const handleNavigateKnowledge = (viewId) => {
+      setKnowledgeView(viewId);
+      setReturnTab(activeTab); // Merkt sich den vorherigen Tab (z.B. den Rechner)
+      setActiveTab('knowledge');
+  };
+
+  const handleTabChange = (tabId) => {
+      setActiveTab(tabId);
+      setReturnTab(null); // Setzt den Zurück-Button zurück, wenn man manuell im Menü navigiert
+  };
 
   useEffect(() => { window.scrollTo(0, 0); }, [activeTab]);
 
@@ -5023,22 +5101,23 @@ export default function App() {
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100 transition-colors duration-300">
           <PrintStyles />
           <div className="flex-1 pb-24 z-10 relative">
-            {activeTab === 'home' ? <DashboardView onSelect={setActiveTab} /> :
-             activeTab === 'weight' ? <WeightModule /> : 
-             activeTab === 'speed' ? <SpeedCalculator /> : 
-             activeTab === 'accident' ? <AccidentCalculator /> :
-             activeTab === 'age' ? <AgeCalculator /> :
-             activeTab === 'knowledge' ? <KnowledgeBaseView /> : 
-             activeTab === 'license' ? <DriverLicenseModule /> : 
-             activeTab === 'info' ? <InfoView /> : <LashingCalculator />}
+            <div className={activeTab === 'home' ? 'block' : 'hidden'}><DashboardView onSelect={handleTabChange} /></div>
+            <div className={activeTab === 'weight' ? 'block' : 'hidden'}><WeightModule /></div>
+            <div className={activeTab === 'speed' ? 'block' : 'hidden'}><SpeedCalculator /></div>
+            <div className={activeTab === 'accident' ? 'block' : 'hidden'}><AccidentCalculator /></div>
+            <div className={activeTab === 'age' ? 'block' : 'hidden'}><AgeCalculator /></div>
+            <div className={activeTab === 'knowledge' ? 'block' : 'hidden'}><KnowledgeBaseView initialView={knowledgeView} onBack={returnTab ? () => handleTabChange(returnTab) : null} /></div>
+            <div className={activeTab === 'license' ? 'block' : 'hidden'}><DriverLicenseModule /></div>
+            <div className={activeTab === 'info' ? 'block' : 'hidden'}><InfoView /></div>
+            <div className={activeTab === 'lashing' ? 'block' : 'hidden'}><LashingCalculator onOpenKnowledge={handleNavigateKnowledge} /></div>
           </div>
           <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print transition-colors duration-300">
             <div className="max-w-md mx-auto flex justify-evenly items-center p-2">
-              <button onClick={() => setActiveTab('home')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'home' ? 'text-indigo-600 bg-indigo-50 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+              <button onClick={() => handleTabChange('home')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'home' ? 'text-indigo-600 bg-indigo-50 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <Home className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">Home</span>
               </button>
-              <button onClick={() => setActiveTab('info')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'info' ? 'text-slate-800 bg-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+              <button onClick={() => handleTabChange('info')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'info' ? 'text-slate-800 bg-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <FileText className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">Infos</span>
               </button>
