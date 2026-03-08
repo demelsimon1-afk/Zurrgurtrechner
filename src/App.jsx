@@ -3228,6 +3228,71 @@ const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
     );
 };
 
+const FahrtzweckeDropdown = ({ purposes }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    return (
+        <div className="bg-slate-50 border border-slate-200 p-2 sm:p-3 rounded-xl flex flex-col gap-3 shadow-sm mb-4">
+            <button onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-full text-left px-1">
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center shrink-0">
+                        <Info className="w-4 h-4 text-teal-600" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-700 text-xs uppercase">Erlaubte Fahrtzwecke</h4>
+                        <div className="text-[10px] text-slate-500 font-medium mt-0.5">{isOpen ? 'Details ausblenden' : 'Details einblenden'}</div>
+                    </div>
+                </div>
+                <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-200">
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400"/> : <ChevronDown className="w-4 h-4 text-slate-400"/>}
+                </div>
+            </button>
+            
+            {isOpen && (
+                <div className="space-y-4 pt-3 border-t border-slate-200 animate-in fade-in">
+                    {purposes.includes('probe') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Probefahrt</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Es muss ein <strong>wirkliches Kaufinteresse</strong> bestehen. Der Fokus muss immer auf der Erprobung des Fahrzeugs liegen.</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Eine Probefahrt kann <strong>mehrere Tage</strong> dauern (z.B. bei Wohnmobilen oder LKW). Ein PKW darf in der Regel <strong>nur 1 Tag</strong> ausgeliehen werden (VGH München).</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div><span className="text-red-800"><strong>NICHT erlaubt:</strong> Reine Alltagsfahrten, wie z.B. eine bloße Essensabholung!</span></li>
+                            </ul>
+                        </div>
+                    )}
+                    {purposes.includes('ueberfuehrung') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Überführungsfahrt</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrt des Käufers nach dem Kauf an einen Wohnort (auch Fahrten ins Ausland).</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zwischen verschiedenen Autohäusern.</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zum Tanken und zur Außenreinigung, sofern sie <strong>anlässlich</strong> von Probe-/Überführungsfahrten stattfinden.</span></li>
+                            </ul>
+                        </div>
+                    )}
+                    {purposes.includes('reparatur') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Reparatur- oder Wartungsfahrt</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Fahrten zur Beibehaltung der technischen Einsatzfähigkeit (Beseitigung von technischen Mängeln).</span></li>
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Die generelle Instandhaltung des Fahrzeugs.</span></li>
+                            </ul>
+                        </div>
+                    )}
+                    {purposes.includes('brauchtum') && (
+                        <div className="space-y-2">
+                            <h5 className="font-black text-slate-800 text-sm">Brauchtumspflege</h5>
+                            <ul className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                                <li className="flex gap-2 items-start"><div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div><span>Teilnahme an Veranstaltungen, die der Darstellung von Oldtimer-Fahrzeugen und der Pflege des kraftfahrzeugtechnischen Kulturgutes dienen.</span></li>
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const dateTime = useDateTime();
   const [view, setView] = useState(initialView); // Startet jetzt standardmäßig mit der Übersicht
