@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';import React, { useState, useEffect, useRef } from 'react';
 import { 
   Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, 
   ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, ChevronDown, ChevronUp, ChevronLeft,
@@ -6,7 +6,7 @@ import {
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Wand2,
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
   List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
-  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed
+  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed, Baby
 } from 'lucide-react';
 
 // --- THEME CONTEXT & STYLES ---
@@ -3302,6 +3302,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const [lasiAblegereife, setLasiAblegereife] = useState('gurte'); // State für LaSi Ablegereife Auswahl
   const [escooterSpeed, setEscooterSpeed] = useState('bis22'); // State für E-Scooter bbH
   const [escooterOrigin, setEscooterOrigin] = useState('de'); // State für E-Scooter Herkunft
+  const [kindersitzView, setKindersitzView] = useState('sitz'); // State für Kindersitze Untermenü
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [reifenExpanded, setReifenExpanded] = useState({ profil: true, winter: false, spikes: false }); // State für Reifen-Tatbestände
 
@@ -3312,7 +3313,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
   useEffect(() => {
       window.scrollTo(0, 0);
-  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin]);
+  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView]);
 
   const tabs = [
       { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
@@ -3323,6 +3324,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
       { id: 'hu', label: 'Hauptuntersuchung', icon: Search, color: 'text-teal-500', bg: 'bg-teal-50' },
       { id: 'juschg', label: 'Jugendschutz', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
       { id: 'kcang', label: 'KCanG (Cannabis)', icon: Trees, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+      { id: 'kindersitz', label: 'Sitz, Gurt & Helm', icon: Shield, color: 'text-pink-500', bg: 'bg-pink-50' },
       { id: 'kz', label: 'Kennzeichen', icon: FileText, color: 'text-cyan-500', bg: 'bg-cyan-50' },
       { id: 'lasi', label: 'Ladungssicherung', icon: LashingStrapIcon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
@@ -4363,6 +4365,133 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                 </div>
             )}
 
+            {/* KINDERSITZE & GURT */}
+            {view === 'kindersitz' && (
+                <div className="space-y-4 animate-in fade-in">
+                    
+                    {/* Sub-Navigation */}
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {[
+                            { id: 'sitz', label: 'Kindersitzpflicht' },
+                            { id: 'ausnahmen', label: 'Ausnahmen Gurtpflicht' },
+                            { id: 'tatbestande', label: 'Tatbestände (BKat)' }
+                        ].map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={() => setKindersitzView(sub.id)}
+                                className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all border ${kindersitzView === sub.id ? 'bg-pink-600 text-white border-pink-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {sub.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
+                        
+                        {/* 1. Kindersitzpflicht */}
+                        {kindersitzView === 'sitz' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-pink-700 pb-2 border-b border-slate-50">
+                                    <Baby className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Pflicht (§ 21 StVO)</h3>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-2 mb-3">
+                                     <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
+                                        <span className="font-black text-slate-700 text-sm mb-0.5">Unter 12 Jahre</span>
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">UND</span>
+                                        <span className="font-black text-slate-700 text-sm">Unter 150 cm</span>
+                                     </div>
+                                     <div className="bg-pink-50 border border-pink-200 p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
+                                        <CheckCircle className="w-6 h-6 text-pink-500 mb-1" />
+                                        <span className="font-black text-pink-800 text-xs uppercase text-center leading-tight">Kindersitz<br/>zwingend!</span>
+                                     </div>
+                                </div>
+                                <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 text-[11px] text-amber-900 font-medium mb-5 shadow-sm flex items-start gap-2">
+                                    <Info className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                                    <span>Ist <strong>eine</strong> der Grenzen überschritten (älter als 12 <em>oder</em> größer als 150 cm), entfällt die Pflicht und der reguläre Gurt reicht aus.</span>
+                                </div>
+
+                                <div className="flex items-center gap-2 mb-3 text-pink-700 pb-2 border-b border-slate-50">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Zulässige Prüfnormen</h3>
+                                </div>
+                                
+                                <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-medium">
+                                    <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm"><div className="w-6 h-6 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><CheckCircle className="w-4 h-4"/></div> <span className="pt-0.5"><strong>UN Reg. 129</strong> ("i-Size" - nach Größe)</span></li>
+                                    <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm"><div className="w-6 h-6 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><CheckCircle className="w-4 h-4"/></div> <span className="pt-0.5"><strong>UN ECE Reg. 44/03</strong> oder <strong>44/04</strong> (nach Gewicht)</span></li>
+                                    <li className="flex gap-3 items-start bg-red-50 p-3 rounded-xl border border-red-100 text-red-900 shadow-sm"><div className="w-6 h-6 rounded bg-red-200 text-red-700 flex items-center justify-center shrink-0 mt-0.5"><AlertTriangle className="w-4 h-4"/></div> <div className="pt-1"><strong>Verboten:</strong> Alte Normen 44/01 und 44/02 dürfen im Straßenverkehr nicht mehr verwendet werden!</div></li>
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* 2. Ausnahmen Anschnallpflicht */}
+                        {kindersitzView === 'ausnahmen' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-pink-700 pb-2 border-b border-slate-50">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Ausnahmen (§ 21a Abs. 1 StVO)</h3>
+                                </div>
+                                
+                                <p className="text-xs text-slate-400 font-bold uppercase mb-3">Keine Gurtpflicht für:</p>
+                                
+                                <ul className="space-y-2.5 text-[13px] text-slate-700 font-medium">
+                                    <li className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                        <div className="w-6 h-6 rounded bg-pink-100 text-pink-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">1</div>
+                                        <div className="pt-0.5">Personen beim <strong>Haus-zu-Haus-Verkehr</strong> (z. B. Paketdienste), wenn in kurzen Abständen verlassen werden muss.</div>
+                                    </li>
+                                    <li className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                        <div className="w-6 h-6 rounded bg-pink-100 text-pink-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">2</div>
+                                        <div className="pt-0.5">Fahrten mit <strong>Schrittgeschwindigkeit</strong> (z.B. Rückwärtsfahren, Parkplätze).</div>
+                                    </li>
+                                    <li className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                        <div className="w-6 h-6 rounded bg-pink-100 text-pink-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">3</div>
+                                        <div className="pt-0.5">Fahrten in Kraftomnibussen, bei denen <strong>stehende Fahrgäste</strong> zugelassen sind.</div>
+                                    </li>
+                                    <li className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                        <div className="w-6 h-6 rounded bg-pink-100 text-pink-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">4</div>
+                                        <div className="pt-0.5">Betriebspersonal in Omnibussen & <strong>Begleitpersonal</strong> von Pflegebedürftigen (während der Dienstleistung).</div>
+                                    </li>
+                                    <li className="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                        <div className="w-6 h-6 rounded bg-pink-100 text-pink-700 flex items-center justify-center shrink-0 font-black text-[10px] mt-0.5">5</div>
+                                        <div className="pt-0.5">Fahrgäste in Bussen über 3,5 t beim <strong>kurzzeitigen Verlassen</strong> des Sitzplatzes.</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* 3. Tatbestände */}
+                        {kindersitzView === 'tatbestande' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-pink-700 pb-2 border-b border-slate-50">
+                                    <Gavel className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Tatbestände & Bußgelder</h3>
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Gurt- & Kindersitzpflicht</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 mb-5 space-y-1">
+                                    <BkatRow title="Sicherheitsgurt nicht angelegt" fines={[{ tbnr: '121172', cost: '30 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="1 Kind angeschnallt, aber ohne Kindersitz" fines={[{ tbnr: '121118', cost: '30 €' }]} />
+                                    <BkatRow title="Mehrere Kinder angeschnallt, ohne Kindersitz" fines={[{ tbnr: '121124', cost: '35 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="1 Kind ohne jegliche Sicherung befördert" fines={[{ tbnr: '121600', cost: '60 €', points: '1 Pkt.' }]} />
+                                    <BkatRow title="Mehrere Kinder ohne jegliche Sicherung" fines={[{ tbnr: '121606', cost: '70 €', points: '1 Pkt.' }]} />
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Helmpflicht (Motorrad etc.)</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Fahren ohne Schutzhelm" fines={[{ tbnr: '121178', cost: '15 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="1 Kind befördert ohne Schutzhelm" fines={[{ tbnr: '121612', cost: '60 €' }]} />
+                                    <BkatRow title="Mehrere Kinder befördert ohne Schutzhelm" fines={[{ tbnr: '121618', cost: '70 €' }]} />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* KENNZEICHEN */}
             {view === 'kz' && (
                 <div className="space-y-4">
@@ -5378,6 +5507,7 @@ const DashboardView = ({ onSelect }) => {
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [knowledgeView, setKnowledgeView] = useState('overview');
+  const [knowledgeResetKey, setKnowledgeResetKey] = useState(0); // <--- NEU: Zähler für den Reset
   const [returnTab, setReturnTab] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -5385,11 +5515,19 @@ export default function App() {
       setKnowledgeView(viewId);
       setReturnTab(activeTab); // Merkt sich den vorherigen Tab (z.B. den Rechner)
       setActiveTab('knowledge');
+      setKnowledgeResetKey(prev => prev + 1); // <--- NEU: Zwingt die Wissensdatenbank zum Neuladen beim Einsprung aus dem Rechner
   };
 
   const handleTabChange = (tabId) => {
       setActiveTab(tabId);
       setReturnTab(null); // Setzt den Zurück-Button zurück, wenn man manuell im Menü navigiert
+      
+      // NEU: Wenn die Wissensdatenbank manuell geöffnet wird (z.B. übers Dashboard),
+      // wird sie immer auf die Startseite ("overview") zurückgesetzt.
+      if (tabId === 'knowledge') {
+          setKnowledgeView('overview');
+          setKnowledgeResetKey(prev => prev + 1); // <--- NEU: Zwingt die Wissensdatenbank zum Neuladen
+      }
   };
 
   useEffect(() => { window.scrollTo(0, 0); }, [activeTab]);
@@ -5406,7 +5544,7 @@ export default function App() {
             <div className={activeTab === 'speed' ? 'block' : 'hidden'}><SpeedCalculator /></div>
             <div className={activeTab === 'accident' ? 'block' : 'hidden'}><AccidentCalculator /></div>
             <div className={activeTab === 'age' ? 'block' : 'hidden'}><AgeCalculator /></div>
-            <div className={activeTab === 'knowledge' ? 'block' : 'hidden'}><KnowledgeBaseView initialView={knowledgeView} onBack={returnTab ? () => handleTabChange(returnTab) : null} /></div>
+            <div className={activeTab === 'knowledge' ? 'block' : 'hidden'}><KnowledgeBaseView key={knowledgeResetKey} initialView={knowledgeView} onBack={returnTab ? () => handleTabChange(returnTab) : null} /></div>
             <div className={activeTab === 'license' ? 'block' : 'hidden'}><DriverLicenseModule /></div>
             <div className={activeTab === 'info' ? 'block' : 'hidden'}><InfoView /></div>
             <div className={activeTab === 'lashing' ? 'block' : 'hidden'}><LashingCalculator onOpenKnowledge={handleNavigateKnowledge} /></div>
