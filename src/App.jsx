@@ -1,4 +1,4 @@
-import React, { useState } from 'react';import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Scale, AlertTriangle, CheckCircle, Info, Box, Truck, ShieldCheck, 
   ShieldAlert, Trees, Ruler, Clock, CheckSquare, Settings, ChevronRight, ChevronDown, ChevronUp, ChevronLeft,
@@ -298,7 +298,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.1
+        RoadTool v. 2.0
     </div>
 );
 
