@@ -298,7 +298,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.0
+        RoadTool v. 2.1
     </div>
 );
 
@@ -4373,6 +4373,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                     <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
                         {[
                             { id: 'sitz', label: 'Kindersitzpflicht' },
+                            { id: 'helm', label: 'Helmpflicht' },
                             { id: 'ausnahmen', label: 'Ausnahmen Gurtpflicht' },
                             { id: 'tatbestande', label: 'Tatbestände (BKat)' }
                         ].map(sub => (
@@ -4422,6 +4423,68 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                     <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm"><div className="w-6 h-6 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><CheckCircle className="w-4 h-4"/></div> <span className="pt-0.5"><strong>UN ECE Reg. 44/03</strong> oder <strong>44/04</strong> (nach Gewicht)</span></li>
                                     <li className="flex gap-3 items-start bg-red-50 p-3 rounded-xl border border-red-100 text-red-900 shadow-sm"><div className="w-6 h-6 rounded bg-red-200 text-red-700 flex items-center justify-center shrink-0 mt-0.5"><AlertTriangle className="w-4 h-4"/></div> <div className="pt-1"><strong>Verboten:</strong> Alte Normen 44/01 und 44/02 dürfen im Straßenverkehr nicht mehr verwendet werden!</div></li>
                                 </ul>
+                            </div>
+                        )}
+
+                        {/* NEU: Helmpflicht */}
+                        {kindersitzView === 'helm' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-pink-700 pb-2 border-b border-slate-50">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Helmpflicht (§ 21a Abs. 2 StVO)</h3>
+                                </div>
+
+                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-4 text-sm text-slate-700 leading-relaxed shadow-sm">
+                                    <p>Wer <strong>Krafträder oder offene drei- oder mehrrädrige Kraftfahrzeuge</strong> mit einer bauartbedingten Höchstgeschwindigkeit von <strong>über 20 km/h</strong> führt sowie auf oder in ihnen mitfährt, muss während der Fahrt einen <strong>geeigneten Schutzhelm</strong> tragen.</p>
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Wichtige Ausnahmen</h4>
+                                <ul className="space-y-2.5 text-[13px] text-slate-700 font-medium mb-5">
+                                    <li className="flex gap-3 items-start bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                        <div className="w-6 h-6 rounded bg-pink-100 text-pink-700 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle className="w-4 h-4"/></div>
+                                        <div className="pt-0.5">Die Helmpflicht gilt <strong>nicht</strong>, wenn vorgeschriebene Sicherheitsgurte angelegt sind (z. B. BMW C1 Roller).</div>
+                                    </li>
+                                </ul>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">"Geeigneter" Schutzhelm</h4>
+                                <div className="space-y-3">
+                                    <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 text-[12px] text-amber-900 font-medium shadow-sm flex items-start gap-3">
+                                        <Info className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
+                                        <div>
+                                            <p>Amtlich genehmigt sind Helme, die nach der <strong>ECE-Regelung Nr. 22</strong> gebaut, geprüft und genehmigt wurden.</p>
+                                            <p className="mt-1">Auch andere Helme können rechtlich "geeignet" sein, wenn sie eine ausreichende Schutzwirkung aufweisen (die Bauart muss als Schutzhelm ausgelegt sein, z. B. reicht ein Bauhelm oder Fahrradhelm <u>nicht</u> aus!).</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <h5 className="font-bold text-slate-700 text-sm mb-3 border-b border-slate-100 pb-2 flex items-center gap-2">
+                                            <ShieldCheck className="w-4 h-4 text-slate-400" />
+                                            Die ECE-Norm (Economic Commission for Europe)
+                                        </h5>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="flex gap-3">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
+                                                <div className="text-xs text-slate-700 leading-relaxed">
+                                                    <strong>ECE-R 22.06:</strong> Die aktuelle Prüfnorm (geprüft seit Juni 2022).
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
+                                                <div className="text-xs text-slate-700 leading-relaxed">
+                                                    <strong>ECE-R 22.05:</strong> Die Vorgängernorm (Produktion seit Juni 2023 eingestellt). <span className="font-bold text-emerald-700">Dürfen weiterhin uneingeschränkt verwendet werden! (Keine Austauschpflicht)</span>. Bei Neuanschaffungen sollte jedoch auf die aktuelle Norm geachtet werden.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 pt-3 border-t border-slate-100">
+                                            <h6 className="font-bold text-slate-600 text-xs mb-1.5">Kennzeichnung (Kinnriemen / Futter):</h6>
+                                            <p className="text-xs text-slate-600 leading-relaxed mb-2">
+                                                Auf dem Prüflabel muss nicht zwingend der Text "ECE" oder "ECE-R 22" stehen! Ausreichend ist das <strong>"E" in einem Kreis</strong> zusammen mit der zugehörigen Prüfnummer.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
