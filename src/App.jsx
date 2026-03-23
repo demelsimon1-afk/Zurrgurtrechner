@@ -3402,7 +3402,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
 
       <div className={`p-2 animate-in fade-in duration-300 pb-20 no-print ${onBack ? 'mt-0' : 'mt-2'}`}>
             
-            {/* ÜBERSICHT (DASHBOARD-STYLE) */}
+            {/* ÜBERSICHT (Home-STYLE) */}
             {view === 'overview' && (
                 <div className="grid grid-cols-2 gap-3 pt-2">
                     {tabs.map(tab => (
@@ -5518,8 +5518,8 @@ function DriverLicenseModule() {
   );
 }
 
-// --- DASHBOARD VIEW ---
-const DashboardView = ({ onSelect }) => {
+// --- Home VIEW ---
+const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
@@ -5536,7 +5536,7 @@ const DashboardView = ({ onSelect }) => {
             <div className="bg-slate-800/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg no-print transition-colors duration-300">
                 <div>
                     <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
-                        <ShieldCheck className="w-6 h-6 shrink-0 text-indigo-400" /> Dashboard
+                        <ShieldCheck className="w-6 h-6 shrink-0 text-indigo-400" /> Home
                     </h1>
                     <p className="text-slate-400 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8">
                         <Clock className="w-3 h-3" /> {dateTime}
@@ -5585,7 +5585,7 @@ export default function App() {
       setActiveTab(tabId);
       setReturnTab(null); // Setzt den Zurück-Button zurück, wenn man manuell im Menü navigiert
       
-      // NEU: Wenn die Wissensdatenbank manuell geöffnet wird (z.B. übers Dashboard),
+      // NEU: Wenn die Wissensdatenbank manuell geöffnet wird (z.B. übers Home),
       // wird sie immer auf die Startseite ("overview") zurückgesetzt.
       if (tabId === 'knowledge') {
           setKnowledgeView('overview');
@@ -5602,7 +5602,7 @@ export default function App() {
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative selection:bg-indigo-100 transition-colors duration-300">
           <PrintStyles />
           <div className="flex-1 pb-24 z-10 relative">
-            <div className={activeTab === 'home' ? 'block' : 'hidden'}><DashboardView onSelect={handleTabChange} /></div>
+            <div className={activeTab === 'home' ? 'block' : 'hidden'}><HomeView onSelect={handleTabChange} /></div>
             <div className={activeTab === 'weight' ? 'block' : 'hidden'}><WeightModule /></div>
             <div className={activeTab === 'speed' ? 'block' : 'hidden'}><SpeedCalculator /></div>
             <div className={activeTab === 'accident' ? 'block' : 'hidden'}><AccidentCalculator /></div>
