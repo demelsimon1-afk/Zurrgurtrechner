@@ -4811,6 +4811,48 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                         </ol>
                     </div>
 
+                  {/* START: Kippgefahr Karte */}
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                      
+                      {/* Header-Bereich */}
+                      <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
+                          <RotateCw className="w-5 h-5" />
+                          <h3 className="font-black uppercase tracking-wide text-xs">Kippgefahr</h3>
+                      </div>
+                      
+                      {/* Content: Text und Grafik */}
+                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 justify-between">
+                          
+                          {/* Text-Bereich */}
+                          <div className="flex-1 text-sm text-slate-700 leading-relaxed font-medium space-y-3">
+                              <p>1. Wenn <strong>b größer c</strong>, dann besteht <strong className="text-red-600">Kippgefahr</strong>.</p>
+                              <p>2. Somit müssen alle Beschleunigungswerte gemäß der VDI 2700 mit dem Faktor <strong>1,2</strong> multipliziert werden.</p>
+                          </div>
+
+                          {/* Grafik-Bereich */}
+                          <div className="flex-shrink-0 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm w-[160px] sm:w-[180px]">
+                              <svg viewBox="0 0 200 240" className="w-full h-auto mx-auto block">
+                                  {/* Oranger Rahmen (Ladung) */}
+                                  <rect x="20" y="20" width="160" height="200" fill="#ffffff" stroke="#f59e0b" strokeWidth="4" rx="4" />
+                                  
+                                  {/* Schwerpunkt 'a' */}
+                                  <circle cx="100" cy="100" r="5" fill="#ef4444" />
+                                  <text x="115" y="105" fontSize="16" fontFamily="sans-serif" fill="#334155" fontWeight="bold">a</text>
+                                  
+                                  {/* Blaue Linie 'b' (Höhe) */}
+                                  <line x1="100" y1="100" x2="100" y2="220" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" />
+                                  <text x="115" y="165" fontSize="16" fontFamily="sans-serif" fill="#334155" fontWeight="bold">b</text>
+                                  
+                                  {/* Blaue Linie 'c' (Abstand zur Kippkante) */}
+                                  <line x1="100" y1="220" x2="180" y2="220" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" />
+                                  <text x="140" y="238" fontSize="16" fontFamily="sans-serif" fill="#334155" fontWeight="bold">c</text>
+                              </svg>
+                          </div>
+                      </div>
+                  </div>
+                  {/* ENDE: Kippgefahr Karte */}
+
+
                     {/* Ablegereife */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-4 text-teal-700 pb-2 border-b border-slate-50">
