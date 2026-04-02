@@ -4826,7 +4826,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             >
                                 <option value="gurte">1. Zurrgurte (VDI 2700 Blatt 3.1)</option>
                                 <option value="ketten">2. Zurrketten (VDI 2700 Blatt 3.1)</option>
-                                <option value="rutsch">3. Rutschhemmendes Material (Blatt 15)</option>
+                                <option value="rutsch">3. Rutschhemmendes Material (VDI 2700 Blatt 15)</option>
                             </select>
                             <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
                                 <ChevronDown className="w-4 h-4" />
@@ -5169,7 +5169,7 @@ function InfoView() {
                         </div>
                         <div>
                             <p className="font-bold text-slate-800 mb-1">Kontakt</p>
-                            <p>E-Mail: <a href="mailto:Demelsimon1@gmail.com" className="text-indigo-600 hover:underline">Demelsimon1@gmail.com</a></p>
+                            <p>E-Mail: <a href="mailto:simondemel@gmx.de" className="text-indigo-600 hover:underline">simondemel@gmx.de</a></p>
                         </div>
                     </div>
                  </div>
