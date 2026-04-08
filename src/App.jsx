@@ -6,7 +6,7 @@ import {
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Wand2,
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
   List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
-  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed, Baby
+  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed, Baby, Bike
 } from 'lucide-react';
 
 // --- THEME CONTEXT & STYLES ---
@@ -2367,7 +2367,6 @@ function LashingCalculator({ onOpenKnowledge }) {
   const [fitSide, setFitSide] = useState(false);
   const [fitRear, setFitRear] = useState(false);
   const [bodyCert, setBodyCert] = useState('NONE'); 
-  const [isTipping, setIsTipping] = useState(false);
   const [lashingResult, setLashingResult] = useState(null);
   const [fineGroups, setFineGroups] = useState([]);
   
@@ -2476,11 +2475,11 @@ function LashingCalculator({ onOpenKnowledge }) {
     // ACCELERATION FACTOR SELECTION
     let accFwd, accSide, accRear;
     if (!maxWeight || maxWeight <= 1999) {
-        accFwd = isTipping ? 1.08 : 0.90; accSide = isTipping ? 0.84 : 0.70; accRear = isTipping ? 0.60 : 0.50;
+        accFwd = 0.90; accSide = 0.70; accRear = 0.50;
     } else if (maxWeight <= 3500) {
-        accFwd = isTipping ? 0.96 : 0.80; accSide = isTipping ? 0.72 : 0.60; accRear = isTipping ? 0.60 : 0.50;
+        accFwd = 0.80; accSide = 0.60; accRear = 0.50;
     } else {
-        accFwd = isTipping ? 0.96 : 0.80; accSide = isTipping ? 0.60 : 0.50; accRear = isTipping ? 0.60 : 0.50;
+        accFwd = 0.80; accSide = 0.50; accRear = 0.50;
     }
 
     // --- NIEDERZURREN CALCULATION ---
@@ -2545,7 +2544,7 @@ function LashingCalculator({ onOpenKnowledge }) {
         { label: 'Hinten', mu: mu, c: accRear, angle: angle, hasFit: fitRear, force: fitRear ? wallRear : 0, result: nRear },
       ]
     });
-  }, [loadWeight, friction, stf, angle, angleBeta, allowedWeight, emptyWeight, isTipping, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
+  }, [loadWeight, friction, stf, angle, angleBeta, allowedWeight, emptyWeight, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
@@ -2564,7 +2563,6 @@ function LashingCalculator({ onOpenKnowledge }) {
                 <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
                 <tr><th>Vorspannkraft (STF)</th><td>{stf} daN</td></tr>
                 <tr><th>Fahrzeugaufbau</th><td>{bodyCert === 'NONE' ? 'Kein geprüfter Aufbau' : `Code ${bodyCert}`}</td></tr>
-                <tr><th>Kippgefahr</th><td>{isTipping ? 'Ja' : 'Nein'}</td></tr>
             </tbody>
         </table>
 
@@ -2611,7 +2609,6 @@ function LashingCalculator({ onOpenKnowledge }) {
                   <tr><th>Reibbeiwert (μ)</th><td>{friction.toFixed(2)}</td></tr>
                   <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
                   <tr><th>Längswinkel (β)</th><td>{angleBeta}°</td></tr>
-                  <tr><th>Kippgefahr</th><td>{isTipping ? 'Ja' : 'Nein'}</td></tr>
               </tbody>
           </table>
           
@@ -2843,21 +2840,10 @@ function LashingCalculator({ onOpenKnowledge }) {
                </div>
             </div>
 
-            {/* KIPPGEFAHR */}
-            <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
-                {isTipping && <CheckSquare className="w-4 h-4" />}
-              </div>
-              <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
-              <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
-                  Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
-              </span>
-            </label>
-
             {/* RESULTAT NIEDERZURREN */}
             {lashingResult !== null && (
               <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
-                <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
+                <div className="border-2 rounded-2xl p-4 mt-4 shadow-xl bg-white border-indigo-100 shadow-indigo-100">
                   
                   <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
                     <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Gurte</h3>
@@ -2873,7 +2859,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                         { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
                     ].map((res, idx) => (
                         <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50">
-                            <span className={`text-4xl font-black ${isTipping ? 'text-amber-600' : 'text-indigo-600'}`}>{res.count}</span>
+                            <span className="text-4xl font-black text-indigo-600">{res.count}</span>
                             <span className="text-xs font-bold uppercase text-slate-400 mt-0.5">{res.label}</span>
                             <div className="flex flex-col items-center gap-0.5">
                                 <span className="text-[10px] text-slate-300">({res.factor}g)</span>
@@ -2887,7 +2873,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                     ))}
                   </div>
 
-                   <div className={`mt-4 p-3 rounded-xl flex items-center justify-between ${isTipping ? 'bg-amber-50 text-amber-900' : 'bg-indigo-50 text-indigo-900'}`}>
+                   <div className="mt-4 p-3 rounded-xl flex items-center justify-between bg-indigo-50 text-indigo-900">
                      <span className="text-xs font-bold uppercase tracking-wide opacity-70">Minimum:</span>
                      <div className="text-3xl font-black">
                         {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
@@ -3004,21 +2990,10 @@ function LashingCalculator({ onOpenKnowledge }) {
                   </div>
                 </div>
 
-                {/* KIPPGEFAHR (Diagonalzurren) */}
-                <label className={`block border-2 rounded-xl p-3 flex items-center gap-3 transition-all cursor-pointer break-inside-avoid print-full-width ${isTipping ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100'}`}>
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isTipping ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'}`}>
-                    {isTipping && <CheckSquare className="w-4 h-4" />}
-                  </div>
-                  <input type="checkbox" checked={isTipping} onChange={(e) => setIsTipping(e.target.checked)} className="hidden" />
-                  <span className={`font-bold text-sm ${isTipping ? 'text-amber-800' : 'text-slate-500'}`}>
-                      Ladung ist kippgefährdet: {isTipping ? 'JA' : 'NEIN'}
-                  </span>
-                </label>
-                
                 {/* RESULTAT DIAGONALZURREN */}
                 {lashingResult !== null && (
                   <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
-                    <div className={`border-2 rounded-2xl p-4 mt-4 shadow-xl ${isTipping ? 'bg-white border-amber-200 shadow-amber-100' : 'bg-white border-indigo-100 shadow-indigo-100'}`}>
+                    <div className="border-2 rounded-2xl p-4 mt-4 shadow-xl bg-white border-indigo-100 shadow-indigo-100">
                       <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
                         <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Zugkraft (LC)</h3>
                       </div>
@@ -3303,6 +3278,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const [escooterSpeed, setEscooterSpeed] = useState('bis22'); // State für E-Scooter bbH
   const [escooterOrigin, setEscooterOrigin] = useState('de'); // State für E-Scooter Herkunft
   const [kindersitzView, setKindersitzView] = useState('sitz'); // State für Kindersitze Untermenü
+  const [ebikeView, setEbikeView] = useState('pedelec25'); // State für E-Bike Untermenü
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [reifenExpanded, setReifenExpanded] = useState({ profil: true, winter: false, spikes: false }); // State für Reifen-Tatbestände
 
@@ -3313,7 +3289,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
   useEffect(() => {
       window.scrollTo(0, 0);
-  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView]);
+  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView]);
 
   const tabs = [
       { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
@@ -3327,6 +3303,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
       { id: 'kindersitz', label: 'Sitz, Gurt & Helm', icon: Shield, color: 'text-pink-500', bg: 'bg-pink-50' },
       { id: 'kz', label: 'Kennzeichen', icon: FileText, color: 'text-cyan-500', bg: 'bg-cyan-50' },
       { id: 'lasi', label: 'Ladungssicherung', icon: LashingStrapIcon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+      { id: 'ebike', label: 'Pedelec & E-Bike', icon: Bike, color: 'text-green-500', bg: 'bg-green-50' },
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
       { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' }
   ];
@@ -3833,6 +3810,208 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             </div>
                         )}
                         
+                    </div>
+                 </div>
+            )}
+
+            {/* PEDELEC / E-BIKE */}
+            {view === 'ebike' && (
+                 <div className="space-y-4 animate-in fade-in">
+                    
+                    {/* Sub-Navigation */}
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {[
+                            { id: 'pedelec25', label: 'Pedelec (25 km/h)' },
+                            { id: 'spedelec45', label: 'S-Pedelec (45 km/h)' },
+                            { id: 'ebike25', label: 'E-Bike (ohne Treten bis 25 km/h)' }
+                        ].map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={() => setEbikeView(sub.id)}
+                                className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all border ${ebikeView === sub.id ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {sub.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
+                        
+                        {/* 1. PEDELEC 25 KM/H */}
+                        {ebikeView === 'pedelec25' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-green-700 pb-2 border-b border-slate-50">
+                                    <Bike className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Pedelec (bis 25 km/h)</h3>
+                                </div>
+                                
+                                <div className="bg-slate-800 text-white p-4 rounded-xl mb-5 flex gap-3 items-start shadow-sm">
+                                    <Info className="w-5 h-5 shrink-0 text-green-400 mt-0.5" />
+                                    <p className="text-xs font-medium leading-relaxed">
+                                        <strong>Definition:</strong> Der Motor (max. 250 Watt Nenndauerleistung) unterstützt <strong>nur, wenn man gleichzeitig in die Pedale tritt</strong>. Bei 25 km/h schaltet der Motor ab. Eine Schiebehilfe bis 6 km/h (ohne Treten) ist erlaubt.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl shadow-sm flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><ShieldCheck className="w-4 h-4"/></div>
+                                        <div>
+                                            <h4 className="font-bold text-emerald-900 text-sm">Rechtliche Einstufung: Fahrrad</h4>
+                                            <p className="text-xs text-emerald-800 mt-0.5">Es ist rechtlich einem herkömmlichen Fahrrad gleichgestellt (§ 1 Abs. 3 StVG).</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Zulassung & Versicherung</h4>
+                                                <p className="text-xs text-slate-600"><strong>Kein</strong> Versicherungskennzeichen und <strong>keine</strong> Betriebserlaubnis erforderlich.</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Fahrerlaubnis</h4>
+                                                <p className="text-xs text-slate-600"><strong>Kein</strong> Führerschein und <strong>keine</strong> Mofaprüfbescheinigung erforderlich. Kein Mindestalter.</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <Shield className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Helmpflicht</h4>
+                                                <p className="text-xs text-slate-600">Es besteht <strong>keine Helmpflicht</strong> (freiwilliges Tragen wird empfohlen).</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Radwegebenutzung</h4>
+                                                <p className="text-xs text-slate-600">Gekennzeichnete Radwege <strong>müssen</strong> genutzt werden.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 2. S-PEDELEC 45 KM/H */}
+                        {ebikeView === 'spedelec45' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-green-700 pb-2 border-b border-slate-50">
+                                    <Zap className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">S-Pedelec (bis 45 km/h)</h3>
+                                </div>
+                                
+                                <div className="bg-slate-800 text-white p-4 rounded-xl mb-5 flex gap-3 items-start shadow-sm">
+                                    <Info className="w-5 h-5 shrink-0 text-yellow-400 mt-0.5" />
+                                    <p className="text-xs font-medium leading-relaxed">
+                                        <strong>Definition:</strong> Der Motor (max. 4.000 Watt) unterstützt das Treten <strong>bis zu 45 km/h</strong>. 
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl shadow-sm flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center shrink-0"><AlertTriangle className="w-4 h-4"/></div>
+                                        <div>
+                                            <h4 className="font-bold text-red-900 text-sm">Rechtliche Einstufung: Kraftfahrzeug</h4>
+                                            <p className="text-xs text-red-800 mt-0.5">Es ist ein Kraftfahrzeug (Leichtkraftrad/Kleinkraftrad der Klasse L1e-B).</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Zulassung & Versicherung</h4>
+                                                <p className="text-xs text-slate-600"><strong>Versicherungskennzeichen</strong> und eine <strong>Betriebserlaubnis</strong> sind zwingend erforderlich! (Ansonsten Straftat § 6 PflVG / § 21 StVG iVm § 4 FZV).</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Fahrerlaubnis</h4>
+                                                <p className="text-xs text-slate-600">Führerschein der <strong>Klasse AM</strong> zwingend erforderlich. (Ansonsten Straftat § 21 StVG).</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <Shield className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Helmpflicht</h4>
+                                                <p className="text-xs text-slate-600"><strong>Es besteht Helmpflicht</strong> (§ 21a StVO). Es muss ein "geeigneter Kraftradschutzhelm" (ECE-Norm) getragen werden.</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Radwegebenutzung</h4>
+                                                <p className="text-xs text-slate-600 text-red-600 font-bold">Verboten!</p>
+                                                <p className="text-xs text-slate-600">Radwege dürfen <strong>nicht</strong> befahren werden, auch nicht außerorts und auch nicht, wenn sie für "Mofas frei" gekennzeichnet sind. Sie müssen die Fahrbahn nutzen.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 3. E-BIKE (Mofa) */}
+                        {ebikeView === 'ebike25' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-green-700 pb-2 border-b border-slate-50">
+                                    <Car className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Bike (ohne Treten bis 25 km/h)</h3>
+                                </div>
+                                
+                                <div className="bg-slate-800 text-white p-4 rounded-xl mb-5 flex gap-3 items-start shadow-sm">
+                                    <Info className="w-5 h-5 shrink-0 text-blue-400 mt-0.5" />
+                                    <p className="text-xs font-medium leading-relaxed">
+                                        <strong>Definition:</strong> Der Motor treibt das Zweirad <strong>auch ohne gleichzeitiges Treten</strong> an (z.B. per Gasgriff/Knopfdruck), bis zu einer bbH von max. 25 km/h. <br/><br/><em>(Hinweis: Bis max. 20 km/h spricht man vom Leichtmofa.</em>
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-xl shadow-sm flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0"><AlertTriangle className="w-4 h-4"/></div>
+                                        <div>
+                                            <h4 className="font-bold text-amber-900 text-sm">Rechtliche Einstufung: Kraftfahrzeug</h4>
+                                            <p className="text-xs text-amber-800 mt-0.5">Es handelt sich um ein Kleinkraftrad (Mofa).</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Zulassung & Versicherung</h4>
+                                                <p className="text-xs text-slate-600"><strong>Versicherungskennzeichen</strong> und eine <strong>Betriebserlaubnis</strong> sind zwingend erforderlich! (Ansonsten Straftat § 6 PflVG).</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Fahrerlaubnis</h4>
+                                                <p className="text-xs text-slate-600">Mindestens <strong>Mofaprüfbescheinigung</strong> erforderlich. Fahren ohne Mofaprüfbescheinigung ist eine Owi (§ 5 FeV), keine Straftat.<br/><br/><span className="italic">Ausnahme: Vor 01.04.1965 Geborene benötigen nur einen Ausweis.</span></p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <Shield className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Helmpflicht</h4>
+                                                <p className="text-xs text-slate-600"><strong>Es besteht Helmpflicht</strong> (§ 21a StVO). Geeigneter Kraftradschutzhelm erforderlich (ein reiner Fahrradhelm reicht i.d.R. nicht).</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
+                                            <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Radwegebenutzung</h4>
+                                                <p className="text-xs text-slate-600"><strong>Innerorts:</strong> Radwege dürfen nur benutzt werden, wenn diese durch Zusatzschild "Mofas frei" oder "E-Bikes frei" freigegeben sind.<br/><strong>Außerorts:</strong> Radwege dürfen benutzt werden.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                  </div>
             )}
