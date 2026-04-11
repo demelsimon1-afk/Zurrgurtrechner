@@ -3864,30 +3864,33 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Zulassung & Versicherung</h4>
                                                 <p className="text-xs text-slate-600"><strong>Kein</strong> Versicherungskennzeichen und <strong>keine</strong> Betriebserlaubnis erforderlich.</p>
                                             </div>
                                         </div>
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Fahrerlaubnis</h4>
                                                 <p className="text-xs text-slate-600"><strong>Kein</strong> Führerschein und <strong>keine</strong> Mofaprüfbescheinigung erforderlich. Kein Mindestalter.</p>
                                             </div>
                                         </div>
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <Shield className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Helmpflicht</h4>
                                                 <p className="text-xs text-slate-600">Es besteht <strong>keine Helmpflicht</strong> (freiwilliges Tragen wird empfohlen).</p>
                                             </div>
                                         </div>
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Radwegebenutzung</h4>
-                                                <p className="text-xs text-slate-600">Gekennzeichnete Radwege <strong>müssen</strong> genutzt werden.</p>
+                                                <p className="text-xs text-slate-600">Gekennzeichnete Radwege <strong>müssen</strong> genutzt werden (wie beim Fahrrad).</p>
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 102100:</span> Gehweg vorschriftswidrig benutzt (55 €)
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -3906,7 +3909,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                 <div className="bg-slate-800 text-white p-4 rounded-xl mb-5 flex gap-3 items-start shadow-sm">
                                     <Info className="w-5 h-5 shrink-0 text-yellow-400 mt-0.5" />
                                     <p className="text-xs font-medium leading-relaxed">
-                                        <strong>Definition:</strong> Der Motor (max. 4.000 Watt) unterstützt das Treten <strong>bis zu 45 km/h</strong>. 
+                                        <strong>Definition:</strong> Der Motor (max. 4.000 Watt) unterstützt das Treten <strong>bis zu 45 km/h</strong>. Sie sehen optisch oft wie normale Fahrräder aus, sind aber deutlich leistungsstärker.
                                     </p>
                                 </div>
 
@@ -3922,31 +3925,40 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Zulassung & Versicherung</h4>
                                                 <p className="text-xs text-slate-600"><strong>Versicherungskennzeichen</strong> und eine <strong>Betriebserlaubnis</strong> sind zwingend erforderlich! (Ansonsten Straftat § 6 PflVG / § 21 StVG iVm § 4 FZV).</p>
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 804600:</span> Ohne Betriebserlaubnis gefahren (70 €, 1 Pkt.)
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Fahrerlaubnis</h4>
-                                                <p className="text-xs text-slate-600">Führerschein der <strong>Klasse AM</strong> zwingend erforderlich. (Ansonsten Straftat § 21 StVG).</p>
+                                                <p className="text-xs text-slate-600">Führerschein der <strong>Klasse AM</strong> zwingend erforderlich (inkludiert im Autoführerschein B). (Ansonsten Straftat § 21 StVG).</p>
                                             </div>
                                         </div>
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <Shield className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Helmpflicht</h4>
-                                                <p className="text-xs text-slate-600"><strong>Es besteht Helmpflicht</strong> (§ 21a StVO). Es muss ein "geeigneter Kraftradschutzhelm" (ECE-Norm) getragen werden.</p>
+                                                <p className="text-xs text-slate-600"><strong>Es besteht Helmpflicht</strong> (§ 21a StVO). Es muss ein "geeigneter Kraftradschutzhelm" (ECE-Norm) getragen werden. Normale Fahrradhelme genügen in der Regel rechtlich nicht.</p>
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 121178:</span> Während der Fahrt keinen Helm getragen (15 €)
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Radwegebenutzung</h4>
                                                 <p className="text-xs text-slate-600 text-red-600 font-bold">Verboten!</p>
                                                 <p className="text-xs text-slate-600">Radwege dürfen <strong>nicht</strong> befahren werden, auch nicht außerorts und auch nicht, wenn sie für "Mofas frei" gekennzeichnet sind. Sie müssen die Fahrbahn nutzen.</p>
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 102100:</span> Gehweg/Radweg vorschriftswidrig benutzt (55 €)
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -3954,7 +3966,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             </div>
                         )}
 
-                        {/* 3. E-BIKE (Mofa) */}
+{/* 3. E-BIKE (Mofa) */}
                         {ebikeView === 'ebike25' && (
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-green-700 pb-2 border-b border-slate-50">
@@ -3965,7 +3977,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                 <div className="bg-slate-800 text-white p-4 rounded-xl mb-5 flex gap-3 items-start shadow-sm">
                                     <Info className="w-5 h-5 shrink-0 text-blue-400 mt-0.5" />
                                     <p className="text-xs font-medium leading-relaxed">
-                                        <strong>Definition:</strong> Der Motor treibt das Zweirad <strong>auch ohne gleichzeitiges Treten</strong> an (z.B. per Gasgriff/Knopfdruck), bis zu einer bbH von max. 25 km/h. <br/><br/><em>(Hinweis: Bis max. 20 km/h spricht man vom Leichtmofa.</em>
+                                        <strong>Definition:</strong> Der Motor treibt das Zweirad <strong>auch ohne gleichzeitiges Treten</strong> an (z.B. per Gasgriff/Knopfdruck), bis zu einer bbH von max. 25 km/h. <br/><br/><em>(Hinweis: Bis max. 20 km/h spricht man vom Leichtmofa, rechtlich jedoch weitestgehend identisch zu behandeln).</em>
                                     </p>
                                 </div>
 
@@ -3981,30 +3993,51 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Zulassung & Versicherung</h4>
                                                 <p className="text-xs text-slate-600"><strong>Versicherungskennzeichen</strong> und eine <strong>Betriebserlaubnis</strong> sind zwingend erforderlich! (Ansonsten Straftat § 6 PflVG).</p>
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 804600:</span> Ohne Betriebserlaubnis gefahren (70 €, 1 Pkt.)
+                                                </div>
                                             </div>
                                         </div>
+                                        
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Fahrerlaubnis</h4>
-                                                <p className="text-xs text-slate-600">Mindestens <strong>Mofaprüfbescheinigung</strong> erforderlich. Fahren ohne Mofaprüfbescheinigung ist eine Owi (§ 5 FeV), keine Straftat.<br/><br/><span className="italic">Ausnahme: Vor 01.04.1965 Geborene benötigen nur einen Ausweis.</span></p>
+                                                <p className="text-xs text-slate-600">Mindestens <strong>Mofaprüfbescheinigung</strong> erforderlich (kein Führerschein im rechtl. Sinne). Fahren ohne Mofaprüfbescheinigung ist eine Owi (§ 5 FeV), keine Straftat.<br/><br/><span className="italic">Ausnahme: Vor 01.04.1965 Geborene benötigen nur einen Ausweis.</span></p>
+                                                {/* Hier ist der reparierte Block für die TBNR 205000 */}
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 205000:</span> Fahren ohne Mofaprüfbescheinigung (20 €)
+                                                </div>
                                             </div>
                                         </div>
+                                        
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <Shield className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Helmpflicht</h4>
                                                 <p className="text-xs text-slate-600"><strong>Es besteht Helmpflicht</strong> (§ 21a StVO). Geeigneter Kraftradschutzhelm erforderlich (ein reiner Fahrradhelm reicht i.d.R. nicht).</p>
+                                                <div className="mt-2 bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                    <span className="font-bold">TBNR 121178:</span> Während der Fahrt keinen Helm getragen (15 €)
+                                                </div>
                                             </div>
                                         </div>
+                                        
                                         <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-start gap-3">
                                             <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
-                                            <div>
+                                            <div className="flex-1">
                                                 <h4 className="font-bold text-slate-700 text-xs uppercase mb-1">Radwegebenutzung</h4>
-                                                <p className="text-xs text-slate-600"><strong>Innerorts:</strong> Radwege dürfen nur benutzt werden, wenn diese durch Zusatzschild "Mofas frei" oder "E-Bikes frei" freigegeben sind.<br/><strong>Außerorts:</strong> Radwege dürfen benutzt werden.</p>
+                                                <p className="text-xs text-slate-600"><strong>Innerorts:</strong> Radwege dürfen nur benutzt werden, wenn diese durch Zusatzschild "Mofas frei" oder "E-Bikes frei" freigegeben sind.<br/><strong>Außerorts:</strong> Radwege dürfen/sollten benutzt werden.</p>
+                                                <div className="mt-2 space-y-1">
+                                                    <div className="bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                        <span className="font-bold">TBNR 102018:</span> Radweg i.g.O. unzulässig befahren (20 €)
+                                                    </div>
+                                                    <div className="bg-red-50 border border-red-100 p-2 rounded text-xs text-red-800">
+                                                        <span className="font-bold">TBNR 102100:</span> Gehweg vorschriftswidrig benutzt (55 €)
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
