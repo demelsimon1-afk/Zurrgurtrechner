@@ -192,14 +192,24 @@ const ConstructionConeIcon = ({ className }) => (
   </svg>
 );
 
-const SpiritLevelIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect x="2" y="8" width="20" height="8" rx="2" />
-      <line x1="7" y1="8" x2="7" y2="16" />
-      <line x1="17" y1="8" x2="17" y2="16" />
-      <circle cx="12" cy="12" r="1.5" fill="currentColor" fillOpacity="0.5" />
-    </svg>
-);
+const CalculationToggle = ({ children, label = "Rechenweg anzeigen", forceOpen = false }) => {
+    const [isOpen, setIsOpen] = useState(forceOpen);
+    return (
+        <div className="mt-4">
+            <button 
+                onClick={() => setIsOpen(!isOpen)} 
+                className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 hover:text-indigo-600 transition-colors mx-auto no-print"
+            >
+                {isOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {label}
+            </button>
+            {/* ÄNDERUNG: Wenn geschlossen, erhält der Container die Klasse 'print-only' */}
+            <div className={isOpen ? "animate-in fade-in slide-in-from-top-2 duration-300" : "print-only"}>
+                {children}
+            </div>
+        </div>
+    );
+};
 
 const TruckTrailerIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
