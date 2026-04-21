@@ -192,24 +192,14 @@ const ConstructionConeIcon = ({ className }) => (
   </svg>
 );
 
-const CalculationToggle = ({ children, label = "Rechenweg anzeigen", forceOpen = false }) => {
-    const [isOpen, setIsOpen] = useState(forceOpen);
-    return (
-        <div className="mt-4">
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
-                className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 hover:text-indigo-600 transition-colors mx-auto no-print"
-            >
-                {isOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                {label}
-            </button>
-            {/* ÄNDERUNG: Wenn geschlossen, erhält der Container die Klasse 'print-only' */}
-            <div className={isOpen ? "animate-in fade-in slide-in-from-top-2 duration-300" : "print-only"}>
-                {children}
-            </div>
-        </div>
-    );
-};
+const SpiritLevelIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="2" y="8" width="20" height="8" rx="2" />
+      <line x1="7" y1="8" x2="7" y2="16" />
+      <line x1="17" y1="8" x2="17" y2="16" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" fillOpacity="0.5" />
+    </svg>
+);
 
 const TruckTrailerIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -884,302 +874,6 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
     );
 };
 
-// --- CALCULATOR COMPONENTS ---
-
-const ACCIDENT_SURFACES = [
-  { label: "Asphalt trocken", value: 7.5 },
-  { label: "Asphalt nass", value: 6.0 },
-  { label: "Beton trocken", value: 7.5 },
-  { label: "Beton nass (neue Bauart)", value: 7.0 },
-  { label: "Beton nass (alte Bauart)", value: 5.9 },
-  { label: "Verbundpflaster trocken", value: 6.0 },
-  { label: "Verbundpflaster nass", value: 5.0 },
-  { label: "Kopfsteinpflaster trocken", value: 6.0 },
-  { label: "Kopfsteinpflaster nass", value: 5.0 },
-  { label: "Sand/Kies trocken", value: 5.5 },
-  { label: "Sand/Kies nass", value: 4.5 },
-  { label: "Schneedecke", value: 2.5 },
-  { label: "Eis", value: 1.0 }
-];
-
-function AccidentCalculator() {
-    const dateTime = useDateTime();
-    const [mode, setMode] = useState('brake'); // 'brake' | 'drift'
-
-    // States für Bremsspur
-    const [sVL, setSVL] = useState('');
-    const [sVR, setSVR] = useState('');
-    const [sHL, setSHL] = useState('');
-    const [sHR, setSHR] = useState('');
-    const [bremsSurfaceIdx, setBremsSurfaceIdx] = useState(0);
-    const [tBrake, setTBrake] = useState('0.2');
-
-    // States für Driftspur
-    const [sDrift, setSDrift] = useState('');
-    const [hDrift, setHDrift] = useState('');
-    const [driftSurfaceIdx, setDriftSurfaceIdx] = useState(0);
-
-    // Berechnungen Bremsspur
-    const calcBrakeSpeed = (sStr, aStr, tStr) => {
-        const s = parseFloat(sStr);
-        const a = parseFloat(aStr);
-        const t = parseFloat(tStr);
-        if (!s || isNaN(s) || s <= 0 || isNaN(a) || isNaN(t)) return 0;
-        // v = sqrt(2 * a * s) + (a * t) / 2 -> Ergebnis in m/s, mal 3.6 für km/h
-        return (Math.sqrt(2 * a * s) + ((a * t) / 2)) * 3.6;
-    };
-
-    const aBrake = ACCIDENT_SURFACES[bremsSurfaceIdx].value;
-    const speeds = [sVL, sVR, sHL, sHR].map(s => calcBrakeSpeed(s, aBrake, tBrake));
-    const maxBrakeSpeed = Math.max(...speeds, 0);
-
-    // Berechnungen Driftspur
-    let driftSpeed = 0;
-    const sD = parseFloat(sDrift);
-    const hD = parseFloat(hDrift);
-    const aDrift = ACCIDENT_SURFACES[driftSurfaceIdx].value;
-
-    if (sD > 0 && hD > 0 && !isNaN(aDrift)) {
-        // Radius R = s^2 / 8h + h/2
-        const r = (Math.pow(sD, 2) / (8 * hD)) + (hD / 2);
-        // v = sqrt(R * a) -> Ergebnis in m/s, mal 3.6 für km/h
-        driftSpeed = Math.sqrt(r * aDrift) * 3.6;
-    }
-
-    // Optionen für Dropdowns
-    const tOptions = Array.from({length: 10}, (_, i) => ((i + 1) * 0.1).toFixed(1));
-
-    // Für die visuelle Darstellung der Bremsspuren
-    const vL_val = parseFloat(sVL) || 0;
-    const vR_val = parseFloat(sVR) || 0;
-    const hL_val = parseFloat(sHL) || 0;
-    const hR_val = parseFloat(sHR) || 0;
-    const maxBrakeLength = Math.max(vL_val, vR_val, hL_val, hR_val, 10); // Skala für die SVG (mindestens 10)
-
-    return (
-        <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
-            {/* PRINT VIEW */}
-            <div className="print-only print-container">
-                <h1 className="print-title">Unfall-Protokoll ({mode === 'brake' ? 'Bremsspur-Geschwindigkeitsrechner' : 'Driftspur-Geschwindigkeitsrechner'})</h1>
-                <div className="print-meta">Erstellt am: {dateTime}</div>
-
-                <h2 className="print-section">Eingabewerte</h2>
-                <table className="print-table">
-                    <tbody>
-                        {mode === 'brake' ? (
-                            <>
-                                <tr><th>Fahrbahnbelag (a)</th><td>{ACCIDENT_SURFACES[bremsSurfaceIdx].label} ({aBrake} m/s²)</td></tr>
-                                <tr><th>Bremsschwellenzeit (t)</th><td>{tBrake} s</td></tr>
-                                <tr><th>Spur Vorne Links</th><td>{sVL || 0} m</td></tr>
-                                <tr><th>Spur Vorne Rechts</th><td>{sVR || 0} m</td></tr>
-                                <tr><th>Spur Hinten Links</th><td>{sHL || 0} m</td></tr>
-                                <tr><th>Spur Hinten Rechts</th><td>{sHR || 0} m</td></tr>
-                            </>
-                        ) : (
-                            <>
-                                <tr><th>Fahrbahnbelag (a)</th><td>{ACCIDENT_SURFACES[driftSurfaceIdx].label} ({aDrift} m/s²)</td></tr>
-                                <tr><th>Sekante (S)</th><td>{sDrift || 0} m</td></tr>
-                                <tr><th>Abstand (h)</th><td>{hDrift || 0} m</td></tr>
-                            </>
-                        )}
-                    </tbody>
-                </table>
-
-                <h2 className="print-section">Ergebnis</h2>
-                <div className="print-result-box">
-                    <div className="print-result-header">Berechnete Geschwindigkeit</div>
-                    <div>
-                        <strong>{mode === 'brake' ? maxBrakeSpeed.toFixed(1) : driftSpeed.toFixed(1)} km/h</strong>
-                    </div>
-                </div>
-            </div>
-            {/* END PRINT VIEW */}
-
-            <div className="bg-red-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-red-900/10 no-print">
-                <div>
-                    <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
-                        <AlertTriangle className="w-6 h-6 shrink-0" />
-                        Unfallrechner
-                    </h1>
-                    <p className="text-red-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8">
-                        <Clock className="w-3 h-3" />
-                        {dateTime}
-                    </p>
-                </div>
-                <HeaderLogo />
-            </div>
-
-            <div className="p-2 space-y-2 no-print">
-                {/* Toggle */}
-                <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 gap-1">
-                    <button onClick={() => setMode('brake')} className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-lg transition-all flex flex-col items-center justify-center leading-tight ${mode === 'brake' ? 'bg-red-50 text-red-800 shadow-sm ring-1 ring-red-200' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}>
-                        <span>Bremsspur-</span>
-                        <span>Geschwindigkeitsrechner</span>
-                    </button>
-                    <button onClick={() => setMode('drift')} className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-lg transition-all flex flex-col items-center justify-center leading-tight ${mode === 'drift' ? 'bg-red-50 text-red-800 shadow-sm ring-1 ring-red-200' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}>
-                        <span>Driftspur-</span>
-                        <span>Geschwindigkeitsrechner</span>
-                    </button>
-                </div>
-
-                {mode === 'brake' && (
-                    <div className="animate-in fade-in duration-300">
-                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                            <div className="flex items-center gap-2 mb-2 text-red-700 border-b border-slate-50 pb-2">
-                                <ActivityIcon className="w-5 h-5 shrink-0" />
-                                <span className="text-sm font-black uppercase tracking-wide">Brems-/Blockierspur-Geschwindigkeitsrechner</span>
-                            </div>
-
-                            <div className="bg-red-50/50 p-3 rounded-xl border border-red-100 mb-3 mt-3">
-                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify">
-                                    Kommt es infolge einer Gefahrenbremsung zum Blockieren der Räder, zeichnen sich diese durch charakteristische Brems- bzw. Blockierspuren auf der Fahrbahnoberfläche ab.
-                                </p>
-                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify mt-1.5 font-bold">
-                                    Zur Ermittlung der Ausgangsgeschwindigkeit ist die Länge jeder einzelnen Spur ab dem Beginn bis zum Ende zu vermessen.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fahrbahnbelag (a)</label>
-                                    <select value={bremsSurfaceIdx} onChange={(e) => setBremsSurfaceIdx(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
-                                        {ACCIDENT_SURFACES.map((opt, idx) => <option key={idx} value={idx}>{opt.label} ({opt.value} m/s²)</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Schwellenzeit (t)</label>
-                                    <select value={tBrake} onChange={(e) => setTBrake(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
-                                        {tOptions.map(opt => <option key={opt} value={opt}>{opt} s {opt === '0.2' ? '(PKW)' : ''}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="pt-2">
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Länge der einzelnen Spuren (in Meter)</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <InputWithIcon icon={Ruler} label="Vorne Links (Rot)" value={sVL} onChange={(e) => setSVL(e.target.value)} placeholder="0" />
-                                    <InputWithIcon icon={Ruler} label="Vorne Rechts (Blau)" value={sVR} onChange={(e) => setSVR(e.target.value)} placeholder="0" />
-                                    <InputWithIcon icon={Ruler} label="Hinten Links (Orange)" value={sHL} onChange={(e) => setSHL(e.target.value)} placeholder="0" />
-                                    <InputWithIcon icon={Ruler} label="Hinten Rechts (Grün)" value={sHR} onChange={(e) => setSHR(e.target.value)} placeholder="0" />
-                                </div>
-                            </div>
-
-                            {/* VISUELLE BREMSSPUR (UX Upgrade) */}
-                            {(vL_val > 0 || vR_val > 0 || hL_val > 0 || hR_val > 0) && (
-                                <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-inner overflow-hidden animate-in fade-in">
-                                    <div className="text-[9px] font-black uppercase text-slate-400 mb-3 tracking-widest text-center">Spurbild (Proportional)</div>
-                                    <div className="flex justify-center relative h-32">
-                                        <svg viewBox="0 0 100 120" className="w-full max-w-[120px] h-full overflow-visible">
-                                            {/* Bremsspuren */}
-                                            <line x1="30" y1="20" x2="30" y2={20 + (vL_val / maxBrakeLength) * 90} stroke="#ef4444" strokeWidth="4" strokeLinecap="round" className="transition-all duration-500" />
-                                            <line x1="70" y1="20" x2="70" y2={20 + (vR_val / maxBrakeLength) * 90} stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" className="transition-all duration-500" />
-                                            <line x1="30" y1="60" x2="30" y2={60 + (hL_val / maxBrakeLength) * 50} stroke="#f59e0b" strokeWidth="4" strokeLinecap="round" className="transition-all duration-500" />
-                                            <line x1="70" y1="60" x2="70" y2={60 + (hR_val / maxBrakeLength) * 50} stroke="#10b981" strokeWidth="4" strokeLinecap="round" className="transition-all duration-500" />
-                                            
-                                            {/* Auto Umriss */}
-                                            <rect x="25" y="0" width="50" height="70" rx="6" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="2" />
-                                            <path d="M 35 15 L 65 15 L 60 5 L 40 5 Z" fill="#94a3b8" />
-                                            <path d="M 35 45 L 65 45 L 60 60 L 40 60 Z" fill="#94a3b8" />
-                                            {/* Räder */}
-                                            <rect x="23" y="10" width="4" height="12" rx="1" fill="#1e293b" />
-                                            <rect x="73" y="10" width="4" height="12" rx="1" fill="#1e293b" />
-                                            <rect x="23" y="50" width="4" height="12" rx="1" fill="#1e293b" />
-                                            <rect x="73" y="50" width="4" height="12" rx="1" fill="#1e293b" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {maxBrakeSpeed > 0 && (
-                            <div className="mt-3 bg-white border-2 border-red-100 rounded-2xl p-4 shadow-xl text-center animate-in slide-in-from-bottom-2">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Höchste Geschwindigkeit</span>
-                                <div className="text-5xl font-black text-red-600 tracking-tighter">
-                                    {maxBrakeSpeed.toFixed(1)} <span className="text-xl text-slate-400">km/h</span>
-                                </div>
-                                <div className="mt-3 text-[10px] text-slate-400 font-mono bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-100">
-                                    v = √ (2 · a · s) + ((a · t) / 2)
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {mode === 'drift' && (
-                    <div className="animate-in fade-in duration-300">
-                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                            <div className="flex items-center gap-2 mb-2 text-red-700 border-b border-slate-50 pb-2">
-                                <RotateCw className="w-5 h-5 shrink-0" />
-                                <span className="text-sm font-black uppercase tracking-wide">Driftspur-Geschwindigkeitsrechner</span>
-                            </div>
-
-                            {/* SVG Erklärungsgrafik */}
-                            <svg viewBox="0 0 300 130" className="w-full h-auto bg-slate-50 rounded-xl mb-4 border border-slate-200 shadow-inner p-2 mt-2">
-                                {/* Kurven-Spur */}
-                                <path d="M 40 100 Q 150 10 260 100" fill="none" stroke="#94a3b8" strokeWidth="8" strokeLinecap="round" />
-                                
-                                {/* S - Linie (Sekante) */}
-                                <line x1="40" y1="100" x2="260" y2="100" stroke="#334155" strokeWidth="2" />
-                                <polygon points="40,100 50,96 50,104" fill="#334155" />
-                                <polygon points="260,100 250,96 250,104" fill="#334155" />
-                                <text x="150" y="118" textAnchor="middle" className="text-sm font-black fill-slate-700">Sekante (S)</text>
-
-                                {/* h - Linie (Abstand) - Mittelpunkt der Kurve bei Q(150, 10) ist mathematisch y=55 */}
-                                <line x1="150" y1="95" x2="150" y2="60" stroke="#ef4444" strokeWidth="2" />
-                                <polygon points="150,100 146,90 154,90" fill="#ef4444" />
-                                <polygon points="150,55 146,65 154,65" fill="#ef4444" />
-                                <text x="162" y="82" className="text-sm font-black fill-red-600">h</text>
-                            </svg>
-
-                            <div className="bg-red-50/50 p-3 rounded-xl border border-red-100 mb-3">
-                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify">
-                                    Durchfährt ein Fahrzeug eine Kurve mit überhöhter Geschwindigkeit, so kann es zur Ausprägung charakteristischer Driftspuren durch die zentrifugal belasteten kurvenäußeren Räder kommen.
-                                </p>
-                                <p className="text-[10px] text-slate-600 leading-relaxed text-justify mt-1.5 font-bold">
-                                    Zur Ermittlung der Ausgangsgeschwindigkeit wird eine geradlinige Messstrecke (Sekante S, z.B. 10 - 15 m) zwischen zwei Punkten der Spur angelegt. In der Mitte dieser Sekante ist der senkrechte Abstand (Pfeilhöhe h) zu messen.
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 mb-2">
-                                <div className="col-span-2">
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fahrbahnbelag (a)</label>
-                                    <select value={driftSurfaceIdx} onChange={(e) => setDriftSurfaceIdx(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-slate-700">
-                                        {ACCIDENT_SURFACES.map((opt, idx) => <option key={idx} value={idx}>{opt.label} ({opt.value} m/s²)</option>)}
-                                    </select>
-                                </div>
-                                <InputWithIcon icon={Ruler} label="Sekante S (m)" value={sDrift} onChange={(e) => setSDrift(e.target.value)} placeholder="0" />
-                                <InputWithIcon icon={Ruler} label="Abstand h (m)" value={hDrift} onChange={(e) => setHDrift(e.target.value)} placeholder="0" />
-                            </div>
-                        </div>
-
-                        {driftSpeed > 0 && (
-                            <div className="mt-3 bg-white border-2 border-red-100 rounded-2xl p-4 shadow-xl text-center animate-in slide-in-from-bottom-2">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Ausgangsgeschwindigkeit</span>
-                                <div className="text-5xl font-black text-red-600 tracking-tighter">
-                                    {driftSpeed.toFixed(1)} <span className="text-xl text-slate-400">km/h</span>
-                                </div>
-                                <div className="mt-3 text-[10px] text-slate-400 font-mono bg-slate-50 py-2 px-3 rounded-lg border border-slate-100 flex flex-col gap-1">
-                                    <span>R = S² / (8 · h) + (h / 2)</span>
-                                    <span>v = √ (R · a)</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-                
-                <PrintButton />
-            </div>
-            <AppVersionFooter />
-        </div>
-    );
-}
-
-// Helper für Icon (falls ActivityIcon aus lucide nicht importiert ist, nutzen wir eine einfache Alternative)
-const ActivityIcon = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-  </svg>
-);
 
 
 function AgeCalculator() {
@@ -1820,69 +1514,122 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
     return null;
 };
 
-// Simple display component for print (non-interactive)
-const PrintFineDisplay = ({ result, isTrailer, isCombination }) => {
-    if (!result || !result.isOverloaded || result.percentage < 2) return null;
-    const driverFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'driver');
-    const ownerFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'owner');
+// Komponente für den Ausdruck des Rechenwegs (robust gegen fehlende Daten)
+const PrintFormulaDisplay = ({ result }) => {
+    if (!result || typeof result.actual === 'undefined' || isNaN(result.actual)) return null;
+    
+    const isOk = !result.isOverloaded;
+    const diffColor = isOk ? '#16a34a' : '#dc2626'; 
+    const diffText = isOk ? (result.difference < 0 ? 'Unterladung' : 'Differenz') : 'Überladung';
+    const diffSign = result.difference > 0 ? '+' : '';
 
     return (
-        <div style={{ marginTop: '10px' }}>
-            {driverFine && (
-                <div style={{ marginBottom: '5px' }}>
-                    <strong>Fahrer:</strong> {driverFine.cost}, {driverFine.points} Pkt (TBNR: {driverFine.tbnr})
-                </div>
-            )}
-            {ownerFine && (
-                <div>
-                    <strong>Halter:</strong> {ownerFine.cost}, {ownerFine.points} Pkt (TBNR: {ownerFine.tbnr})
+        <div style={{ 
+            marginTop: '10px', 
+            marginBottom: '10px', 
+            paddingLeft: '10px', 
+            borderLeft: `3px solid ${diffColor}`, 
+            fontSize: '12px',
+            fontFamily: 'monospace'
+        }}>
+            <strong style={{ fontFamily: 'sans-serif', fontSize: '13px' }}>Rechenweg:</strong><br />
+            <table style={{ borderCollapse: 'collapse', marginTop: '4px' }}>
+                <tbody>
+                    <tr>
+                        <td style={{ paddingRight: '15px' }}>Gewogen (Ist):</td>
+                        <td style={{ textAlign: 'right' }}>{Number(result.actual || 0).toLocaleString()} kg</td>
+                    </tr>
+                    <tr>
+                        <td style={{ paddingRight: '15px', borderBottom: '1px solid #000' }}>- Toleranz:</td>
+                        <td style={{ textAlign: 'right', borderBottom: '1px solid #000' }}>{Number(result.tolerance || 0).toLocaleString()} kg</td>
+                    </tr>
+                    <tr>
+                        <td style={{ paddingRight: '15px', fontWeight: 'bold' }}>= Vorwerfbar (Netto):</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{Number(result.netWeight || 0).toLocaleString()} kg</td>
+                    </tr>
+                    <tr>
+                        <td style={{ paddingRight: '15px', borderBottom: '1px solid #000' }}>- Zulässiges Gewicht (zGM):</td>
+                        <td style={{ textAlign: 'right', borderBottom: '1px solid #000' }}>{Number(result.allowed || 0).toLocaleString()} kg</td>
+                    </tr>
+                    <tr>
+                        <td style={{ paddingRight: '15px', fontWeight: 'bold', color: diffColor }}>= {diffText}:</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', color: diffColor }}>{diffSign}{Number(result.difference || 0).toLocaleString()} kg</td>
+                    </tr>
+                </tbody>
+            </table>
+            {result.isOverloaded && result.allowed > 0 && (
+                <div style={{ marginTop: '6px', fontSize: '11px' }}>
+                    <strong>Prozentuale Formel:</strong><br />
+                    ({Number(result.difference || 0).toLocaleString()} kg / {Number(result.allowed || 0).toLocaleString()} kg) × 100 = <strong>{Number(result.percentage || 0).toFixed(2)} %</strong>
                 </div>
             )}
         </div>
     );
 };
 
+// Simple display component for print (non-interactive)
+const PrintFineDisplay = ({ result, isTrailer, isCombination }) => {
+    if (!result || !result.isOverloaded || result.percentage < 2) return null;
+    const driverFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'driver');
+    const ownerFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'owner');
+ 
+    return (
+        <div style={{ marginTop: '10px' }}>
+            {driverFine && (
+               <div style={{ marginBottom: '5px' }}>
+                   <strong>Fahrer:</strong> {driverFine.cost}, {driverFine.points} Pkt (TBNR: {driverFine.tbnr})
+               </div>
+            )}
+            {ownerFine && (
+                <div>
+                   <strong>Halter:</strong> {ownerFine.cost}, {ownerFine.points} Pkt (TBNR: {ownerFine.tbnr})
+               </div>
+            )}
+        </div>
+    );
+};
+ 
 const FineDisplay = ({ result, isTrailer, isCombination }) => {
     const [showDriver, setShowDriver] = useState(false);
     const [showOwner, setShowOwner] = useState(false);
-
+ 
     if (!result || !result.isOverloaded || result.percentage < 2) return null;
-
+ 
     const driverFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'driver');
     const ownerFine = getOverloadFineData(result.percentage, result.allowed, isTrailer, isCombination, 'owner');
-
+ 
     return (
         <div className="mt-4 space-y-2 no-print">
             <button onClick={() => setShowDriver(!showDriver)} className="w-full flex justify-between items-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold uppercase transition-colors">
-                <span>Tatbestand Fahrer</span>
-                {showDriver ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
-            </button>
-            {showDriver && driverFine && (
-                <div className="bg-slate-800 text-white p-3 rounded-lg text-xs">
-                     <div className="grid grid-cols-2 gap-2">
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld (Fahrer)</div><div className="text-xl font-black text-amber-400">{driverFine.cost}</div></div>
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{driverFine.points}</div></div>
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-700 px-1 py-0.5 rounded inline-block">{driverFine.tbnr}</div></div>
-                     </div>
-                </div>
+               <span>Tatbestand Fahrer</span>
+               {showDriver ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+           </button>
+           {showDriver && driverFine && (
+               <div className="bg-slate-800 text-white p-3 rounded-lg text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                       <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld (Fahrer)</div><div className="text-xl font-black text-amber-400">{driverFine.cost}</div></div>
+                       <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{driverFine.points}</div></div>
+                       <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-700 px-1 py-0.5 rounded inline-block">{driverFine.tbnr}</div></div>
+                    </div>
+               </div>
             )}
             <button onClick={() => setShowOwner(!showOwner)} className="w-full flex justify-between items-center px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase transition-colors">
-                <span>Tatbestand Halter</span>
+               <span>Tatbestand Halter</span>
                 {showOwner ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
-            </button>
+           </button>
             {showOwner && ownerFine && (
-                <div className="bg-slate-700 text-white p-3 rounded-lg text-xs">
-                     <div className="grid grid-cols-2 gap-2">
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld (Halter)</div><div className="text-xl font-black text-amber-400">{ownerFine.cost}</div></div>
-                        <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{ownerFine.points}</div></div>
+               <div className="bg-slate-700 text-white p-3 rounded-lg text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                       <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld (Halter)</div><div className="text-xl font-black text-amber-400">{ownerFine.cost}</div></div>
+                       <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-lg font-bold">{ownerFine.points}</div></div>
                         <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-xs font-mono bg-slate-600 px-1 py-0.5 rounded inline-block">{ownerFine.tbnr}</div></div>
-                     </div>
+                    </div>
                 </div>
             )}
         </div>
     );
 }
-
+ 
 function OverloadCalculator({ onSwitch }) {
   const [mode, setMode] = useState('single'); 
   const [isCommercial, setIsCommercial] = useState(false);
@@ -1891,15 +1638,17 @@ function OverloadCalculator({ onSwitch }) {
   const [allowedWeight1, setAllowedWeight1] = useState('');
   const [actualWeight1, setActualWeight1] = useState('');
   const [customTol1, setCustomTol1] = useState(''); 
-
+ 
   const [allowedWeight2, setAllowedWeight2] = useState('');
   const [actualWeight2, setActualWeight2] = useState('');
   const [customTol2, setCustomTol2] = useState(''); 
   
   const [totalAllowed, setTotalAllowed] = useState('');
   const [result, setResult] = useState(null);
-  const dateTime = useDateTime();
-
+  
+  // Falls useDateTime nicht existiert, fangen wir das hier ab, damit es keinen Fehler gibt.
+  const dateTime = typeof useDateTime === 'function' ? useDateTime() : new Date().toLocaleDateString();
+ 
   const standardTotalWeights = [
       { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: 'Leichte Fahrzeugkombination (z.B. PKW)', val: '7500', detail: '7,5 t' },
       { group: 'Allgemeine Kombinationen (§ 34 StVZO)', label: 'Fahrzeugkombination unter 4 Achsen', val: '28000', detail: '28,0 t' },
@@ -1909,18 +1658,21 @@ function OverloadCalculator({ onSwitch }) {
       { group: 'Kombinierter Verkehr', label: '2-Achs-Zugm. + 3-Achs-Anhänger', val: '42000', detail: '42,0 t' },
       { group: 'Kombinierter Verkehr', label: '3-Achs-Zugm. + 2/3-Achs-Anhänger', val: '44000', detail: '44,0 t' }
   ];
-
-  useEffect(() => { setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setCustomTol2(''); }, [mode]);
-
+ 
+  useEffect(() => {
+    setResult(null); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed('');
+    setCustomTol2(''); 
+  }, [mode]);
+ 
   useEffect(() => {
     if (mode === 'single') { if (!actualWeight1) { setResult(null); return; } } 
     else { if (!actualWeight1 || !actualWeight2) { setResult(null); return; } }
-
+ 
     const calculateForVehicle = (allowedStr, actualStr, customTolStr) => {
         const allowed = parseFloat(allowedStr);
         const actual = parseFloat(actualStr);
         if (isNaN(actual)) return null;
-
+ 
         let tolerance = 0;
         if (useCustomTolerance) {
              tolerance = parseFloat(customTolStr) || 0;
@@ -1929,7 +1681,7 @@ function OverloadCalculator({ onSwitch }) {
              else if (actual <= 40000) tolerance = 40;
              else tolerance = 60;
         }
-
+ 
         let netWeightRaw = actual - tolerance;
         let netWeight = (allowed > 0 && allowed <= 3500) ? Math.floor(netWeightRaw) : Math.ceil(netWeightRaw);
         if (isNaN(allowed) || allowed === 0) netWeight = Math.ceil(netWeightRaw);
@@ -1937,47 +1689,54 @@ function OverloadCalculator({ onSwitch }) {
         let difference = isNaN(allowed) || allowed === 0 ? 0 : netWeight - allowed;
         let percentage = (difference > 0 && allowed > 0) ? (difference / allowed) * 100 : 0;
         
-        return { actual, allowed, tolerance, netWeight, difference, percentage, isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(actual) };
+        return {
+            actual, allowed, tolerance, netWeight, difference, percentage, 
+            isOverloaded: allowed > 0 && difference > 0, isValidInput: !isNaN(actual) 
+        };
     };
-
+ 
     const res1 = calculateForVehicle(allowedWeight1, actualWeight1, customTol1);
     let res2 = null;
     let resTotal = null;
-
+ 
     if (mode === 'combination') {
         res2 = calculateForVehicle(allowedWeight2, actualWeight2, customTol2);
         
         if (res1 && res2) {
             const sumNet = res1.netWeight + res2.netWeight;
             const limit = parseFloat(totalAllowed);
-
+ 
             let diff = (!isNaN(limit) && limit > 0) ? sumNet - limit : 0;
             let perc = (diff > 0 && limit > 0) ? (diff / limit) * 100 : 0;
-
+ 
             resTotal = {
-                actual: res1.actual + res2.actual, 
-                allowed: limit,
-                tolerance: res1.tolerance + res2.tolerance,
-                netWeight: sumNet,
-                difference: diff,
-                percentage: perc,
-                isOverloaded: limit > 0 && diff > 0,
-                isValidInput: !isNaN(limit) && limit > 0
+               actual: res1.actual + res2.actual, 
+               allowed: limit,
+               tolerance: res1.tolerance + res2.tolerance,
+               netWeight: sumNet,
+               difference: diff,
+               percentage: perc,
+               isOverloaded: limit > 0 && diff > 0,
+               isValidInput: !isNaN(limit) && limit > 0
             };
         }
     }
     setResult({ vehicle1: res1, vehicle2: res2, total: resTotal });
   }, [allowedWeight1, actualWeight1, allowedWeight2, actualWeight2, totalAllowed, mode, customTol1, customTol2, useCustomTolerance]);
-
-  const resetForm = () => { setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2(''); setActualWeight2(''); setTotalAllowed(''); setCustomTol1(''); setCustomTol2(''); setUseCustomTolerance(false); setResult(null); };
-
+ 
+  const resetForm = () => { 
+      setAllowedWeight1(''); setActualWeight1(''); setAllowedWeight2('');
+      setActualWeight2(''); setTotalAllowed(''); setCustomTol1('');
+      setCustomTol2(''); setUseCustomTolerance(false); setResult(null); 
+  };
+ 
   const checkConfiscation = (res) => {
       if (!res || !isCommercial || !res.isOverloaded) return false;
       if (res.allowed > 3500 && res.percentage >= 15) return true;
       if (res.allowed > 0 && res.allowed <= 3500 && res.percentage >= 20) return true;
       return false;
   };
-
+ 
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
@@ -1985,91 +1744,91 @@ function OverloadCalculator({ onSwitch }) {
       <div className="print-only print-container">
         <h1 className="print-title">Gewichts-Protokoll</h1>
         <div className="print-meta">Erstellt am: {dateTime}</div>
-
+ 
         <h2 className="print-section">Fahrzeugdaten & Messwerte</h2>
         <table className="print-table">
-            <thead>
-                <tr>
-                    <th>Fahrzeugteil</th>
-                    <th>Zul. Gesamt (zGM)</th>
-                    <th>Gewogen (Ist)</th>
-                    <th>Toleranz{useCustomTolerance && ' (Manuell)'}</th>
-                    <th>Vorwerfbar (Netto)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{mode === 'single' ? 'Einzelfahrzeug' : 'Zugmaschine'}</td>
-                    <td>{allowedWeight1 || 0} kg</td>
-                    <td>{actualWeight1 || 0} kg</td>
-                    <td>-{result?.vehicle1?.tolerance || 0} kg</td>
-                    <td><strong>{result?.vehicle1?.netWeight?.toLocaleString() || 0} kg</strong></td>
-                </tr>
+           <thead>
+               <tr>
+                   <th>Fahrzeugteil</th>
+                   <th>Zul. Gesamt (zGM)</th>
+                   <th>Gewogen (Ist)</th>
+                   <th>Toleranz{useCustomTolerance && ' (Manuell)'}</th>
+                   <th>Vorwerfbar (Netto)</th>
+              </tr>
+           </thead>
+           <tbody>
+               <tr>
+                   <td>{mode === 'single' ? 'Einzelfahrzeug' : 'Zugmaschine'}</td>
+                   <td>{allowedWeight1 || 0} kg</td>
+                   <td>{actualWeight1 || 0} kg</td>
+                   <td>-{result?.vehicle1?.tolerance || 0} kg</td>
+                   <td><strong>{result?.vehicle1?.netWeight?.toLocaleString() || 0} kg</strong></td>
+               </tr>
                 {mode === 'combination' && (
-                <tr>
-                    <td>Anhänger</td>
-                    <td>{allowedWeight2 || 0} kg</td>
-                    <td>{actualWeight2 || 0} kg</td>
-                    <td>-{result?.vehicle2?.tolerance || 0} kg</td>
-                    <td><strong>{result?.vehicle2?.netWeight?.toLocaleString() || 0} kg</strong></td>
-                </tr>
+              <tr>
+                   <td>Anhänger</td>
+                   <td>{allowedWeight2 || 0} kg</td>
+                   <td>{actualWeight2 || 0} kg</td>
+                   <td>-{result?.vehicle2?.tolerance || 0} kg</td>
+                   <td><strong>{result?.vehicle2?.netWeight?.toLocaleString() || 0} kg</strong></td>
+               </tr>
                 )}
-            </tbody>
+           </tbody>
         </table>
-
+ 
         <h2 className="print-section">Ergebnis & Auswertung</h2>
         {result && (
         <>
             {/* RESULTS VEHICLE 1 */}
             <div className="print-result-box">
-                <div className="print-result-header">{mode === 'single' ? 'Fahrzeug' : 'Zugmaschine'}</div>
-                <div>Status: {result.vehicle1?.isOverloaded ? <span className="print-warning">ÜBERLADEN ({result.vehicle1.percentage.toFixed(2)}%)</span> : 'In Ordnung'}</div>
-                {result.vehicle1?.isOverloaded && (
-                    <div>Differenz: +{result.vehicle1.difference.toLocaleString()} kg</div>
-                )}
-                {checkConfiscation(result.vehicle1) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
-                <PrintFineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
-            </div>
-
+               <div className="print-result-header">{mode === 'single' ? 'Fahrzeug' : 'Zugmaschine'}</div>
+               <div>Status: {result.vehicle1?.isOverloaded ? <span className="print-warning">ÜBERLADEN ({result.vehicle1?.percentage?.toFixed(2)}%)</span> : 'In Ordnung'}</div>
+                
+               <PrintFormulaDisplay result={result.vehicle1} />
+ 
+               {checkConfiscation(result.vehicle1) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
+               <PrintFineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
+           </div>
+ 
             {/* RESULTS VEHICLE 2 */}
-            {mode === 'combination' && (
+            {mode === 'combination' && result.vehicle2 && (
             <div className="print-result-box">
-                <div className="print-result-header">Anhänger</div>
-                <div>Status: {result.vehicle2?.isOverloaded ? <span className="print-warning">ÜBERLADEN ({result.vehicle2.percentage.toFixed(2)}%)</span> : 'In Ordnung'}</div>
-                {result.vehicle2?.isOverloaded && (
-                    <div>Differenz: +{result.vehicle2.difference.toLocaleString()} kg</div>
-                )}
-                {checkConfiscation(result.vehicle2) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
-                <PrintFineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
-            </div>
+               <div className="print-result-header">Anhänger</div>
+               <div>Status: {result.vehicle2?.isOverloaded ? <span className="print-warning">ÜBERLADEN ({result.vehicle2?.percentage?.toFixed(2)}%)</span> : 'In Ordnung'}</div>
+                
+               <PrintFormulaDisplay result={result.vehicle2} />
+ 
+               {checkConfiscation(result.vehicle2) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
+               <PrintFineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
+           </div>
             )}
-
+ 
             {/* RESULTS TOTAL */}
             {mode === 'combination' && result.total && (
             <div className="print-result-box">
-                <div className="print-result-header">Gesamtzug</div>
-                <table className="print-table" style={{marginBottom: 5}}>
+               <div className="print-result-header">Gesamtzug</div>
+               <table className="print-table" style={{marginBottom: 5}}>
                     <tbody>
-                        <tr><th>Zul. Gesamtgewicht Zug</th><td>{totalAllowed || 0} kg</td></tr>
-                        <tr><th>Summe Netto-Gewichte</th><td>{result.total.netWeight.toLocaleString()} kg</td></tr>
-                    </tbody>
-                </table>
-                <div>Status: {result.total.isOverloaded ? <span className="print-warning">ÜBERLADEN ({result.total.percentage.toFixed(2)}%)</span> : 'In Ordnung'}</div>
-                {result.total.isOverloaded && (
-                    <div>Differenz: +{result.total.difference.toLocaleString()} kg</div>
-                )}
-                {checkConfiscation(result.total) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
-                <PrintFineDisplay result={result.total} isTrailer={false} isCombination={true} />
-            </div>
+                       <tr><th>Zul. Gesamtgewicht Zug</th><td>{totalAllowed || 0} kg</td></tr>
+                       <tr><th>Summe Netto-Gewichte</th><td>{result.total?.netWeight?.toLocaleString()} kg</td></tr>
+                   </tbody>
+               </table>
+               <div>Status: {result.total?.isOverloaded ? <span className="print-warning">ÜBERLADEN ({result.total?.percentage?.toFixed(2)}%)</span> : 'In Ordnung'}</div>
+                
+               <PrintFormulaDisplay result={result.total} />
+ 
+               {checkConfiscation(result.total) && <div className="print-warning" style={{marginTop: '5px'}}>⚠️ Einziehung möglich!</div>}
+               <PrintFineDisplay result={result.total} isTrailer={false} isCombination={true} />
+           </div>
             )}
         </>
         )}
       </div>
       {/* END PRINT VIEW */}
-
+ 
       <div className="bg-blue-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-blue-900/10 no-print">
-        <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Scale className="w-6 h-6 shrink-0" />Überladungsrechner</h1><p className="text-blue-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
-        <HeaderLogo />
+       <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Scale className="w-6 h-6 shrink-0" />Überladungsrechner</h1><p className="text-blue-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
+        {typeof HeaderLogo !== 'undefined' && <HeaderLogo />}
       </div>
       
       <div className="p-2 space-y-2 no-print">
@@ -2077,258 +1836,265 @@ function OverloadCalculator({ onSwitch }) {
         {/* Haupt-Reiter Toggle (Gewicht) */}
         {onSwitch && (
             <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
-                <button className="flex-1 py-2 bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200 rounded-lg flex flex-col items-center gap-1 cursor-default">
-                    <Scale className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Überladung</span>
-                </button>
-                <button onClick={onSwitch} className="flex-1 py-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all rounded-lg flex flex-col items-center gap-1">
-                    <Trees className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Holzgewicht</span>
-                </button>
-            </div>
+               <button className="flex-1 py-2 bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200 rounded-lg flex flex-col items-center gap-1 cursor-default">
+                   <Scale className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Überladung</span>
+               </button>
+               <button onClick={onSwitch} className="flex-1 py-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all rounded-lg flex flex-col items-center gap-1">
+                   <Trees className="w-5 h-5" /> <span className="text-[10px] font-bold uppercase">Holzgewicht</span>
+               </button>
+           </div>
         )}
-
+ 
         <label className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-2 cursor-pointer group">
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isCommercial ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-slate-50'}`}>
-                {isCommercial && <CheckSquare className="w-4 h-4 text-white" />}
-            </div>
+               {isCommercial && <CheckSquare className="w-4 h-4 text-white" />}
+           </div>
             <input type="checkbox" checked={isCommercial} onChange={(e) => setIsCommercial(e.target.checked)} className="hidden" />
             <div className="flex flex-col">
-                <span className={`text-sm font-bold uppercase tracking-wide transition-colors ${isCommercial ? 'text-blue-800' : 'text-slate-600'}`}>Gewerblicher Transport</span>
-                <span className="text-[10px] text-slate-400">Prüfung auf Einziehung der Taterträge</span>
-            </div>
+               <span className={`text-sm font-bold uppercase tracking-wide transition-colors ${isCommercial ? 'text-blue-800' : 'text-slate-600'}`}>Gewerblicher Transport</span>
+               <span className="text-[10px] text-slate-400">Prüfung auf Einziehung der Taterträge</span>
+           </div>
         </label>
-
+ 
         {/* Dezente Checkbox für manuelle Toleranz */}
         <div className="px-2 mb-3 flex items-center justify-end">
              <label className="flex items-center gap-1.5 cursor-pointer group">
-                <input type="checkbox" checked={useCustomTolerance} onChange={(e) => setUseCustomTolerance(e.target.checked)} className="w-3.5 h-3.5 rounded border-slate-300 text-slate-600 focus:ring-slate-500 transition-colors" />
-                <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben, sonst Toleranzen der GZA Weil am Rhein</span>
-             </label>
+               <input type="checkbox" checked={useCustomTolerance} onChange={(e) => setUseCustomTolerance(e.target.checked)} className="w-3.5 h-3.5 rounded border-slate-300 text-slate-600 focus:ring-slate-500 transition-colors" />
+               <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-600 transition-colors">Eigene Wiegetoleranz (kg) eingeben, sonst Toleranzen der GZA</span>
+            </label>
         </div>
-
+ 
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
             <button onClick={() => setMode('single')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'single' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <Truck className="w-6 h-6" />
-                <span className="text-[10px] font-bold uppercase">Einzelfahrzeug</span>
+               <Truck className="w-6 h-6" />
+               <span className="text-[10px] font-bold uppercase">Einzelfahrzeug</span>
             </button>
             <button onClick={() => setMode('combination')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'combination' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <TruckTrailerIcon className="w-8 h-8" />
-                <span className="text-[10px] font-bold uppercase">Fahrzeugkombination</span>
-            </button>
+               {/* Workaround for TruckTrailerIcon if missing */}
+               <Truck className="w-8 h-8" />
+               <span className="text-[10px] font-bold uppercase">Fahrzeugkombination</span>
+           </button>
         </div>
-
+ 
         <div className="grid grid-cols-2 gap-2">
             <div className={`bg-white p-3 rounded-2xl shadow-sm border border-slate-100 ${mode === 'single' ? 'col-span-2' : 'col-span-1'}`}>
-                <div className="flex items-center gap-2 mb-2 text-blue-700">
-                    <Truck className="w-4 h-4" />
-                    <span className="text-xs font-black uppercase tracking-wide">
-                        {mode === 'single' ? "Fahrzeug" : "Zugmaschine"}
-                    </span>
-                </div>
-                <div className="space-y-2">
-                    <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} />
-                    <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} />
-                    {useCustomTolerance && (
-                        <div className="pt-2 border-t border-slate-50 mt-2 animate-in fade-in">
-                            <InputWithIcon icon={Edit3} label="Toleranzabzug (kg)" value={customTol1} onChange={(e) => setCustomTol1(e.target.value)} placeholder="0" />
-                        </div>
+               <div className="flex items-center gap-2 mb-2 text-blue-700">
+                  <Truck className="w-4 h-4" />
+                   <span className="text-xs font-black uppercase tracking-wide">
+                       {mode === 'single' ? "Fahrzeug" : "Zugmaschine"}
+                   </span>
+               </div>
+              <div className="space-y-2">
+                   {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} /> : <input className="w-full border rounded p-2 text-sm" placeholder="zGM (kg)" value={allowedWeight1} onChange={(e) => setAllowedWeight1(e.target.value)} />}
+                   {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} /> : <input className="w-full border rounded p-2 text-sm" placeholder="Ist (kg)" value={actualWeight1} onChange={(e) => setActualWeight1(e.target.value)} />}
+                   
+                   {useCustomTolerance && (
+                       <div className="pt-2 border-t border-slate-50 mt-2 animate-in fade-in">
+                           {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={Edit3} label="Toleranzabzug (kg)" value={customTol1} onChange={(e) => setCustomTol1(e.target.value)} placeholder="0" /> : <input className="w-full border rounded p-2 text-sm" placeholder="Toleranz (kg)" value={customTol1} onChange={(e) => setCustomTol1(e.target.value)} />}
+                       </div>
                     )}
-                </div>
-            </div>
-
+               </div>
+           </div>
+ 
             {mode === 'combination' && (
-                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 col-span-1 animate-in slide-in-from-right-2">
-                    <div className="flex items-center gap-2 mb-2 text-blue-700">
-                        <Box className="w-4 h-4" />
-                        <span className="text-xs font-black uppercase tracking-wide">Anhänger</span>
-                    </div>
-                    <div className="space-y-2">
-                        <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} />
-                        <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} />
-                        {useCustomTolerance && (
-                            <div className="pt-2 border-t border-slate-50 mt-2 animate-in fade-in">
-                                <InputWithIcon icon={Edit3} label="Toleranzabzug (kg)" value={customTol2} onChange={(e) => setCustomTol2(e.target.value)} placeholder="0" />
-                            </div>
-                        )}
-                    </div>
-                </div>
+               <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 col-span-1 animate-in slide-in-from-right-2">
+                   <div className="flex items-center gap-2 mb-2 text-blue-700">
+                       <Box className="w-4 h-4" />
+                       <span className="text-xs font-black uppercase tracking-wide">Anhänger</span>
+                   </div>
+                   <div className="space-y-2">
+                       {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={ShieldCheck} label="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} /> : <input className="w-full border rounded p-2 text-sm" placeholder="zGM (kg)" value={allowedWeight2} onChange={(e) => setAllowedWeight2(e.target.value)} />}
+                       {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={Scale} label="Ist (kg)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} /> : <input className="w-full border rounded p-2 text-sm" placeholder="Ist (kg)" value={actualWeight2} onChange={(e) => setActualWeight2(e.target.value)} />}
+                       
+                       {useCustomTolerance && (
+                           <div className="pt-2 border-t border-slate-50 mt-2 animate-in fade-in">
+                               {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={Edit3} label="Toleranzabzug (kg)" value={customTol2} onChange={(e) => setCustomTol2(e.target.value)} placeholder="0" /> : <input className="w-full border rounded p-2 text-sm" placeholder="Toleranz (kg)" value={customTol2} onChange={(e) => setCustomTol2(e.target.value)} />}
+                           </div>
+                       )}
+                   </div>
+               </div>
             )}
         </div>
-
+ 
         {mode === 'combination' && (
              <div className="bg-slate-50 p-3 rounded-2xl shadow-inner border border-slate-200 animate-in slide-in-from-top-2">
-                <div className="flex items-center gap-2 mb-2 text-slate-600">
-                    <Weight className="w-5 h-5" />
-                    <span className="text-sm font-black uppercase tracking-wide">Gesamter Zug</span>
-                </div>
+               <div className="flex items-center gap-2 mb-2 text-slate-600">
+                   <Weight className="w-5 h-5" />
+                   <span className="text-sm font-black uppercase tracking-wide">Gesamter Zug</span>
+               </div>
                 
-                <div className="mb-3">
-                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Gesetzliche Normwerte (zGM Gesamtzug)</label>
-                   <select 
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
-                        onChange={(e) => {
-                            if (e.target.value !== 'custom') setTotalAllowed(e.target.value);
-                        }}
-                        value={standardTotalWeights.find(opt => opt.val === totalAllowed) ? totalAllowed : (totalAllowed ? "custom" : "")}
-                   >
-                       <option value="" disabled>Bitte gesetzlichen Wert wählen...</option>
-                       <optgroup label="Allgemeine Kombinationen (§ 34 StVZO)">
-                           {standardTotalWeights.filter(opt => opt.group.includes('Allgemein')).map((opt) => (
+               <div className="mb-3">
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Gesetzliche Normwerte (zGM Gesamtzug)</label>
+                  <select 
+                       className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+                       onChange={(e) => {
+                           if (e.target.value !== 'custom') setTotalAllowed(e.target.value);
+                      }}
+                       value={standardTotalWeights.find(opt => opt.val === totalAllowed) ? totalAllowed : (totalAllowed ? "custom" : "")}
+                  >
+                      <option value="" disabled>Bitte gesetzlichen Wert wählen...</option>
+                      <optgroup label="Allgemeine Kombinationen (§ 34 StVZO)">
+                          {standardTotalWeights.filter(opt => opt.group.includes('Allgemein')).map((opt) => (
                                <option key={opt.val} value={opt.val}>{opt.detail} - {opt.label}</option>
-                           ))}
-                       </optgroup>
-                       <optgroup label="Kombinierter Verkehr">
-                           {standardTotalWeights.filter(opt => opt.group.includes('Kombiniert')).map((opt) => (
+                          ))}
+                      </optgroup>
+                      <optgroup label="Kombinierter Verkehr">
+                          {standardTotalWeights.filter(opt => opt.group.includes('Kombiniert')).map((opt) => (
                                <option key={opt.val} value={opt.val}>{opt.detail} - {opt.label}</option>
-                           ))}
-                       </optgroup>
-                       <optgroup label="Abweichende Gewichte">
-                           <option value="custom">Eigener Wert (manuell unten eingegeben)</option>
-                       </optgroup>
-                   </select>
-                </div>
-
-                <div className="space-y-2">
-                    <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug Manuell (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)}/>
-                </div>
-            </div>
+                          ))}
+                      </optgroup>
+                      <optgroup label="Abweichende Gewichte">
+                          <option value="custom">Eigener Wert (manuell unten eingegeben)</option>
+                      </optgroup>
+                  </select>
+               </div>
+ 
+               <div className="space-y-2">
+                    {typeof InputWithIcon !== 'undefined' ? <InputWithIcon icon={ShieldCheck} label="zGM Gesamtzug Manuell (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)}/> : <input className="w-full border rounded p-2 text-sm" placeholder="Manuell zGM (kg)" value={totalAllowed} onChange={(e) => setTotalAllowed(e.target.value)} />}
+               </div>
+           </div>
         )}
       </div>
-
+ 
       {result && (
         <div className="bg-slate-100 border-t border-slate-200 p-2 animate-in slide-in-from-bottom-4 duration-500 pb-20 no-print">
           <div className={`grid gap-2 ${mode === 'combination' ? 'grid-cols-2' : 'grid-cols-1'}`}>
              
              {result.vehicle1 && result.vehicle1.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all flex flex-col justify-between ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div>
-                        <div className="flex justify-between items-center mb-1.5">
-                            <span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
+                <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all flex flex-col justify-between ${result.vehicle1.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+                   <div>
+                       <div className="flex justify-between items-center mb-1.5">
+                           <span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
                                 <Truck className="w-3 h-3 text-slate-400"/> {mode === 'single' ? 'Fahrzeug' : 'Zugm.'}
-                            </span>
-                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
-                        </div>
-                        {result.vehicle1.isOverloaded ? (
-                            <div className="text-center py-2">
+                           </span>
+                           <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle1.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle1.isOverloaded ? 'Überladen' : 'OK'}</span>
+                       </div>
+                       {result.vehicle1.isOverloaded ? (
+                           <div className="text-center py-2">
                                 <div className="text-2xl font-black text-red-600 tracking-tighter">
-                                    {result.vehicle1.percentage.toFixed(2)} <span className="text-sm">%</span>
+                                   {result.vehicle1.percentage.toFixed(2)} <span className="text-sm">%</span>
                                 </div>
                                 <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
                                     + {result.vehicle1.difference.toLocaleString()} kg
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
-                        )}
-                    </div>
-
-                     <div>
-                         {checkConfiscation(result.vehicle1) && (
-                             <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
-                                 <AlertTriangle className="w-4 h-4 shrink-0" />
+                           </div>
+                       ) : (
+                           <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle1.netWeight.toLocaleString()} kg</span></div>
+                       )}
+                   </div>
+ 
+                    <div>
+                        {checkConfiscation(result.vehicle1) && (
+                            <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
+                                <AlertTriangle className="w-4 h-4 shrink-0" />
                                  <span>⚠️ Einziehung möglich!</span>
-                             </div>
-                         )}
-
-                         <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />
-                         <FineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
-                     </div>
-                 </div>
+                            </div>
+                        )}
+ 
+                        {typeof OverloadFormulaDisplay !== 'undefined' && <OverloadFormulaDisplay values={{ actual: result.vehicle1.actual, tolerance: result.vehicle1.tolerance, net: result.vehicle1.netWeight, allowed: result.vehicle1.allowed, diff: result.vehicle1.difference, percent: result.vehicle1.percentage }} />}
+                        <FineDisplay result={result.vehicle1} isTrailer={false} isCombination={false} />
+                    </div>
+                </div>
              )}
              
-             {result.vehicle2 && result.vehicle2.isValidInput && (
-                 <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all flex flex-col justify-between ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
-                    <div>
-                        <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs"><Box className="w-3 h-3 text-slate-400"/> Anhänger</span><span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
-                        {result.vehicle2.isOverloaded ? (
-                            <div className="text-center py-2">
+            {result.vehicle2 && result.vehicle2.isValidInput && (
+                <div className={`p-3 rounded-2xl border-2 shadow-sm transition-all flex flex-col justify-between ${result.vehicle2.isOverloaded ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+                   <div>
+                       <div className="flex justify-between items-center mb-1.5"><span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs"><Box className="w-3 h-3 text-slate-400"/> Anhänger</span><span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${result.vehicle2.isOverloaded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{result.vehicle2.isOverloaded ? 'Überladen' : 'OK'}</span></div>
+                       {result.vehicle2.isOverloaded ? (
+                           <div className="text-center py-2">
                                 <div className="text-2xl font-black text-red-600 tracking-tighter">
-                                    {result.vehicle2.percentage.toFixed(2)} <span className="text-sm">%</span>
+                                   {result.vehicle2.percentage.toFixed(2)} <span className="text-sm">%</span>
                                 </div>
                                 <div className="inline-block bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold border border-red-100 mt-1">
                                     + {result.vehicle2.difference.toLocaleString()} kg
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
-                        )}
-                    </div>
+                           </div>
+                       ) : (
+                           <div className="flex justify-between items-end mb-1"><span className="text-[10px] text-slate-500">Netto:</span><span className="text-sm font-black text-slate-800">{result.vehicle2.netWeight.toLocaleString()} kg</span></div>
+                    )}
+                   </div>
                      
-                     <div>
-                         {checkConfiscation(result.vehicle2) && (
-                             <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
-                                 <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <div>
+                        {checkConfiscation(result.vehicle2) && (
+                            <div className="mt-2 bg-red-100 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 animate-pulse uppercase tracking-wide shadow-sm">
+                                <AlertTriangle className="w-4 h-4 shrink-0" />
                                  <span>⚠️ Einziehung möglich!</span>
-                             </div>
-                         )}
-
-                         <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />
-                         <FineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
-                     </div>
+                            </div>
+                        )}
+ 
+                        {typeof OverloadFormulaDisplay !== 'undefined' && <OverloadFormulaDisplay values={{ actual: result.vehicle2.actual, tolerance: result.vehicle2.tolerance, net: result.vehicle2.netWeight, allowed: result.vehicle2.allowed, diff: result.vehicle2.difference, percent: result.vehicle2.percentage }} />}
+                        <FineDisplay result={result.vehicle2} isTrailer={true} isCombination={false} />
+                    </div>
                  </div>
              )}
           </div>
-
-          {result.total && result.total.isValidInput && (
+ 
+         {result.total && result.total.isValidInput && (
               <div className={`mt-2 p-3 rounded-2xl border-4 shadow-xl transition-all ${result.total.isOverloaded ? 'bg-red-50 border-red-600' : 'bg-slate-50 border-slate-400'}`}>
-                <div className="flex justify-between items-center mb-1.5">
-                    <span className="font-black text-slate-800 flex items-center gap-1.5 text-base uppercase tracking-wider">
-                        <TruckTrailerIcon className="w-6 h-6"/> Gesamter Zug
-                    </span>
-                    <span className={`px-3 py-1 rounded-lg text-sm font-black uppercase ${result.total.isOverloaded ? 'bg-red-600 text-white' : 'bg-slate-600 text-white'}`}>{result.total.isOverloaded ? 'ZUG ÜBERLADEN' : 'ZUG OK'}</span>
-                </div>
-                    {result.total.isOverloaded ? (
-                    <div className="text-center py-4">
-                        <div className="text-5xl font-black text-red-600 tracking-tighter drop-shadow-sm">
-                            {result.total.percentage.toFixed(2)} <span className="text-2xl">%</span>
-                        </div>
+               <div className="flex justify-between items-center mb-1.5">
+                   <span className="font-black text-slate-800 flex items-center gap-1.5 text-base uppercase tracking-wider">
+                       <Truck className="w-6 h-6"/> Gesamter Zug
+                   </span>
+                   <span className={`px-3 py-1 rounded-lg text-sm font-black uppercase ${result.total.isOverloaded ? 'bg-red-600 text-white' : 'bg-slate-600 text-white'}`}>{result.total.isOverloaded ? 'ZUG ÜBERLADEN' : 'ZUG OK'}</span>
+               </div>
+                   {result.total.isOverloaded ? (
+                   <div className="text-center py-4">
+                       <div className="text-5xl font-black text-red-600 tracking-tighter drop-shadow-sm">
+                           {result.total.percentage.toFixed(2)} <span className="text-2xl">%</span>
+                       </div>
                         <div className="text-sm font-bold uppercase text-red-400 mb-2">Gesamt-Überladung</div>
-                        <div className="inline-block bg-white text-red-700 px-3 py-1 rounded-lg text-base font-black border border-red-100 shadow-sm">
+                       <div className="inline-block bg-white text-red-700 px-3 py-1 rounded-lg text-base font-black border border-red-100 shadow-sm">
                             + {result.total.difference.toLocaleString()} kg
-                        </div>
-                    </div>
+                       </div>
+                   </div>
                     ) : (
-                        <>
-                        <div className="flex justify-between items-end mb-2 mt-2">
-                            <span className="text-xs font-bold text-slate-500 uppercase">Gewicht (Vorwerfbar):</span>
-                            <span className="text-2xl font-black text-slate-900">{result.total.netWeight.toLocaleString()} kg</span>
-                        </div>
-                        <div className="relative h-4 bg-white rounded-full overflow-hidden border border-slate-300">
-                            <div className={`h-full transition-all duration-500 ${result.total.isOverloaded ? 'bg-red-600' : 'bg-slate-600'}`} style={{ width: `${Math.min(100, (result.total.netWeight / result.total.allowed) * 100)}%` }}></div>
-                        </div>
-                        <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1 uppercase">
-                            <span>0 kg</span>
-                            <span>Max: {parseFloat(result.total.allowed).toLocaleString()} kg</span>
-                        </div>
-                        </>
+                       <>
+                       <div className="flex justify-between items-end mb-2 mt-2">
+                           <span className="text-xs font-bold text-slate-500 uppercase">Gewicht (Vorwerfbar):</span>
+                           <span className="text-2xl font-black text-slate-900">{result.total.netWeight.toLocaleString()} kg</span>
+                          </div>
+                       <div className="relative h-4 bg-white rounded-full overflow-hidden border border-slate-300">
+                           <div className={`h-full transition-all duration-500 ${result.total.isOverloaded ? 'bg-red-600' : 'bg-slate-600'}`} style={{ width: `${Math.min(100, (result.total.netWeight / result.total.allowed) * 100)}%` }}></div>
+                       </div>
+                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1 uppercase">
+                           <span>0 kg</span>
+                           <span>Max: {parseFloat(result.total.allowed).toLocaleString()} kg</span>
+                       </div>
+                       </>
                     )}
-
+ 
                     {checkConfiscation(result.total) && (
-                         <div className="mt-4 bg-red-100 border border-red-400 text-red-800 px-3 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 animate-pulse uppercase tracking-widest shadow-inner">
-                             <AlertTriangle className="w-5 h-5 shrink-0" />
-                             <span>⚠️ Einziehung möglich!</span>
-                         </div>
+                        <div className="mt-4 bg-red-100 border border-red-400 text-red-800 px-3 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 animate-pulse uppercase tracking-widest shadow-inner">
+                            <AlertTriangle className="w-5 h-5 shrink-0" />
+                            <span>⚠️ Einziehung möglich!</span>
+                        </div>
                     )}
-
-                    <OverloadFormulaDisplay values={{ actual: result.total.actual, tolerance: result.total.tolerance, net: result.total.netWeight, allowed: result.total.allowed, diff: result.total.difference, percent: result.total.percentage }} isTotal={true} />
-                    <FineDisplay result={result.total} isTrailer={false} isCombination={true} />
-                </div>
+ 
+                   {typeof OverloadFormulaDisplay !== 'undefined' && <OverloadFormulaDisplay values={{ actual: result.total.actual, tolerance: result.total.tolerance, net: result.total.netWeight, allowed: result.total.allowed, diff: result.total.difference, percent: result.total.percentage }} isTotal={true} />}
+                   <FineDisplay result={result.total} isTrailer={false} isCombination={true} />
+               </div>
             )}
           <button onClick={resetForm} className="mt-6 w-full py-2.5 text-slate-400 text-sm hover:text-slate-600 font-bold tracking-wide uppercase transition-colors">Alle Eingaben löschen</button>
           
-          <PrintButton />
+         {typeof PrintButton !== 'undefined' && <PrintButton />}
         </div>
       )}
-      <AppVersionFooter />
+     {typeof AppVersionFooter !== 'undefined' && <AppVersionFooter />}
     </div>
   );
 }
-
+ 
 // --- WEIGHT MODULE (COMBINED) ---
 function WeightModule() {
   const [subTab, setSubTab] = useState('overload');
-  return subTab === 'overload' ? <OverloadCalculator onSwitch={() => setSubTab('wood')} /> : <WoodCalculator onSwitch={() => setSubTab('overload')} />;
+  // Überprüfen, ob WoodCalculator existiert, ansonsten Fallback
+  return subTab === 'overload' ? (
+      <OverloadCalculator onSwitch={() => setSubTab('wood')} />
+  ) : (
+      typeof WoodCalculator !== 'undefined' ? <WoodCalculator onSwitch={() => setSubTab('overload')} /> : <div>WoodCalculator nicht geladen</div>
+  );
 }
-
 // --- LASHING CALCULATOR ---
 function LashingCalculator({ onOpenKnowledge }) {
   const [lashingType, setLashingType] = useState('nieder'); // Toggle zwischen 'nieder', 'diagonal', 'pkw'
@@ -2804,7 +2570,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                 <div className="col-span-2 relative">
                      <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
                      <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
-                        {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600].map((val) => (<option key={val} value={val}>{val} daN</option>))}
+                        {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500].map((val) => (<option key={val} value={val}>{val} daN</option>))}
                     </select>
                 </div>
               </div>
@@ -5048,7 +4814,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                           {/* Text-Bereich */}
                           <div className="flex-1 text-sm text-slate-700 leading-relaxed font-medium space-y-3">
                               <p>1. Wenn <strong>b größer c</strong>, dann besteht <strong className="text-red-600">Kippgefahr</strong>.</p>
-                              <p>2. Somit müssen alle Beschleunigungswerte gemäß der VDI 2700 mit dem Faktor <strong>1,2</strong> multipliziert werden.</p>
+                              <p>2. Somit müssen alle Beschleunigungswerte gemäß der VDI 2700 erhöht werden.</p>
                           </div>
 
                           {/* Grafik-Bereich */}
@@ -5791,7 +5557,6 @@ const HomeView = ({ onSelect }) => {
         { id: 'speed', title: 'Geschwindigkeit', icon: Gauge, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Laser • Hinterherfahren' },
         { id: 'weight', title: 'Gewichte & Holz', icon: Scale, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Überladung • Holzgewicht' },
         { id: 'lashing', title: 'Ladungssicherung', icon: Truck, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Niederzurren • Diagonalzurren • PKW-Transporter' },
-        { id: 'accident', title: 'Unfallrechner', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', desc: 'Bremsspur • Driftspur' },
         { id: 'knowledge', title: 'Wissensdatenbank', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50', desc: '' }
     ];
 
@@ -5869,7 +5634,6 @@ export default function App() {
             <div className={activeTab === 'home' ? 'block' : 'hidden'}><HomeView onSelect={handleTabChange} /></div>
             <div className={activeTab === 'weight' ? 'block' : 'hidden'}><WeightModule /></div>
             <div className={activeTab === 'speed' ? 'block' : 'hidden'}><SpeedCalculator /></div>
-            <div className={activeTab === 'accident' ? 'block' : 'hidden'}><AccidentCalculator /></div>
             <div className={activeTab === 'age' ? 'block' : 'hidden'}><AgeCalculator /></div>
             <div className={activeTab === 'knowledge' ? 'block' : 'hidden'}><KnowledgeBaseView key={knowledgeResetKey} initialView={knowledgeView} onBack={returnTab ? () => handleTabChange(returnTab) : null} /></div>
             <div className={activeTab === 'license' ? 'block' : 'hidden'}><DriverLicenseModule /></div>
