@@ -2400,11 +2400,11 @@ function LashingCalculator({ onOpenKnowledge }) {
                <p className="font-semibold">Verfahren: Kraftschlüssige Ladungssicherung (Niederzurren)</p>
                <div className="font-mono text-sm p-4 bg-slate-50 rounded border border-slate-200">
                  <p className="font-bold mb-1 text-slate-500">Angewandte Formel:</p>
-                 <p className="text-base mb-4">n = (m · g · (c_x - μ_D)) / (k · μ_D · S_TF · sin(α))</p>
+                 <p className="text-base mb-4">n = (m · g · (c - μ)) / (k · μ · SFT · sin(α))</p>
                  
                  <div className="pt-4 border-t border-slate-300">
                    <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Sicherung nach vorn):</p>
-                   <p>n = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (k · {friction.toFixed(2)} · {stf || 0} · sin({angle || 0}°))</p>
+                   <p>n = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (k (Beschleunigung) · {friction.toFixed(2)} · {stf || 0} · sin({angle || 0}°))</p>
                  </div>
                </div>
              </div>
