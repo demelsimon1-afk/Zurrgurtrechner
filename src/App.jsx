@@ -2121,7 +2121,7 @@ function WeightModule() {
 // --- LASHING CALCULATOR ---
 function LashingCalculator({ onOpenKnowledge }) {
   const [lashingType, setLashingType] = useState('nieder'); // Toggle zwischen 'nieder', 'diagonal', 'pkw'
-
+  
   const [allowedWeight, setAllowedWeight] = useState('');
   const [emptyWeight, setEmptyWeight] = useState('');
   const [loadWeight, setLoadWeight] = useState('');
@@ -2141,11 +2141,11 @@ function LashingCalculator({ onOpenKnowledge }) {
     { id: '0.55_betonware', val: 0.55, label: '0,55 μ - Betonware auf Siebdruckboden' },
     { id: '0.60_antirutsch', val: 0.60, label: '0,60 μ - Antirutschmatte' },
   ];
-
+  
   const [selectedFrictionId, setSelectedFrictionId] = useState('0.30_holz_mehrweg');
   const [customFrictionVal, setCustomFrictionVal] = useState(''); 
   const [friction, setFriction] = useState(0.30);
-
+  
   useEffect(() => {
     if (selectedFrictionId === 'CUSTOM') {
        const val = parseFloat(customFrictionVal);
@@ -2155,7 +2155,7 @@ function LashingCalculator({ onOpenKnowledge }) {
        if (option) setFriction(option.val);
     }
   }, [selectedFrictionId, customFrictionVal]);
-
+  
   const [stf, setStf] = useState('500');
   const [angle, setAngle] = useState('90');
   const [angleBeta, setAngleBeta] = useState('45');
@@ -2178,11 +2178,11 @@ function LashingCalculator({ onOpenKnowledge }) {
   // State für die Handy-Winkelmessung
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
   const [activeAngleField, setActiveAngleField] = useState(null); // 'alpha' oder 'beta'
-
+  
   // State für PKW-Transporter
   const [carsTop, setCarsTop] = useState([]);
   const [carsBottom, setCarsBottom] = useState([]);
-
+  
   const createNewCar = () => ({
       id: Date.now() + Math.random(),
       weightClass: '2000',
@@ -2196,30 +2196,30 @@ function LashingCalculator({ onOpenKnowledge }) {
           rr: { strap: false, chock: 'none' }
       }
   });
-
+  
   const [showFines, setShowFines] = useState(false);
   const dateTime = useDateTime();
-
+  
   const handleBlur = (type, val, setter) => {
     let num = parseFloat(val);
     if (isNaN(num)) setter('0');
   };
-
+  
   // Automatische Berechnung von Beta über Tangens
   useEffect(() => {
     const x = parseFloat(distX);
     const y = parseFloat(distY);
     if (!isNaN(x) && !isNaN(y)) {
         if (x === 0 && y > 0) {
-            setAngleBeta('90');
+           setAngleBeta('90');
         } else if (x > 0) {
-            const betaRad = Math.atan(y / x);
-            const betaDeg = Math.round(betaRad * (180 / Math.PI));
-            setAngleBeta(betaDeg.toString());
+           const betaRad = Math.atan(y / x);
+           const betaDeg = Math.round(betaRad * (180 / Math.PI));
+           setAngleBeta(betaDeg.toString());
         }
     }
   }, [distX, distY]);
-
+  
   const getStandardForces = () => {
     const total = parseFloat(allowedWeight) || 0;
     const empty = parseFloat(emptyWeight) || 0;
@@ -2228,7 +2228,7 @@ function LashingCalculator({ onOpenKnowledge }) {
     if (bodyCert === 'XL') return { front: Math.round(payload * 0.50), side: Math.round(payload * 0.30), rear: Math.round(payload * 0.40) };
     return { front: 0, side: 0, rear: 0 };
   };
-
+  
   useEffect(() => {
     const standards = getStandardForces();
     if (bodyCert === 'NONE' || bodyCert === null) {
@@ -2237,7 +2237,7 @@ function LashingCalculator({ onOpenKnowledge }) {
        setWallFront(standards.front.toString()); setWallSide(standards.side.toString()); setWallRear(standards.rear.toString());
     }
   }, [bodyCert, allowedWeight, emptyWeight]);
-
+  
   useEffect(() => {
     setFineGroups([]);
     const m = parseFloat(loadWeight);
@@ -2246,7 +2246,7 @@ function LashingCalculator({ onOpenKnowledge }) {
     const alpha = parseFloat(angle);
     const beta = parseFloat(angleBeta);
     const maxWeight = parseFloat(allowedWeight);
-
+  
     if (isNaN(m) || m <= 0) {
       setLashingResult(null); return;
     }
@@ -2254,23 +2254,23 @@ function LashingCalculator({ onOpenKnowledge }) {
     let groups = [];
     if (maxWeight > 0) {
         if (maxWeight > 3500) {
-            groups.push({ title: 'LKW bzw. dessen Anhänger (> 3,5t)', items: [{ role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' }, { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
+           groups.push({ title: 'LKW bzw. dessen Anhänger (> 3,5t)', items: [{ role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' }, { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
         } else {
-            if (bodyCert === 'L' || bodyCert === 'XL') {
-                groups.push({ title: 'LKW bzw. dessen Anhänger', items: [{ role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' }, { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
-            } else {
-                groups.push({ title: 'PKW bzw. dessen Anhänger', items: [{ role: 'Fahrer', code: '122100', cost: '35 €', points: '' }, { role: 'Halter', code: '331630', cost: '135 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
-                groups.push({ title: 'LKW bzw. dessen Anhänger', items: [{ role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' }, { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
-            }
+           if (bodyCert === 'L' || bodyCert === 'XL') {
+               groups.push({ title: 'LKW bzw. dessen Anhänger', items: [{ role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' }, { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
+           } else {
+               groups.push({ title: 'PKW bzw. dessen Anhänger', items: [{ role: 'Fahrer', code: '122100', cost: '35 €', points: '' }, { role: 'Halter', code: '331630', cost: '135 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
+               groups.push({ title: 'LKW bzw. dessen Anhänger', items: [{ role: 'Fahrer', code: '122600', cost: '60 €', points: '1 Pkt' }, { role: 'Halter', code: '331618', cost: '270 €', points: '1 Pkt', note: 'Nur wenn nicht genug Zurrmittel bereitgestellt' }] });
+           }
         }
     }
     setFineGroups(groups);
-
+  
     const g = 9.81; 
     const alphaRad = (alpha * Math.PI) / 180; 
     const betaRad = (beta * Math.PI) / 180;
     const stfInNewton = s_tf * 10; 
-
+  
     // ACCELERATION FACTOR SELECTION
     let accFwd, accSide, accRear;
     if (!maxWeight || maxWeight <= 1999) {
@@ -2280,7 +2280,7 @@ function LashingCalculator({ onOpenKnowledge }) {
     } else {
         accFwd = 0.80; accSide = 0.50; accRear = 0.50;
     }
-
+  
     // --- NIEDERZURREN CALCULATION ---
     const calculateN = (acc, blockingDaN, direction) => {
        const weightForce = m * g;
@@ -2303,11 +2303,11 @@ function LashingCalculator({ onOpenKnowledge }) {
            return Math.ceil(n);
        }
     };
-
+  
     const nForward = calculateN(accFwd, fitFront ? wallFront : 0, 'forward');
     const nSide = calculateN(accSide, fitSide ? wallSide : 0, 'side');
     const nRear = calculateN(accRear, fitRear ? wallRear : 0, 'rear');
-
+  
     // --- DIAGONALZURREN CALCULATION ---
     const calcDiagLC = (c, isSide) => {
         const f_mu = mu * 0.75; // Anpassung: Reibbeiwert * 0.75
@@ -2321,14 +2321,14 @@ function LashingCalculator({ onOpenKnowledge }) {
         if (geo <= 0) return 0;
         return (num / (2 * geo)) / 10; // Division durch 10 rechnet Newton in daN um
     };
-
+  
     const lcDiagFwd = calcDiagLC(accFwd, false);
     const lcDiagSide = calcDiagLC(accSide, true);
     const lcDiagRear = calcDiagLC(accRear, false);
     
     // Die benötigte LC ist der Maximalwert aus allen Richtungen
     const diagLC = Math.ceil(Math.max(lcDiagFwd, lcDiagSide, lcDiagRear));
-
+  
     setLashingResult({
       forward: nForward, side: nSide, rear: nRear,
       factorForward: accFwd, factorSide: accSide, factorRear: accRear,
@@ -2344,7 +2344,7 @@ function LashingCalculator({ onOpenKnowledge }) {
       ]
     });
   }, [loadWeight, friction, stf, angle, angleBeta, allowedWeight, emptyWeight, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
-
+  
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
@@ -2353,617 +2353,658 @@ function LashingCalculator({ onOpenKnowledge }) {
       <div className="print-only print-container">
         <h1 className="print-title">LaSi-Protokoll (Niederzurren)</h1>
         <div className="print-meta">Erstellt am: {dateTime}</div>
-
+  
         <h2 className="print-section">Eingabedaten</h2>
         <table className="print-table">
-            <tbody>
-                <tr><th>Ladungsgewicht</th><td>{loadWeight || 0} kg</td></tr>
-                <tr><th>Reibbeiwert (μ)</th><td>{friction.toFixed(2)}</td></tr>
-                <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
-                <tr><th>Vorspannkraft (STF)</th><td>{stf} daN</td></tr>
-                <tr><th>Fahrzeugaufbau</th><td>{bodyCert === 'NONE' ? 'Kein geprüfter Aufbau' : `Code ${bodyCert}`}</td></tr>
-            </tbody>
+           <tbody>
+              <tr><th>Ladungsgewicht</th><td>{loadWeight || 0} kg</td></tr>
+              <tr><th>Reibbeiwert (μ)</th><td>{friction.toFixed(2)}</td></tr>
+              <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
+              <tr><th>Vorspannkraft (STF)</th><td>{stf} daN</td></tr>
+              <tr><th>Fahrzeugaufbau</th><td>{bodyCert === 'NONE' ? 'Kein geprüfter Aufbau' : `Code ${bodyCert}`}</td></tr>
+           </tbody>
         </table>
-
+  
         <h2 className="print-section">Formschluss & Blockierkräfte</h2>
         <table className="print-table">
-            <thead><tr><th>Richtung</th><th>Formschluss aktiv</th><th>Kraft (daN)</th></tr></thead>
-            <tbody>
-                <tr><td>Stirnwand</td><td>{fitFront ? 'Ja' : 'Nein'}</td><td>{fitFront ? wallFront : 0} daN</td></tr>
-                <tr><td>Seite</td><td>{fitSide ? 'Ja' : 'Nein'}</td><td>{fitSide ? wallSide : 0} daN</td></tr>
-                <tr><td>Heck</td><td>{fitRear ? 'Ja' : 'Nein'}</td><td>{fitRear ? wallRear : 0} daN</td></tr>
-            </tbody>
+           <thead><tr><th>Richtung</th><th>Formschluss aktiv</th><th>Kraft (daN)</th></tr></thead>
+           <tbody>
+               <tr><td>Stirnwand</td><td>{fitFront ? 'Ja' : 'Nein'}</td><td>{fitFront ? wallFront : 0} daN</td></tr>
+               <tr><td>Seite</td><td>{fitSide ? 'Ja' : 'Nein'}</td><td>{fitSide ? wallSide : 0} daN</td></tr>
+               <tr><td>Heck</td><td>{fitRear ? 'Ja' : 'Nein'}</td><td>{fitRear ? wallRear : 0} daN</td></tr>
+           </tbody>
         </table>
-
+  
         {lashingResult && (
         <>
             <h2 className="print-section">Ergebnis: Erforderliche Gurte</h2>
             <table className="print-table">
-                <thead><tr><th>Richtung</th><th>Berechnungsfaktor (c)</th><th>Mindestanzahl Gurte</th></tr></thead>
-                <tbody>
-                    <tr><td>Sicherung nach Vorne</td><td>{lashingResult.factorForward}g</td><td><strong>{lashingResult.forward}</strong></td></tr>
-                    <tr><td>Sicherung zur Seite</td><td>{lashingResult.factorSide}g</td><td><strong>{lashingResult.side}</strong></td></tr>
-                    <tr><td>Sicherung nach Hinten</td><td>{lashingResult.factorRear}g</td><td><strong>{lashingResult.rear}</strong></td></tr>
-                </tbody>
-            </table>
+               <thead><tr><th>Richtung</th><th>Berechnungsfaktor (c)</th><th>Mindestanzahl Gurte</th></tr></thead>
+               <tbody>
+                   <tr><td>Sicherung nach Vorne</td><td>{lashingResult.factorForward}g</td><td><strong>{lashingResult.forward}</strong></td></tr>
+                   <tr><td>Sicherung zur Seite</td><td>{lashingResult.factorSide}g</td><td><strong>{lashingResult.side}</strong></td></tr>
+                   <tr><td>Sicherung nach Hinten</td><td>{lashingResult.factorRear}g</td><td><strong>{lashingResult.rear}</strong></td></tr>
+               </tbody>
+           </table>
             <div className="print-result-box">
-                <div className="print-result-header">Gesamtempfehlung</div>
-                <div>Es sind mindestens <strong>{Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)}</strong> Zurrgurte (Niederzurren) zu verwenden, um die Ladung in alle Richtungen zu sichern.</div>
-            </div>
+               <div className="print-result-header">Gesamtempfehlung</div>
+               <div>Es sind mindestens <strong>{Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)}</strong> Zurrgurte (Niederzurren) zu verwenden, um die Ladung in alle Richtungen zu sichern.</div>
+           </div>
+
+           {/* --- START: NEUER BERECHNUNGSNACHWEIS FÜR AUSDRUCK (NIEDERZURREN) --- */}
+           <div className="mt-6 p-4 border-2 border-slate-300 rounded-xl bg-white text-black">
+             <h3 className="text-md font-bold mb-3 border-b-2 border-black pb-1">
+               Berechnungsnachweis nach VDI 2700
+             </h3>
+             <div className="space-y-3">
+               <p className="font-semibold">Verfahren: Kraftschlüssige Ladungssicherung (Niederzurren)</p>
+               <div className="font-mono text-sm p-4 bg-slate-50 rounded border border-slate-200">
+                 <p className="font-bold mb-1 text-slate-500">Angewandte Formel:</p>
+                 <p className="text-base mb-4">n = (m · g · (c_x - μ_D)) / (k · μ_D · S_TF · sin(α))</p>
+                 
+                 <div className="pt-4 border-t border-slate-300">
+                   <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Sicherung nach vorn):</p>
+                   <p>n = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (k · {friction.toFixed(2)} · {stf || 0} · sin({angle || 0}°))</p>
+                 </div>
+               </div>
+             </div>
+           </div>
+           {/* --- ENDE: NEUER BERECHNUNGSNACHWEIS --- */}
         </>
         )}
       </div>
       )}
-
+  
       {/* PRINT VIEW ONLY (Diagonalzurren) */}
       {lashingType === 'diagonal' && (
       <div className="print-only print-container">
           <h1 className="print-title">LaSi-Protokoll (Diagonalzurren)</h1>
           <div className="print-meta">Erstellt am: {dateTime}</div>
-
+  
           <h2 className="print-section">Eingabedaten</h2>
           <table className="print-table">
-              <tbody>
-                  <tr><th>Ladungsgewicht</th><td>{loadWeight || 0} kg</td></tr>
-                  <tr><th>Reibbeiwert (μ)</th><td>{friction.toFixed(2)}</td></tr>
-                  <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
+            <tbody>
+                 <tr><th>Ladungsgewicht</th><td>{loadWeight || 0} kg</td></tr>
+                 <tr><th>Reibbeiwert (μ)</th><td>{friction.toFixed(2)}</td></tr>
+                 <tr><th>Vertikalwinkel (α)</th><td>{angle}°</td></tr>
                   <tr><th>Längswinkel (β)</th><td>{angleBeta}°</td></tr>
-              </tbody>
-          </table>
+             </tbody>
+         </table>
           
-          {lashingResult && (
+         {lashingResult && (
+         <>
           <div className="print-result-box">
               <div className="print-result-header">Benötigte LC Werte je Gurt</div>
-              <div>Gurte vorne (Sicherung nach hinten/seitlich): <strong>{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</strong></div>
-              <div>Gurte hinten (Sicherung nach vorne/seitlich): <strong>{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</strong></div>
+             <div>Gurte vorne (Sicherung nach hinten/seitlich): <strong>{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</strong></div>
+             <div>Gurte hinten (Sicherung nach vorne/seitlich): <strong>{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</strong></div>
           </div>
-          )}
+
+          {/* --- START: NEUER BERECHNUNGSNACHWEIS FÜR AUSDRUCK (DIAGONALZURREN) --- */}
+          <div className="mt-6 p-4 border-2 border-slate-300 rounded-xl bg-white text-black">
+            <h3 className="text-md font-bold mb-3 border-b-2 border-black pb-1">
+              Berechnungsnachweis nach VDI 2700
+            </h3>
+            <div className="space-y-3">
+              <p className="font-semibold">Verfahren: Formschlüssige Ladungssicherung (Diagonalzurren)</p>
+              <div className="font-mono text-sm p-4 bg-slate-50 rounded border border-slate-200">
+                <p className="font-bold mb-1 text-slate-500">Angewandte Formel:</p>
+                <p className="text-base mb-4">LC = (m · g · (c_x - μ_D)) / (2 · (μ_D · cos(α) · cos(β) + sin(α)))</p>
+                
+                <div className="pt-4 border-t border-slate-300">
+                  <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Längsrichtung):</p>
+                  <p>LC = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (2 · ({friction.toFixed(2)} · cos({angle || 0}°) · cos({angleBeta || 0}°) + sin({angle || 0}°)))</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* --- ENDE: NEUER BERECHNUNGSNACHWEIS --- */}
+         </>
+         )}
       </div>
       )}
-
+  
       {/* PRINT VIEW ONLY (PKW Transporter) */}
       {lashingType === 'pkw' && (
       <div className="print-only print-container" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
           <h1 className="print-title">LaSi-Protokoll (PKW-Transporter)</h1>
           <div className="print-meta">Erstellt am: {dateTime}</div>
-
+  
           <h2 className="print-section">Schematische Beladungsübersicht</h2>
           
           <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'center', marginTop: '20px', pageBreakInside: 'avoid' }}>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                  <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
-              </div>
+                 <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
+             </div>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                  <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
-              </div>
+                 <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
+             </div>
           </div>
-
+  
           <div className="print-result-box" style={{ pageBreakInside: 'avoid', marginTop: '30px' }}>
              <div className="print-result-header">Legende</div>
              <table className="print-table" style={{ border: 'none', fontSize: '9pt' }}>
-                 <tbody>
-                     <tr>
-                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#fde047', border: '1px solid #ca8a04' }}></div></td>
+                <tbody>
+                    <tr>
+                        <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#fde047', border: '1px solid #ca8a04' }}></div></td>
                          <td style={{ border: 'none', padding: '2px' }}>Radkeil</td>
-                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#3b82f6', border: '1px solid #1d4ed8' }}></div></td>
-                         <td style={{ border: 'none', padding: '2px' }}>Autotransportgurt</td>
-                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '10px', backgroundColor: '#0f172a' }}></div></td>
-                         <td style={{ border: 'none', padding: '2px' }}>Rad</td>
-                     </tr>
-                 </tbody>
-             </table>
+                        <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#3b82f6', border: '1px solid #1d4ed8' }}></div></td>
+                        <td style={{ border: 'none', padding: '2px' }}>Autotransportgurt</td>
+                        <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '10px', backgroundColor: '#0f172a' }}></div></td>
+                        <td style={{ border: 'none', padding: '2px' }}>Rad</td>
+                    </tr>
+                </tbody>
+            </table>
           </div>
       </div>
       )}
       {/* END PRINT VIEW */}
-
+  
       <div className={`${lashingType === 'nieder' ? 'bg-indigo-600/95 shadow-indigo-900/10' : lashingType === 'diagonal' ? 'bg-cyan-600/95 shadow-cyan-900/10' : 'bg-rose-600/95 shadow-rose-900/10'} backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg no-print transition-colors duration-300`}>
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight">
-            {lashingType === 'nieder' ? <LashingStrapIcon className="w-5 h-5 shrink-0" /> : lashingType === 'diagonal' ? <DiagonalLashingIcon className="w-5 h-5 shrink-0" /> : <Car className="w-5 h-5 shrink-0" />}
-            LaSi-Rechner
+           {lashingType === 'nieder' ? <LashingStrapIcon className="w-5 h-5 shrink-0" /> : lashingType === 'diagonal' ? <DiagonalLashingIcon className="w-5 h-5 shrink-0" /> : <Car className="w-5 h-5 shrink-0" />}
+           LaSi-Rechner
           </h1>
           <p className={`${lashingType === 'nieder' ? 'text-indigo-100' : lashingType === 'diagonal' ? 'text-cyan-100' : 'text-rose-100'} text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-7 transition-colors duration-300`}>
              <Clock className="w-3 h-3" />
-             {dateTime}
+            {dateTime}
           </p>
         </div>
         <HeaderLogo />
       </div>
-
-      <AngleMeasureModal 
-         isOpen={isMeasureModalOpen} 
+  
+     <AngleMeasureModal 
+        isOpen={isMeasureModalOpen} 
          onClose={() => {
-             setIsMeasureModalOpen(false);
-             setActiveAngleField(null);
+            setIsMeasureModalOpen(false);
+            setActiveAngleField(null);
          }} 
          onApply={(a) => {
              if (activeAngleField === 'alpha') setAngle(a.toString());
              else if (activeAngleField === 'beta') setAngleBeta(a.toString());
-             setIsMeasureModalOpen(false);
-             setActiveAngleField(null);
+            setIsMeasureModalOpen(false);
+            setActiveAngleField(null);
          }} 
-      />
-
+    />
+  
       <div className="p-2 space-y-2 no-print">
         
         {/* Toggle Niederzurren / Diagonalzurren / PKW */}
         <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2 gap-1 overflow-x-auto custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <button onClick={() => setLashingType('nieder')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'nieder' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <LashingStrapIcon className="w-6 h-6" />
-                <span className="text-[10px] font-bold uppercase">Niederzurren</span>
-            </button>
-            <button onClick={() => setLashingType('diagonal')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'diagonal' ? 'bg-cyan-50 text-cyan-800 shadow-sm ring-1 ring-cyan-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <DiagonalLashingIcon className="w-6 h-6" />
-                <span className="text-[10px] font-bold uppercase">Diagonalzurren</span>
-            </button>
-            <button onClick={() => setLashingType('pkw')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'pkw' ? 'bg-rose-50 text-rose-800 shadow-sm ring-1 ring-rose-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-                <Car className="w-6 h-6" />
-                <span className="text-[10px] font-bold uppercase">PKW-Transp.</span>
-            </button>
+           <button onClick={() => setLashingType('nieder')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'nieder' ? 'bg-indigo-50 text-indigo-800 shadow-sm ring-1 ring-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+               <LashingStrapIcon className="w-6 h-6" />
+               <span className="text-[10px] font-bold uppercase">Niederzurren</span>
+           </button>
+           <button onClick={() => setLashingType('diagonal')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'diagonal' ? 'bg-cyan-50 text-cyan-800 shadow-sm ring-1 ring-cyan-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+               <DiagonalLashingIcon className="w-6 h-6" />
+               <span className="text-[10px] font-bold uppercase">Diagonalzurren</span>
+           </button>
+           <button onClick={() => setLashingType('pkw')} className={`flex-1 min-w-[100px] py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${lashingType === 'pkw' ? 'bg-rose-50 text-rose-800 shadow-sm ring-1 ring-rose-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+               <Car className="w-6 h-6" />
+               <span className="text-[10px] font-bold uppercase">PKW-Transp.</span>
+           </button>
         </div>
-
+  
         {/* --- WISSEN-LINK --- */}
-        {onOpenKnowledge && (
-            <button 
-                onClick={() => onOpenKnowledge(lashingType === 'pkw' ? 'pkw' : 'lasi')}
+       {onOpenKnowledge && (
+            <button
+               onClick={() => onOpenKnowledge(lashingType === 'pkw' ? 'pkw' : 'lasi')}
                 className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl mb-2 text-xs font-bold transition-all border shadow-sm ${
-                    lashingType === 'pkw' 
+                   lashingType === 'pkw' 
                     ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 hover:border-rose-300' 
                     : lashingType === 'diagonal'
                     ? 'bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border-cyan-200 hover:border-cyan-300'
                     : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 hover:border-indigo-300'
                 }`}
             >
-                <BookOpen className="w-4 h-4" />
-                {lashingType === 'pkw' ? 'Wissensdatenbank: PKW-Transporter öffnen' : 'Wissensdatenbank: Ladungssicherung öffnen'}
-            </button>
+               <BookOpen className="w-4 h-4" />
+               {lashingType === 'pkw' ? 'Wissensdatenbank: PKW-Transporter öffnen' : 'Wissensdatenbank: Ladungssicherung öffnen'}
+           </button>
         )}
-
+  
         {lashingType === 'nieder' ? (
         <>
-            {/* AUFBAU CARD */}
-            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-                <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5" /> Fahrzeugaufbau wählen
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                     <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
-                        <span>Kein geprüfter Aufbau</span>
-                    </button>
-                    <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
-                        <span>Code L</span>
-                    </button>
-                     <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
-                        <span>Code XL</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* GEWICHTE CARD */}
+           {/* AUFBAU CARD */}
+          <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+               <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                   <ShieldCheck className="w-3.5 h-3.5" /> Fahrzeugaufbau wählen
+               </div>
+               <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => setBodyCert('NONE')} className={`col-span-2 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'NONE' ? 'bg-slate-700 text-white border-slate-700 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
+                         <span>Kein geprüfter Aufbau</span>
+                   </button>
+                   <button onClick={() => setBodyCert('L')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'L' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
+                       <span>Code L</span>
+                   </button>
+                    <button onClick={() => setBodyCert('XL')} className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-1.5 transition-all ${bodyCert === 'XL' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-[1.02]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'}`}>
+                       <span>Code XL</span>
+                   </button>
+               </div>
+           </div>
+  
+           {/* GEWICHTE CARD */}
             <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
                <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-                  <Scale className="w-5 h-5" />
-                  <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
-               </div>
+                 <Scale className="w-5 h-5" />
+                 <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
+              </div>
                <div className="grid grid-cols-2 gap-2 mb-2">
-                 <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
-                 <InputWithIcon icon={ShieldCheck} label="Zul. Gesamt (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
-               </div>
-               <InputWithIcon icon={Box} label="Ladungsgewicht (kg)" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
-            </div>
-
-            {/* SETTINGS CARD */}
+                <InputWithIcon icon={Truck} label="Leergewicht (kg)" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} placeholder="0" />
+                <InputWithIcon icon={ShieldCheck} label="Zul. Gesamt (kg)" value={allowedWeight} onChange={(e) => setAllowedWeight(e.target.value)} placeholder="0" />
+              </div>
+              <InputWithIcon icon={Box} label="Ladungsgewicht (kg)" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
+           </div>
+  
+           {/* SETTINGS CARD */}
             <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
               <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-                  <Settings className="w-5 h-5" />
+                 <Settings className="w-5 h-5" />
                   <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
-               </div>
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="relative col-span-2 sm:col-span-1">
+               <div className="relative col-span-2 sm:col-span-1">
                     <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
-                    {selectedFrictionId === 'CUSTOM' ? (
-                      <div className="flex gap-1">
-                        <div className="relative w-full">
-                            <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
-                            <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
-                        </div>
+                   {selectedFrictionId === 'CUSTOM' ? (
+                     <div className="flex gap-1">
+                       <div className="relative w-full">
+                           <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
+                           <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
+                       </div>
                         <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
-                      </div>
+                     </div>
                     ) : (
-                      <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
-                        {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
-                        <option disabled>──────────</option>
-                        <option value="CUSTOM">Eigener Wert...</option>
+                     <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
+                       {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
+                       <option disabled>──────────</option>
+                       <option value="CUSTOM">Eigener Wert...</option>
                       </select>
                     )}
-                </div>
-
-                <div className="relative col-span-2 sm:col-span-1">
-                    <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
-                    <div className="flex gap-1.5">
-                        <div className="relative w-full">
-                             <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
-                             <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
-                        </div>
-                        <button onClick={() => { setActiveAngleField('alpha'); setIsMeasureModalOpen(true); }} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
-                    </div>
-                </div>
-
-                <div className="col-span-2 relative">
-                     <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
-                     <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
-                        {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500].map((val) => (<option key={val} value={val}>{val} daN</option>))}
-                    </select>
-                </div>
-              </div>
-            </div>
-
-            {/* FORMSCHLUSS CARD */}
+               </div>
+  
+               <div className="relative col-span-2 sm:col-span-1">
+                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Winkel α (°)</label>
+                   <div className="flex gap-1.5">
+                       <div className="relative w-full">
+                            <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="90" />
+                            <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
+                       </div>
+                       <button onClick={() => { setActiveAngleField('alpha'); setIsMeasureModalOpen(true); }} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+                   </div>
+               </div>
+  
+               <div className="col-span-2 relative">
+                    <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vorspannkraft STF (daN)</label>
+                    <select value={stf} onChange={(e) => setStf(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium">
+                       {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500].map((val) => (<option key={val} value={val}>{val} daN</option>))}
+                   </select>
+               </div>
+             </div>
+           </div>
+  
+           {/* FORMSCHLUSS CARD */}
             <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
                <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-                  <Box className="w-5 h-5" />
-                  <span className="text-sm font-black uppercase tracking-wide">Aufbau Belastbarkeit (daN)</span>
-               </div>
+                 <Box className="w-5 h-5" />
+                 <span className="text-sm font-black uppercase tracking-wide">Aufbau Belastbarkeit (daN)</span>
+              </div>
                
                <div className="grid grid-cols-3 gap-2">
-                 <div className="flex flex-col">
-                   <div className="flex items-center gap-1 mb-1">
-                     <input type="checkbox" checked={fitFront} onChange={(e) => setFitFront(e.target.checked)} id="cb_front" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
-                     <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
-                   </div>
-                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Stirnwand</label>
-                   <input type="number" inputMode="numeric" disabled={!fitFront} value={wallFront} onChange={(e) => setWallFront(e.target.value)} onBlur={(e) => handleBlur('front', e.target.value, setWallFront)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitFront ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
-                 </div>
-                 <div className="flex flex-col">
-                   <div className="flex items-center gap-1 mb-1">
-                     <input type="checkbox" checked={fitSide} onChange={(e) => setFitSide(e.target.checked)} id="cb_side" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
-                     <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
-                   </div>
-                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Seite</label>
-                   <input type="number" inputMode="numeric" disabled={!fitSide} value={wallSide} onChange={(e) => setWallSide(e.target.value)} onBlur={(e) => handleBlur('side', e.target.value, setWallSide)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitSide ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
-                 </div>
-                 <div className="flex flex-col">
-                   <div className="flex items-center gap-1 mb-1">
-                     <input type="checkbox" checked={fitRear} onChange={(e) => setFitRear(e.target.checked)} id="cb_rear" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1 mb-1">
+                    <input type="checkbox" checked={fitFront} onChange={(e) => setFitFront(e.target.checked)} id="cb_front" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                    <label htmlFor="cb_front" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
+                  </div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Stirnwand</label>
+                  <input type="number" inputMode="numeric" disabled={!fitFront} value={wallFront} onChange={(e) => setWallFront(e.target.value)} onBlur={(e) => handleBlur('front', e.target.value, setWallFront)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitFront ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1 mb-1">
+                    <input type="checkbox" checked={fitSide} onChange={(e) => setFitSide(e.target.checked)} id="cb_side" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                    <label htmlFor="cb_side" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
+                  </div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Seite</label>
+                  <input type="number" inputMode="numeric" disabled={!fitSide} value={wallSide} onChange={(e) => setWallSide(e.target.value)} onBlur={(e) => handleBlur('side', e.target.value, setWallSide)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitSide ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1 mb-1">
+                    <input type="checkbox" checked={fitRear} onChange={(e) => setFitRear(e.target.checked)} id="cb_rear" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
                      <label htmlFor="cb_rear" className="text-xs font-bold text-slate-600 uppercase cursor-pointer select-none">Formschluss</label>
-                   </div>
-                   <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Heck</label>
-                   <input type="number" inputMode="numeric" disabled={!fitRear} value={wallRear} onChange={(e) => setWallRear(e.target.value)} onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitRear ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
-                 </div>
-               </div>
+                  </div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5">Heck</label>
+                  <input type="number" inputMode="numeric" disabled={!fitRear} value={wallRear} onChange={(e) => setWallRear(e.target.value)} onBlur={(e) => handleBlur('rear', e.target.value, setWallRear)} placeholder="0" className={`w-full border rounded px-1.5 py-2 text-sm text-center focus:outline-none focus:ring-2 transition-all ${fitRear ? 'bg-white border-indigo-300 focus:ring-indigo-500 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-400'}`} />
+                </div>
+              </div>
                
                <div className="mt-2 flex gap-2 items-start text-xs text-slate-500 bg-slate-50 p-2 rounded-xl">
-                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400" />
+                 <Info className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400" />
                   <p>Formschluss gilt bis 5 cm Abstand (hinten max. 30 cm).</p>
-               </div>
-            </div>
-
-            {/* RESULTAT NIEDERZURREN */}
-            {lashingResult !== null && (
+              </div>
+           </div>
+  
+           {/* RESULTAT NIEDERZURREN */}
+           {lashingResult !== null && (
               <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
-                <div className="border-2 rounded-2xl p-4 mt-4 shadow-xl bg-white border-indigo-100 shadow-indigo-100">
-                  
-                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-                    <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Gurte</h3>
-                    <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+               <div className="border-2 rounded-2xl p-4 mt-4 shadow-xl bg-white border-indigo-100 shadow-indigo-100">
+                 
+                 <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Gurte</h3>
+                   <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
                       {lashingResult.weightClassInfo}
-                    </span>
-                  </div>
+                   </span>
+                 </div>
                   
-                  <div className="grid grid-cols-3 gap-3">
+                 <div className="grid grid-cols-3 gap-3">
                     {[
-                        { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward, hasFit: fitFront },
-                        { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
-                        { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
-                    ].map((res, idx) => (
-                        <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50">
-                            <span className="text-4xl font-black text-indigo-600">{res.count}</span>
-                            <span className="text-xs font-bold uppercase text-slate-400 mt-0.5">{res.label}</span>
-                            <div className="flex flex-col items-center gap-0.5">
+                       { label: 'Vorne', count: lashingResult.forward, factor: lashingResult.factorForward, hasFit: fitFront },
+                       { label: 'Seite', count: lashingResult.side, factor: lashingResult.factorSide, hasFit: fitSide },
+                       { label: 'Hinten', count: lashingResult.rear, factor: lashingResult.factorRear, hasFit: fitRear }
+                   ].map((res, idx) => (
+                       <div key={idx} className="flex flex-col items-center p-2 rounded-xl bg-slate-50">
+                           <span className="text-4xl font-black text-indigo-600">{res.count}</span>
+                           <span className="text-xs font-bold uppercase text-slate-400 mt-0.5">{res.label}</span>
+                           <div className="flex flex-col items-center gap-0.5">
                                 <span className="text-[10px] text-slate-300">({res.factor}g)</span>
                                 <span className={`text-[10px] font-bold ${res.hasFit ? 'text-emerald-600' : 'text-slate-300'}`}>
                                     {res.hasFit ? (
                                         <span className="flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" /> Formschl.</span>
                                     ) : 'Kein Formschl.'}
                                 </span>
-                            </div>
+                           </div>
                         </div>
-                    ))}
-                  </div>
-
-                   <div className="mt-4 p-3 rounded-xl flex items-center justify-between bg-indigo-50 text-indigo-900">
-                     <span className="text-xs font-bold uppercase tracking-wide opacity-70">Minimum:</span>
-                     <div className="text-3xl font-black">
-                        {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
+                   ))}
+                 </div>
+  
+                  <div className="mt-4 p-3 rounded-xl flex items-center justify-between bg-indigo-50 text-indigo-900">
+                    <span className="text-xs font-bold uppercase tracking-wide opacity-70">Minimum:</span>
+                    <div className="text-3xl font-black">
+                       {Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)} <span className="text-base font-bold opacity-60">Gurte</span>
                      </div>
-                   </div>
+                  </div>
                    
-                   <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} weightClass={lashingResult.weightClass} />
-                </div>
-              </div>
+                  <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} weightClass={lashingResult.weightClass} />
+               </div>
+            </div>
             )}
         </>
         ) : lashingType === 'diagonal' ? (
             <>
-                {/* HINWEIS FREISTEHENDE LADUNG */}
-                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-center mb-2 shadow-sm break-inside-avoid animate-in fade-in">
-                    <Info className="w-5 h-5 shrink-0 text-indigo-500" />
-                    <span className="text-xs font-bold text-indigo-800 leading-tight">
-                        Wichtig: Diagonalzurren ist nur bei <span className="underline decoration-indigo-300 decoration-2 underline-offset-2">freistehender Ladung</span> anwendbar!
-                    </span>
-                </div>
-
-                {/* GEWICHTE CARD (Diagonalzurren) */}
-                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
-                   <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-                      <Scale className="w-5 h-5" />
-                      <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
-                   </div>
-                   <InputWithIcon icon={Box} label="Ladungsgewicht (kg)" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
-                </div>
-
-                {/* SETTINGS CARD (Diagonalzurren) */}
-                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+               {/* HINWEIS FREISTEHENDE LADUNG */}
+               <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex gap-2.5 items-center mb-2 shadow-sm break-inside-avoid animate-in fade-in">
+                   <Info className="w-5 h-5 shrink-0 text-indigo-500" />
+                   <span className="text-xs font-bold text-indigo-800 leading-tight">
+                       Wichtig: Diagonalzurren ist nur bei <span className="underline decoration-indigo-300 decoration-2 underline-offset-2">freistehender Ladung</span> anwendbar!
+                   </span>
+               </div>
+  
+               {/* GEWICHTE CARD (Diagonalzurren) */}
+               <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
                   <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
-                      <Settings className="w-5 h-5" />
-                      <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
-                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="relative col-span-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
-                        {selectedFrictionId === 'CUSTOM' ? (
-                          <div className="flex gap-1">
-                            <div className="relative w-full">
+                     <Scale className="w-5 h-5" />
+                     <span className="text-sm font-black uppercase tracking-wide">Gewicht</span>
+                  </div>
+                  <InputWithIcon icon={Box} label="Ladungsgewicht (kg)" value={loadWeight} onChange={(e) => setLoadWeight(e.target.value)} placeholder="0" />
+               </div>
+  
+               {/* SETTINGS CARD (Diagonalzurren) */}
+               <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 break-inside-avoid">
+                 <div className="flex items-center gap-1.5 mb-2 text-indigo-700">
+                     <Settings className="w-5 h-5" />
+                     <span className="text-sm font-black uppercase tracking-wide">Parameter</span>
+                  </div>
+                 <div className="grid grid-cols-2 gap-2">
+                   <div className="relative col-span-2">
+                       <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Reibbeiwert (μ)</label>
+                       {selectedFrictionId === 'CUSTOM' ? (
+                         <div className="flex gap-1">
+                           <div className="relative w-full">
                                 <input type="number" step="0.01" value={customFrictionVal} onChange={(e) => setCustomFrictionVal(e.target.value)} className="w-full bg-white border-2 border-indigo-500 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-0 font-medium text-slate-800" placeholder="z.B. 0.33" autoFocus />
                                 <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">μ</span>
-                            </div>
-                            <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
-                          </div>
-                        ) : (
-                          <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
-                            {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
-                            <option disabled>──────────</option>
-                            <option value="CUSTOM">Eigener Wert...</option>
-                          </select>
-                        )}
-                    </div>
-
-                    <div className="relative col-span-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vertikalwinkel α</label>
-                        <div className="flex gap-1.5">
-                            <div className="relative w-full">
+                           </div>
+                           <button onClick={() => { setSelectedFrictionId('0.30_holz_mehrweg'); setFriction(0.3); }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl px-3 flex items-center justify-center transition-colors no-print" title="Zurück zur Liste"><X className="w-5 h-5" /></button>
+                         </div>
+                       ) : (
+                         <select value={selectedFrictionId} onChange={(e) => setSelectedFrictionId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none font-medium truncate pr-8">
+                           {FRICTION_OPTIONS.map((opt) => (<option key={opt.id} value={opt.id}>{opt.label}</option>))}
+                           <option disabled>──────────</option>
+                           <option value="CUSTOM">Eigener Wert...</option>
+                         </select>
+                      )}
+                   </div>
+  
+                   <div className="relative col-span-2">
+                       <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Vertikalwinkel α</label>
+                       <div className="flex gap-1.5">
+                           <div className="relative w-full">
                                  <input type="number" min="0" max="90" value={angle} onChange={(e) => setAngle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" placeholder="z.B. 30" />
                                  <span className="absolute right-3 top-2.5 text-slate-400 font-bold pointer-events-none">°</span>
-                            </div>
-                            <button onClick={() => { setActiveAngleField('alpha'); setIsMeasureModalOpen(true); }} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
-                        </div>
-                    </div>
-
-                    <div className="relative col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200 mt-1">
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5"><Calculator className="w-4 h-4 text-indigo-500"/> Längswinkel β (Tangens-Berechnung)</label>
-                        
-                        <div className="grid grid-cols-2 gap-3 mb-3 items-start">
-                            <div className="flex flex-col h-full">
+                           </div>
+                           <button onClick={() => { setActiveAngleField('alpha'); setIsMeasureModalOpen(true); }} className="bg-indigo-600 text-white rounded-xl px-3.5 flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200 no-print" title="Winkel messen"><SpiritLevelIcon className="w-5 h-5" /></button>
+                       </div>
+                   </div>
+  
+                   <div className="relative col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200 mt-1">
+                       <label className="block text-xs font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5"><Calculator className="w-4 h-4 text-indigo-500"/> Längswinkel β (Tangens-Berechnung)</label>
+                       
+                       <div className="grid grid-cols-2 gap-3 mb-3 items-start">
+                           <div className="flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-1">
                                     <label className="text-[10px] font-bold text-slate-500 uppercase" title="Abstand vom Zurrpunkt der Ladung zum Zurrpunkt am Fahrzeug, parallel zur Seite">Längsabstand X</label>
                                     <button onClick={() => setShowInfoX(!showInfoX)} className="text-indigo-400 hover:text-indigo-600 p-0.5 rounded-full hover:bg-indigo-50 transition-colors"><Info className="w-3.5 h-3.5"/></button>
                                 </div>
-                                <div className="relative mb-auto">
+                               <div className="relative mb-auto">
                                     <input type="number" step="0.1" value={distX} onChange={(e) => setDistX(e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium shadow-sm" placeholder="z.B. 2.5" />
                                     <span className="absolute right-3 top-2 text-slate-400 font-bold text-xs pointer-events-none">m</span>
-                                </div>
+                               </div>
                                 {showInfoX && (
                                     <div className="mt-1.5 p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-[9px] leading-relaxed text-indigo-800 animate-in fade-in slide-in-from-top-1">
-                                        <strong>Ankathete:</strong> Der Abstand in Längsrichtung (Abstand vom Zurrpunkt der Ladung zum Zurrpunkt am Fahrzeug, parallel zur Seite).
-                                        <AnglePictogram highlight="X" />
+                                       <strong>Ankathete:</strong> Der Abstand in Längsrichtung (Abstand vom Zurrpunkt der Ladung zum Zurrpunkt am Fahrzeug, parallel zur Seite).
+                                       <AnglePictogram highlight="X" />
                                     </div>
                                 )}
-                            </div>
-                            <div className="flex flex-col h-full">
+                           </div>
+                           <div className="flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-1">
                                     <label className="text-[10px] font-bold text-slate-500 uppercase" title="Seitlicher Abstand vom Anschlagpunkt der Ladung zur Befestigungsschiene">Querabstand Y</label>
                                     <button onClick={() => setShowInfoY(!showInfoY)} className="text-indigo-400 hover:text-indigo-600 p-0.5 rounded-full hover:bg-indigo-50 transition-colors"><Info className="w-3.5 h-3.5"/></button>
                                 </div>
-                                <div className="relative mb-auto">
+                               <div className="relative mb-auto">
                                     <input type="number" step="0.1" value={distY} onChange={(e) => setDistY(e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium shadow-sm" placeholder="z.B. 1.2" />
                                     <span className="absolute right-3 top-2 text-slate-400 font-bold text-xs pointer-events-none">m</span>
-                                </div>
+                               </div>
                                 {showInfoY && (
                                     <div className="mt-1.5 p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-[9px] leading-relaxed text-indigo-800 animate-in fade-in slide-in-from-top-1">
-                                        <strong>Gegenkathete:</strong> Der seitliche Abstand vom Anschlagpunkt der Ladung zur Befestigungsschiene am Fahrzeug.
-                                        <AnglePictogram highlight="Y" />
-                                    </div>
+                                       <strong>Gegenkathete:</strong> Der seitliche Abstand vom Anschlagpunkt der Ladung zur Befestigungsschiene am Fahrzeug.
+                                       <AnglePictogram highlight="Y" />
+                                   </div>
                                 )}
-                            </div>
-                        </div>
-                        
-                        <div className="flex gap-2 items-center bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 shrink-0 flex-1">Resultierender Winkel β:</label>
-                            <div className="relative w-24 shrink-0">
+                           </div>
+                       </div>
+                       
+                       <div className="flex gap-2 items-center bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+                           <label className="text-xs font-bold text-slate-500 uppercase ml-1 shrink-0 flex-1">Resultierender Winkel β:</label>
+                           <div className="relative w-24 shrink-0">
                                  <input type="number" min="0" max="90" value={angleBeta} onChange={(e) => { setAngleBeta(e.target.value); setDistX(''); setDistY(''); }} className="w-full bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg px-2 py-1.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 font-black text-center" placeholder="45" />
                                  <span className="absolute right-2 top-1.5 text-indigo-400 font-bold pointer-events-none">°</span>
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* RESULTAT DIAGONALZURREN */}
-                {lashingResult !== null && (
-                  <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
-                    <div className="border-2 rounded-2xl p-4 mt-4 shadow-xl bg-white border-indigo-100 shadow-indigo-100">
-                      <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-                        <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Zugkraft (LC)</h3>
+                           </div>
+                       </div>
+                   </div>
+                 </div>
+               </div>
+  
+               {/* RESULTAT DIAGONALZURREN */}
+               {lashingResult !== null && (
+                 <div className="space-y-3 pb-20 break-inside-avoid print-full-width">
+                   <div className="border-2 rounded-2xl p-4 mt-4 shadow-xl bg-white border-indigo-100 shadow-indigo-100">
+                     <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                       <h3 className="text-sm font-black uppercase tracking-wider text-slate-400">Erforderliche Zugkraft (LC)</h3>
                       </div>
                       
-                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-center">
-                         <svg viewBox="0 0 300 360" className="w-full max-w-[280px] h-auto drop-shadow-sm print-safe">
-                            {/* Arrow Fahrtrichtung */}
-                            <path d="M150 15 L150 45 M135 30 L150 15 L165 30" stroke="#94a3b8" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-center">
+                        <svg viewBox="0 0 300 360" className="w-full max-w-[280px] h-auto drop-shadow-sm print-safe">
+                           {/* Arrow Fahrtrichtung */}
+                           <path d="M150 15 L150 45 M135 30 L150 15 L165 30" stroke="#94a3b8" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                             <text x="150" y="60" textAnchor="middle" className="text-[11px] font-black fill-slate-400 uppercase tracking-widest">Fahrtrichtung</text>
-
-                            {/* Truck bed */}
-                            <rect x="30" y="80" width="240" height="260" rx="12" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="4" />
-                            <rect x="40" y="90" width="220" height="240" rx="8" fill="#f8fafc" stroke="none" />
+  
+                           {/* Truck bed */}
+                           <rect x="30" y="80" width="240" height="260" rx="12" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="4" />
+                           <rect x="40" y="90" width="220" height="240" rx="8" fill="#f8fafc" stroke="none" />
                             
-                            {/* Straps (Lines) */}
-                            <line x1="100" y1="160" x2="40" y2="100" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
-                            <line x1="200" y1="160" x2="260" y2="100" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
-                            <line x1="100" y1="280" x2="40" y2="320" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
-                            <line x1="200" y1="280" x2="260" y2="320" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
-
-                            {/* Cargo */}
-                            <rect x="100" y="160" width="100" height="120" rx="4" fill="#fcd34d" stroke="#f59e0b" strokeWidth="4" />
-                            <text x="150" y="225" textAnchor="middle" className="text-sm font-black fill-amber-700 tracking-widest">LADUNG</text>
-
-                            {/* Badges Front Straps */}
-                            <g transform="translate(10, 115)">
+                           {/* Straps (Lines) */}
+                           <line x1="100" y1="160" x2="40" y2="100" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+                           <line x1="200" y1="160" x2="260" y2="100" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+                           <line x1="100" y1="280" x2="40" y2="320" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+                           <line x1="200" y1="280" x2="260" y2="320" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round"/>
+  
+                           {/* Cargo */}
+                           <rect x="100" y="160" width="100" height="120" rx="4" fill="#fcd34d" stroke="#f59e0b" strokeWidth="4" />
+                          <text x="150" y="225" textAnchor="middle" className="text-sm font-black fill-amber-700 tracking-widest">LADUNG</text>
+  
+                           {/* Badges Front Straps */}
+                           <g transform="translate(10, 115)">
                                 <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
                                 <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</text>
-                            </g>
-                            <g transform="translate(220, 115)">
+                           </g>
+                           <g transform="translate(220, 115)">
                                 <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
                                 <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagRear))} daN</text>
-                            </g>
-
-                            {/* Badges Rear Straps */}
-                            <g transform="translate(10, 290)">
+                           </g>
+  
+                           {/* Badges Rear Straps */}
+                           <g transform="translate(10, 290)">
                                 <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
                                 <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</text>
-                            </g>
-                            <g transform="translate(220, 290)">
+                           </g>
+                           <g transform="translate(220, 290)">
                                 <rect x="0" y="0" width="70" height="24" rx="6" fill="#fff" stroke="#c7d2fe" strokeWidth="2" />
                                 <text x="35" y="16" textAnchor="middle" className="text-[10px] font-black fill-indigo-700">{Math.max(Math.ceil(lashingResult.lcDiagSide), Math.ceil(lashingResult.lcDiagFwd))} daN</text>
-                            </g>
-                         </svg>
-                      </div>
-                    </div>
-                  </div>
+                           </g>
+                        </svg>
+                     </div>
+                   </div>
+                 </div>
                 )}
-            </>
+           </>
         ) : lashingType === 'pkw' ? (
             <div className="animate-in fade-in duration-300 pb-20">
-                {/* OBERE EBENE */}
-                <div className="mb-6">
-                    <div className="flex items-center justify-between bg-slate-800 text-white p-3 rounded-xl mb-3 shadow-md">
-                        <span className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
-                            <Truck className="w-5 h-5" /> Obere Ebene
+               {/* OBERE EBENE */}
+               <div className="mb-6">
+                   <div className="flex items-center justify-between bg-slate-800 text-white p-3 rounded-xl mb-3 shadow-md">
+                       <span className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                           <Truck className="w-5 h-5" /> Obere Ebene
                         </span>
-                        <span className="bg-slate-700 px-2 py-0.5 rounded text-xs font-mono font-bold">{carsTop.length} PKW</span>
-                    </div>
-                    
-                    {carsTop.map((car, idx) => (
-                        <PkwCarEditor 
-                            key={car.id} 
-                            car={car} 
-                            index={idx} 
-                            onUpdate={(updatedCar) => setCarsTop(carsTop.map(c => c.id === car.id ? updatedCar : c))}
-                            onRemove={() => setCarsTop(carsTop.filter(c => c.id !== car.id))}
-                        />
-                    ))}
-
-                    <button 
-                        onClick={() => setCarsTop([...carsTop, createNewCar()])}
-                        className="w-full py-3 bg-white border-2 border-dashed border-slate-300 hover:border-indigo-400 text-slate-500 hover:text-indigo-600 rounded-2xl font-bold uppercase tracking-wide text-xs transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Car className="w-4 h-4" /> PKW Hinzufügen (Oben)
-                    </button>
-                </div>
-
+                       <span className="bg-slate-700 px-2 py-0.5 rounded text-xs font-mono font-bold">{carsTop.length} PKW</span>
+                   </div>
+                   
+                   {carsTop.map((car, idx) => (
+                    <PkwCarEditor 
+                           key={car.id} 
+                           car={car} 
+                           index={idx} 
+                           onUpdate={(updatedCar) => setCarsTop(carsTop.map(c => c.id === car.id ? updatedCar : c))}
+                           onRemove={() => setCarsTop(carsTop.filter(c => c.id !== car.id))}
+                       />
+                   ))}
+  
+                   <button 
+                       onClick={() => setCarsTop([...carsTop, createNewCar()])}
+                       className="w-full py-3 bg-white border-2 border-dashed border-slate-300 hover:border-indigo-400 text-slate-500 hover:text-indigo-600 rounded-2xl font-bold uppercase tracking-wide text-xs transition-colors flex items-center justify-center gap-2"
+                   >
+                       <Car className="w-4 h-4" /> PKW Hinzufügen (Oben)
+                   </button>
+               </div>
+  
                 {/* UNTERE EBENE */}
-                <div className="mb-6">
-                    <div className="flex items-center justify-between bg-slate-700 text-white p-3 rounded-xl mb-3 shadow-md">
-                        <span className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
-                            <Truck className="w-5 h-5 opacity-70" /> Untere Ebene
-                        </span>
-                        <span className="bg-slate-600 px-2 py-0.5 rounded text-xs font-mono font-bold">{carsBottom.length} PKW</span>
-                    </div>
-                    
-                    {carsBottom.map((car, idx) => (
-                        <PkwCarEditor 
-                            key={car.id} 
-                            car={car} 
-                            index={idx} 
-                            onUpdate={(updatedCar) => setCarsBottom(carsBottom.map(c => c.id === car.id ? updatedCar : c))}
-                            onRemove={() => setCarsBottom(carsBottom.filter(c => c.id !== car.id))}
-                        />
-                    ))}
-
-                    <button 
-                        onClick={() => setCarsBottom([...carsBottom, createNewCar()])}
-                        className="w-full py-3 bg-white border-2 border-dashed border-slate-300 hover:border-indigo-400 text-slate-500 hover:text-indigo-600 rounded-2xl font-bold uppercase tracking-wide text-xs transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Car className="w-4 h-4" /> PKW Hinzufügen (Unten)
-                    </button>
-                </div>
-
+               <div className="mb-6">
+                   <div className="flex items-center justify-between bg-slate-700 text-white p-3 rounded-xl mb-3 shadow-md">
+                       <span className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                           <Truck className="w-5 h-5 opacity-70" /> Untere Ebene
+                       </span>
+                       <span className="bg-slate-600 px-2 py-0.5 rounded text-xs font-mono font-bold">{carsBottom.length} PKW</span>
+                   </div>
+                   
+                   {carsBottom.map((car, idx) => (
+                       <PkwCarEditor 
+                           key={car.id} 
+                           car={car} 
+                           index={idx} 
+                           onUpdate={(updatedCar) => setCarsBottom(carsBottom.map(c => c.id === car.id ? updatedCar : c))}
+                           onRemove={() => setCarsBottom(carsBottom.filter(c => c.id !== car.id))}
+                       />
+                   ))}
+  
+                   <button 
+                       onClick={() => setCarsBottom([...carsBottom, createNewCar()])}
+                       className="w-full py-3 bg-white border-2 border-dashed border-slate-300 hover:border-indigo-400 text-slate-500 hover:text-indigo-600 rounded-2xl font-bold uppercase tracking-wide text-xs transition-colors flex items-center justify-center gap-2"
+                   >
+                       <Car className="w-4 h-4" /> PKW Hinzufügen (Unten)
+                   </button>
+               </div>
+  
                 {/* LIVE PREVIEW (SCREEN ONLY) */}
-                {(carsTop.length > 0 || carsBottom.length > 0) && (
-                    <div className="mt-8 pt-6 border-t border-slate-200 animate-in fade-in">
-                        <div className="flex items-center justify-center gap-2 mb-4 text-indigo-700">
-                            <Eye className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-sm">Live-Vorschau Beladung</h3>
-                        </div>
+               {(carsTop.length > 0 || carsBottom.length > 0) && (
+                   <div className="mt-8 pt-6 border-t border-slate-200 animate-in fade-in">
+                       <div className="flex items-center justify-center gap-2 mb-4 text-indigo-700">
+                           <Eye className="w-5 h-5" />
+                           <h3 className="font-black uppercase tracking-wide text-sm">Live-Vorschau Beladung</h3>
+                       </div>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start">
-                            {carsTop.length > 0 && (
+                           {carsTop.length > 0 && (
                                 <div className="w-full max-w-[220px]">
                                     <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
                                 </div>
-                            )}
-                            {carsBottom.length > 0 && (
+                           )}
+                           {carsBottom.length > 0 && (
                                 <div className="w-full max-w-[220px]">
-                                    <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
+                                   <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
                                 </div>
-                            )}
-                        </div>
-                    </div>
+                           )}
+                       </div>
+                   </div>
                 )}
-            </div>
+           </div>
         ) : null}
         
         {/* STRAFTATBESTÄNDE - SICHTBAR FÜR BEIDE RECHNERARTEN */}
         {lashingType !== 'pkw' && lashingResult !== null && fineGroups.length > 0 && (
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-3 shadow-sm mt-3 pb-20 break-inside-avoid print-full-width">
             <button onClick={() => setShowFines(!showFines)} className="flex items-center justify-between w-full no-print">
-                <div className="flex items-center gap-2">
-                    <Gavel className="w-5 h-5 text-slate-400" />
-                    <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
-                </div>
-                {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
-            </button>
+               <div className="flex items-center gap-2">
+                   <Gavel className="w-5 h-5 text-slate-400" />
+                   <h4 className="font-bold text-slate-600 text-xs uppercase">Mögliches Bußgeld (bei Verstoß)</h4>
+               </div>
+               {showFines ? <EyeOff className="w-4 h-4 text-slate-400"/> : <Eye className="w-4 h-4 text-slate-400"/>}
+           </button>
             
             <div className={showFines ? 'block' : 'hidden print-visible'}>
-                <div className="bg-white p-2 sm:p-3 rounded-xl border border-slate-200">
-                    {fineGroups.map((group, gIdx) => (
-                        <BkatRow 
-                            key={gIdx} 
-                            title={group.title} 
-                            fines={group.items.map(item => ({ 
+               <div className="bg-white p-2 sm:p-3 rounded-xl border border-slate-200">
+                   {fineGroups.map((group, gIdx) => (
+                      <BkatRow 
+                           key={gIdx} 
+                           title={group.title} 
+                           fines={group.items.map(item => ({ 
                                 role: item.role, 
-                                tbnr: item.code, 
+                                tbnr: item.code,
                                 cost: item.cost, 
                                 points: item.points, 
-                                note: item.note 
-                            }))} 
-                        />
-                    ))}
-                </div>
-            </div>
+                                note: item.note
+                           }))} 
+                       />
+                   ))}
+              </div>
+           </div>
           </div>
         )}
         
         {/* Print-Button für alle Reiter */}
         {((lashingType === 'nieder' && lashingResult !== null) || (lashingType === 'diagonal' && lashingResult !== null) || (lashingType === 'pkw' && (carsTop.length > 0 || carsBottom.length > 0))) && (
-             <PrintButton />
+            <PrintButton />
         )}
-
+  
       </div>
-      <AppVersionFooter />
+     <AppVersionFooter />
     </div>
   );
 }
-
 // --- KNOWLEDGE BASE VIEW (NEW) ---
 const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
     const renderWheelFeatures = (x, y, data) => (
