@@ -1646,7 +1646,6 @@ function OverloadCalculator({ onSwitch }) {
   const [totalAllowed, setTotalAllowed] = useState('');
   const [result, setResult] = useState(null);
   
-  // Falls useDateTime nicht existiert, fangen wir das hier ab, damit es keinen Fehler gibt.
   const dateTime = typeof useDateTime === 'function' ? useDateTime() : new Date().toLocaleDateString();
  
   const standardTotalWeights = [
@@ -1741,6 +1740,32 @@ function OverloadCalculator({ onSwitch }) {
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
       {/* PRINT VIEW ONLY */}
+      <style>
+        {`
+          @media print {
+            @page { 
+              size: A4; 
+              margin: 1.2cm; 
+            }
+            .print-container {
+              zoom: 0.9; 
+            }
+            .print-section { 
+              page-break-after: avoid !important; 
+              break-after: avoid !important; 
+              margin-bottom: 5px !important;
+            }
+            .print-result-box { 
+              page-break-inside: avoid !important; 
+              break-inside: avoid !important; 
+            }
+            .print-table th, .print-table td {
+              padding: 4px 6px !important;
+              font-size: 11px !important;
+            }
+          }
+        `}
+      </style>
       <div className="print-only print-container">
         <h1 className="print-title">Gewichts-Protokoll</h1>
         <div className="print-meta">Erstellt am: {dateTime}</div>
@@ -1870,7 +1895,6 @@ function OverloadCalculator({ onSwitch }) {
                <span className="text-[10px] font-bold uppercase">Einzelfahrzeug</span>
             </button>
             <button onClick={() => setMode('combination')} className={`flex-1 py-2 rounded-lg transition-all flex flex-col items-center gap-1 ${mode === 'combination' ? 'bg-blue-50 text-blue-800 shadow-sm ring-1 ring-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
-               {/* Workaround for TruckTrailerIcon if missing */}
                <Truck className="w-8 h-8" />
                <span className="text-[10px] font-bold uppercase">Fahrzeugkombination</span>
            </button>
@@ -2088,7 +2112,6 @@ function OverloadCalculator({ onSwitch }) {
 // --- WEIGHT MODULE (COMBINED) ---
 function WeightModule() {
   const [subTab, setSubTab] = useState('overload');
-  // Überprüfen, ob WoodCalculator existiert, ansonsten Fallback
   return subTab === 'overload' ? (
       <OverloadCalculator onSwitch={() => setSubTab('wood')} />
   ) : (
