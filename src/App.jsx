@@ -1492,8 +1492,8 @@ const getOverloadFineData = (percentage, allowed, isTrailer, isCombination, role
         else {
              if (allowed > 7500) {
                  if (p > 30) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
-                 if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331787' };
-                 if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331786' };
+                 if (p > 25) return { cost: '425 €', points: '1', ban: '', tbnr: '331788' };
+                 if (p > 20) return { cost: '380 €', points: '1', ban: '', tbnr: '331787' };
                  if (p > 15) return { cost: '285 €', points: '1', ban: '', tbnr: '331786' };
                  if (p > 10) return { cost: '235 €', points: '1', ban: '', tbnr: '331785' };
                  if (p > 5)  return { cost: '140 €', points: '1', ban: '', tbnr: '331784' };
