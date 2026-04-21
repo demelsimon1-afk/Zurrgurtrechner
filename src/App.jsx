@@ -2404,7 +2404,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                  
                  <div className="pt-4 border-t border-slate-300">
                    <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Sicherung nach vorn):</p>
-                   <p>n = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (k (Sicherheitsbeiwert) · {friction.toFixed(2)} · {stf || 0} · sin({angle || 0}°))</p>
+                   <p>n = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (1,5) · {friction.toFixed(2)} · {stf || 0} · sin({angle || 0}°))</p>
                  </div>
                </div>
              </div>
