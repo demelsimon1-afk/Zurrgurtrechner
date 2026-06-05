@@ -6,7 +6,7 @@ import {
   Calculator, Smartphone, RotateCw, Lock, MapPin, Gauge, Car, Zap, Wand2,
   Copyright, Caravan, Calendar, UserPlus, Eye, EyeOff, Globe, Server, Cookie, UserCheck, Printer,
   List, Heart, Coffee, BookOpen, AlertCircle, Syringe, Fingerprint, Scale as ScaleLaw, Key, Download,
-  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed, Baby, Bike
+  Menu, Sun, Moon, Home, Search, Shield, Users, CreditCard, CircleDashed, Baby, Bike, CigaretteOff
 } from 'lucide-react';
 
 // --- THEME CONTEXT & STYLES ---
@@ -3145,6 +3145,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
       { id: 'lasi', label: 'Ladungssicherung', icon: LashingStrapIcon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
       { id: 'ebike', label: 'Pedelec & E-Bike', icon: Bike, color: 'text-green-500', bg: 'bg-green-50' },
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
+      { id: 'rauchverbot', label: 'Rauchverbot', icon: CigaretteOff, color: 'text-slate-500', bg: 'bg-slate-100' },
       { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' }
   ];
 
@@ -5115,6 +5116,86 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
 
                     </div>
                 </div>
+            )}
+
+            {/* RAUCHVERBOT */}
+            {view === 'rauchverbot' && (
+                 <div className="space-y-4 animate-in fade-in">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-4 text-slate-700 pb-2 border-b border-slate-50">
+                            <CigaretteOff className="w-5 h-5" />
+                            <h3 className="font-black uppercase tracking-wide text-xs">Landesnichtraucherschutzgesetz (LNRSchG BW)</h3>
+                        </div>
+
+                        <div className="bg-red-50 border border-red-200 p-4 rounded-xl mb-5 text-sm text-red-900 leading-relaxed shadow-sm flex items-start gap-3">
+                            <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5 text-red-600" />
+                            <div>
+                                <strong className="block mb-1 text-red-800 text-base uppercase tracking-wide">Neues Rauchverbot (seit 1. Juni 2026)</strong>
+                                Die Regelungen gelten <strong>unabhängig vom Nikotin- oder Cannabisgehalt</strong> für klassische Tabakprodukte, E-Zigaretten, Tabakerhitzer und vergleichbare Produkte. Ausnahmen sind in § 4 LNRSchG geregelt.
+                            </div>
+                        </div>
+
+                        <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Das Rauchverbot gilt insbesondere:</h4>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
+                                <Home className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <span className="font-bold text-slate-800 text-sm block mb-0.5">In öffentlich zugänglichen Innenräumen</span>
+                                    <span className="text-xs text-slate-600">z. B. in Behörden, Geschäften, Restaurants, Kultureinrichtungen, Krankenhäusern u. v. m.</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
+                                <Baby className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <span className="font-bold text-slate-800 text-sm block mb-0.5">Auf öffentlichen Kinderspielplätzen</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
+                                <Caravan className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <span className="font-bold text-slate-800 text-sm block mb-0.5">An Haltestellen des ÖPNV</span>
+                                    <span className="text-xs text-slate-600">An Bus- und Straßenbahnhaltestellen des öffentlichen Personennahverkehrs.</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
+                                <BookOpen className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <span className="font-bold text-slate-800 text-sm block mb-0.5">Auf Schulgeländen</span>
+                                    <span className="text-xs text-slate-600">Einschließlich der Schulhöfe.</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-3 shadow-sm sm:col-span-2">
+                                <Sun className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <span className="font-bold text-slate-800 text-sm block mb-0.5">In bestimmten Außenbereichen</span>
+                                    <span className="text-xs text-slate-600">z. B. in Zoos, Freizeitparks und Freibädern.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 className="font-bold text-xs uppercase text-slate-500 mb-2">Kontrollen & Bußgelder</h4>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3 text-sm">
+                            <p className="text-slate-600 text-xs mb-2">Für die Kontrollen sind die jeweils Verantwortlichen der Bereiche und Einrichtungen beziehungsweise die Ortspolizeibehörden zuständig.</p>
+                            
+                            <div className="flex gap-2">
+                                 <div className="flex-1 bg-white border border-slate-200 p-3 rounded-lg text-center shadow-sm">
+                                    <span className="block text-[10px] text-slate-400 font-bold uppercase mb-1">Verstoß (erstmalig)</span>
+                                    <span className="text-lg font-black text-red-600">bis zu 200 €</span>
+                                 </div>
+                                 <div className="flex-1 bg-white border border-slate-200 p-3 rounded-lg text-center shadow-sm">
+                                    <span className="block text-[10px] text-slate-400 font-bold uppercase mb-1">Wiederholungsfall</span>
+                                    <span className="text-lg font-black text-red-600">bis zu 500 €</span>
+                                 </div>
+                            </div>
+                            
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex gap-3 items-start text-xs text-amber-900 mt-3 shadow-sm">
+                                <Info className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+                                <span><strong>Betreiberpflichten:</strong> Betreiberinnen und Betreiber, die ihren Kennzeichnungs- und Kontrollpflichten nicht nachkommen, müssen mit <strong>höheren Bußgeldern</strong> rechnen.</span>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
             )}
 
             {/* REIFEN */}
