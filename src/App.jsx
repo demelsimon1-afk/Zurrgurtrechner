@@ -4080,7 +4080,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
 
                                     <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-start gap-3 shadow-sm text-xs text-indigo-900 font-medium">
                                         <CreditCard className="w-5 h-5 shrink-0 text-indigo-500 mt-0.5" />
-                                        <p><strong>Fahrerlaubnis Klasse B</strong> zwingend vonnöten, da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen.</p>
+                                        <p><strong>Fahrerlaubnis Klasse B</strong> zwingend vonnöten, da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen. Auch ein Mofa muss einen Sitzplatz aufweisen (siehe VO (EG) 168/2013 ) somit scheidet auch die Mofaprüfbescheinigung aus.</p>
                                     </div>
 
                                     <div className="bg-orange-50 border border-orange-200 p-3.5 rounded-xl shadow-sm">
@@ -4143,7 +4143,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                             <CreditCard className="w-5 h-5 text-indigo-500" />
                                             <span className="font-black text-sm">Fahrerlaubnis Klasse B zwingend erforderlich</span>
                                         </div>
-                                        <p className="mb-2">Da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen, scheiden diese aus.</p>
+                                        <p className="mb-2">Da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen, scheiden diese aus. Auch ein Mofa muss nach dieser VO (EG) einen Sitzplatz aufweisen. Somit genügt eine Mofaprüfbescheinigung nicht</p>
                                         
                                         <div className="mt-3 bg-white p-3.5 rounded-xl border border-indigo-100 text-[11px] leading-relaxed text-slate-700 shadow-sm">
                                             <strong className="text-indigo-800 block mb-1">Besonderheit bei Schweizer Fahrern:</strong>
@@ -5696,6 +5696,10 @@ function DriverLicenseModule() {
 // --- Home VIEW ---
 const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
+    
+    // --- HIER UPDATE TEXT EINTRAGEN ---
+    const updateText = "🚀 Update 2.3: Reiter Rauchverbot gemäß LNRSchG implementiert";
+
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
         { id: 'license', title: 'Führerschein', icon: CreditCard, color: 'text-sky-500', bg: 'bg-sky-50', desc: 'Schlüsselzahlen • Klassen' },
@@ -5718,6 +5722,36 @@ const HomeView = ({ onSelect }) => {
                 </div>
                 <HeaderLogo />
             </div>
+
+            {/* --- LAUFSCHRIFT (TICKER) --- */}
+            <div className="bg-indigo-600 text-white overflow-hidden flex items-center px-2 py-1.5 text-xs font-bold border-b border-indigo-700 shadow-inner no-print relative pause-marquee">
+                <style>{`
+                    @keyframes marquee {
+                        0% { transform: translateX(0%); }
+                        100% { transform: translateX(-100%); }
+                    }
+                    .animate-marquee {
+                        animation: marquee 15s linear infinite;
+                    }
+                    .pause-marquee:hover .animate-marquee {
+                        animation-play-state: paused;
+                    }
+                `}</style>
+                <div className="bg-indigo-800 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0 z-10 shadow-sm mr-2 flex items-center gap-1 relative">
+                    <AlertCircle className="w-3 h-3" /> Update
+                </div>
+                <div className="whitespace-nowrap overflow-hidden relative flex-1 flex">
+                    <div className="animate-marquee flex shrink-0 gap-8 pr-8 cursor-default">
+                        <span>{updateText}</span>
+                        <span>{updateText}</span>
+                    </div>
+                    <div className="animate-marquee flex shrink-0 gap-8 pr-8 cursor-default" aria-hidden="true">
+                        <span>{updateText}</span>
+                        <span>{updateText}</span>
+                    </div>
+                </div>
+            </div>
+
             <div className="p-4 animate-in fade-in zoom-in-95 duration-300 pb-20">
                 <div className="grid grid-cols-2 gap-3 pt-2">
                     {tiles.map(tile => (
