@@ -989,20 +989,18 @@ function SpeedCalculator() {
 
             <div className="p-2 space-y-2 no-print">
                 <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
-                    <button onClick={() => setMode('laser')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'laser' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400'}`}>Laser</button>
-                    <button onClick={() => setMode('follow')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'follow' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400'}`}>Hinterherfahren</button>
+                    <button onClick={() => setMode('laser')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'laser' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Laser</button>
+                    <button onClick={() => { setMode('follow'); setVehicleType('pkw'); }} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'follow' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Hinterherfahren</button>
                 </div>
 
                 <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                    {mode === 'laser' && (
-                        <div className="mb-4">
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
-                            <div className="flex gap-2">
-                                <button onClick={() => setVehicleType('pkw')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-400'}`}><Car className="w-6 h-6" /><span className="text-[10px] font-bold">PKW</span></button>
-                                <button onClick={() => setVehicleType('pkw_trailer')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-400'}`}><CarWithTrailerIcon className="w-8 h-8" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span></button>
-                            </div>
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
+                        <div className="flex gap-2">
+                            <button onClick={() => setVehicleType('pkw')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Car className="w-6 h-6" /><span className="text-[10px] font-bold">PKW</span></button>
+                            <button onClick={() => setVehicleType('pkw_trailer')} disabled={mode === 'follow'} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${mode === 'follow' ? 'border-slate-100 bg-slate-50 text-slate-300 opacity-60 cursor-not-allowed' : vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><CarWithTrailerIcon className="w-8 h-8" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span>{mode === 'follow' && <span className="text-[8px] text-red-400 font-bold -mt-1 leading-tight">Nicht möglich</span>}</button>
                         </div>
-                    )}
+                    </div>
                     <div className="space-y-4 mb-4">
                         <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Zulässige Höchstgeschwindigkeit</label>
                         <div className="flex justify-between items-center px-1">
