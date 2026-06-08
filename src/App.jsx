@@ -269,14 +269,44 @@ const CarWithTrailerIcon = ({ className }) => (
     </svg>
 );
 
-const TrafficSign = ({ value, selected, onClick }) => (
-    <button 
-        onClick={onClick}
-        className={`traffic-sign relative flex items-center justify-center w-12 h-12 rounded-full border-4 bg-white shadow-md transition-all duration-200 ${selected ? 'border-red-600 scale-110 ring-2 ring-red-200 z-10' : 'border-red-600/80 scale-100 opacity-70 hover:opacity-100 hover:scale-105'}`}
-    >
-        <span className="font-black text-slate-900 text-sm tracking-tighter">{value}</span>
-    </button>
+const AutobahnIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M4 22 10 2" />
+        <path d="M20 22 14 2" />
+        <path d="M6 12h12" />
+        <path d="M5 16h14" />
+    </svg>
 );
+
+const TrafficSign = ({ value, selected, onClick }) => {
+    if (value === 'VB') {
+        return (
+            <button 
+                onClick={onClick}
+                title="Verkehrsberuhigter Bereich (intern 10 km/h)"
+                className={`traffic-sign relative flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 border-2 border-white shadow-md transition-all duration-200 ${selected ? 'scale-110 ring-2 ring-blue-300 z-10' : 'scale-100 opacity-80 hover:opacity-100 hover:scale-105'}`}
+            >
+                <div className="relative w-full h-full">
+                    <Home className="w-[18px] h-[18px] text-white absolute top-0.5 left-0.5" strokeWidth={2.5} />
+                    <User className="w-3.5 h-3.5 text-white absolute top-1.5 right-1" strokeWidth={2.5} />
+                    <Car className="w-[18px] h-[18px] text-white absolute bottom-1 right-0.5" strokeWidth={2.5} />
+                    <div className="w-2.5 h-2.5 bg-white rounded-full absolute bottom-1.5 left-1.5 flex items-center justify-center">
+                        <div className="w-1 h-1 bg-blue-600 rounded-full"></div>
+                    </div>
+                </div>
+            </button>
+        );
+    }
+    
+    return (
+        <button 
+            onClick={onClick}
+            className={`traffic-sign relative flex items-center justify-center w-12 h-12 rounded-full border-4 bg-white shadow-md transition-all duration-200 ${selected ? 'border-red-600 scale-110 ring-2 ring-red-200 z-10' : 'border-red-600/80 scale-100 opacity-70 hover:opacity-100 hover:scale-105'}`}
+        >
+            <span className="font-black text-slate-900 text-sm tracking-tighter">{value}</span>
+        </button>
+    );
+};
 
 const HeaderLogo = () => {
   const { isDarkMode, toggleDarkMode } = React.useContext(ThemeContext);
@@ -298,7 +328,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.3
+        RoadTool v. 2.4
     </div>
 );
 
@@ -925,6 +955,7 @@ function AgeCalculator() {
 
 function SpeedCalculator() {
     const [mode, setMode] = useState('laser'); 
+    const [location, setLocation] = useState('autobahn'); // NEU: 'igo' (Innerorts), 'ago' (Außerorts) oder 'autobahn' (Autobahn)
     const [vehicleType, setVehicleType] = useState('pkw'); 
     const [allowedSpeed, setAllowedSpeed] = useState('');
     const [measuredSpeedRaw, setMeasuredSpeedRaw] = useState('');
@@ -933,26 +964,58 @@ function SpeedCalculator() {
     const [result, setResult] = useState(null);
     const dateTime = useDateTime();
 
-    const getViolation = (exceedance, type) => {
+    const getViolation = (exceedance, type, loc, allowedSpeedVal) => {
+        if (exceedance <= 0) return null;
+
+        if (loc === 'igo') {
+            if (allowedSpeedVal === '10') { // Verkehrsberuhigter Bereich
+                if (exceedance <= 10) return { cost: '30 €', points: '-', ban: '-', id: '142130' };
+                if (exceedance <= 15) return { cost: '50 €', points: '-', ban: '-', id: '142131' };
+                if (exceedance <= 20) return { cost: '70 €', points: '-', ban: '-', id: '142629' };
+                if (exceedance <= 25) return { cost: '115 €', points: '1', ban: '-', id: '142630'};
+                if (exceedance <= 30) return { cost: '180 €', points: '1', ban: '-', id: '142631'};
+                if (exceedance <= 40) return { cost: '260 €', points: '2', ban: '1 M', id: '142632'};
+                if (exceedance <= 50) return { cost: '400 €', points: '2', ban: '1 M', id: '142633'};
+                if (exceedance <= 60) return { cost: '560 €', points: '2', ban: '2 M', id: '142634'};
+                if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '142635'};
+                return { cost: '800 €', points: '2', ban: '3 M', id: '142636', };
+            }
+            
+            // Normal innerorts
+            if (exceedance <= 10) return { cost: '30 €', points: '-', ban: '-', id: '141236' };
+            if (exceedance <= 15) return { cost: '50 €', points: '-', ban: '-', id: '141237' };
+            if (exceedance <= 20) return { cost: '70 €', points: '-', ban: '-', id: '141711' };
+            if (exceedance <= 25) return { cost: '115 €', points: '1', ban: '-', id: '141712'};
+            if (exceedance <= 30) return { cost: '180 €', points: '1', ban: '-', id: '141713'};
+            if (exceedance <= 40) return { cost: '260 €', points: '2', ban: '1 M', id: '141714'};
+            if (exceedance <= 50) return { cost: '400 €', points: '2', ban: '1 M', id: '141715'};
+            if (exceedance <= 60) return { cost: '560 €', points: '2', ban: '2 M', id: '141716'};
+            if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '141717'};
+            return { cost: '800 €', points: '2', ban: '3 M', id: '141718'};
+        }
+
         if (exceedance < 16) return null;
         if (type === 'pkw_trailer') {
-            if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '118632' };
-            if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '118633' };
-            if (exceedance <= 30) return { cost: '175 €', points: '1', ban: '-', id: '118634' };
-            if (exceedance <= 40) return { cost: '255 €', points: '2', ban: '1 M', id: '118635' };
-            if (exceedance <= 50) return { cost: '480 €', points: '2', ban: '1 M', id: '118636' };
-            if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '118637' }; 
-            if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '118638' }; 
-            return { cost: '800 €', points: '2', ban: '3 M', id: '118639' }; 
+            if (loc !== 'autobahn') return null; // NEU: PKW mit Anhänger nur auf Autobahn
+            if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '118632'};
+            if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '118633'};
+            if (exceedance <= 30) return { cost: '175 €', points: '1', ban: '-', id: '118634'};
+            if (exceedance <= 40) return { cost: '255 €', points: '2', ban: '1 M', id: '118635'};
+            if (exceedance <= 50) return { cost: '480 €', points: '2', ban: '1 M', id: '118636'};
+            if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '118637'}; 
+            if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '118638'}; 
+            return { cost: '800 €', points: '2', ban: '3 M', id: '118639'}; 
         }
+        
+        // Für PKW (loc ist hier 'ago' oder 'autobahn')
         if (exceedance <= 20) return { cost: '60 €', points: '-', ban: '-', id: '141720' };
-        if (exceedance <= 25) return { cost: '100 €', points: '1', ban: '-', id: '141721' };
-        if (exceedance <= 30) return { cost: '150 €', points: '1', ban: '-', id: '141722' };
-        if (exceedance <= 40) return { cost: '200 €', points: '1', ban: '-', id: '141723' };
-        if (exceedance <= 50) return { cost: '320 €', points: '2', ban: '1 M', id: '141724' };
-        if (exceedance <= 60) return { cost: '480 €', points: '2', ban: '1 M', id: '141725' };
-        if (exceedance <= 70) return { cost: '600 €', points: '2', ban: '2 M', id: '141726' };
-        return { cost: '700 €', points: '2', ban: '3 M', id: '141727' };
+        if (exceedance <= 25) return { cost: '100 €', points: '1', ban: '-', id: '141721'};
+        if (exceedance <= 30) return { cost: '150 €', points: '1', ban: '-', id: '141722'};
+        if (exceedance <= 40) return { cost: '200 €', points: '1', ban: '-', id: '141723'};
+        if (exceedance <= 50) return { cost: '320 €', points: '2', ban: '1 M', id: '141724'};
+        if (exceedance <= 60) return { cost: '480 €', points: '2', ban: '1 M', id: '141725'};
+        if (exceedance <= 70) return { cost: '600 €', points: '2', ban: '2 M', id: '141726'};
+        return { cost: '700 €', points: '2', ban: '3 M', id: '141727'};
     };
 
     useEffect(() => {
@@ -970,7 +1033,7 @@ function SpeedCalculator() {
             formula = `((${measured} - 10%) - 4) - 3% = ${netSpeed.toFixed(0)}`;
         }
         const exceedance = Math.max(0, netSpeed - allowed);
-        const violation = getViolation(exceedance, vehicleType);
+        const violation = getViolation(exceedance, vehicleType, location, allowedSpeed);
         
         // Gauge Logik (Für den visuellen Tacho)
         const gaugeMax = allowed * 1.6; // Skala geht bis 160% der erlaubten Geschwindigkeit
@@ -978,7 +1041,7 @@ function SpeedCalculator() {
         const gaugePercentAllowed = Math.min(100, (allowed / gaugeMax) * 100);
         
         setResult({ netSpeed: Math.round(netSpeed), tolerance: tolerance, exceedance: Math.round(exceedance), violation: violation, formula: formula, gaugePercentNet, gaugePercentAllowed });
-    }, [mode, allowedSpeed, measuredSpeedRaw, vehicleType]);
+    }, [mode, location, allowedSpeed, measuredSpeedRaw, vehicleType]);
 
     return (
         <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
@@ -994,17 +1057,30 @@ function SpeedCalculator() {
                 </div>
 
                 <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                    <div className="mb-4">
-                        <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
-                        <div className="flex gap-2">
-                            <button onClick={() => setVehicleType('pkw')} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Car className="w-6 h-6" /><span className="text-[10px] font-bold">PKW</span></button>
-                            <button onClick={() => setVehicleType('pkw_trailer')} disabled={mode === 'follow'} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${mode === 'follow' ? 'border-slate-100 bg-slate-50 text-slate-300 opacity-60 cursor-not-allowed' : vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><CarWithTrailerIcon className="w-8 h-8" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span>{mode === 'follow' && <span className="text-[8px] text-red-400 font-bold -mt-1 leading-tight">Nicht möglich</span>}</button>
+                    {mode === 'laser' && (
+                        <div className="mb-4">
+                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Ort der Messung</label>
+                            <div className="flex gap-2">
+                                <button onClick={() => { setLocation('igo'); setAllowedSpeed(''); setVehicleType('pkw'); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'igo' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Home className="w-4 h-4" /><span className="text-[10px] font-bold">Innerorts</span></button>
+                                <button onClick={() => { setLocation('ago'); setAllowedSpeed(''); setVehicleType('pkw'); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'ago' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Trees className="w-4 h-4" /><span className="text-[10px] font-bold">Außerorts</span></button>
+                                <button onClick={() => { setLocation('autobahn'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'autobahn' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><AutobahnIcon className="w-4 h-4" /><span className="text-[10px] font-bold">Autobahn</span></button>
+                            </div>
                         </div>
-                    </div>
+                    )}
+                    
+                    {location === 'autobahn' && mode !== 'follow' && (
+                        <div className="mb-4">
+                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
+                            <div className="flex gap-2">
+                                <button onClick={() => { setVehicleType('pkw'); if (allowedSpeed && !['60', '70', '80', '100', '120'].includes(allowedSpeed)) setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Car className="w-6 h-6" /><span className="text-[10px] font-bold">PKW</span></button>
+                                <button onClick={() => { setVehicleType('pkw_trailer'); if (allowedSpeed && !['80', '100'].includes(allowedSpeed)) setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><CarWithTrailerIcon className="w-8 h-8" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span></button>
+                            </div>
+                        </div>
+                    )}
                     <div className="space-y-4 mb-4">
                         <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Zulässige Höchstgeschwindigkeit</label>
-                        <div className="flex justify-between items-center px-1">
-                            {[60, 70, 80, 100, 120].map(v => (<TrafficSign key={v} value={v} selected={allowedSpeed == v} onClick={() => setAllowedSpeed(v.toString())} />))}
+                        <div className="flex flex-wrap justify-center gap-2 px-1">
+                            {(location === 'igo' ? ['VB', 20, 30, 40, 50] : location === 'ago' ? [30, 50, 60, 70, 80, 100] : (vehicleType === 'pkw_trailer' ? [80, 100] : [60, 70, 80, 100, 120])).map(v => (<TrafficSign key={v} value={v} selected={allowedSpeed == (v === 'VB' ? '10' : v)} onClick={() => setAllowedSpeed(v === 'VB' ? '10' : v.toString())} />))}
                         </div>
                     </div>
                     <div className="space-y-3">
@@ -1043,12 +1119,12 @@ function SpeedCalculator() {
                                 <div className="flex items-center gap-2 mb-4 border-b border-slate-700 pb-2"><Gavel className="w-5 h-5 text-amber-400" /><h3 className="font-bold uppercase tracking-wide text-sm">Folgen des Verstoßes</h3></div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div><div className="text-[10px] text-slate-400 uppercase font-bold">Bußgeld</div><div className="text-2xl font-black text-amber-400">{result.violation.cost}</div></div>
-                                    <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-xl font-bold">{result.violation.points}</div></div>
+                                    <div><div className="text-[10px] text-slate-400 uppercase font-bold">Punkte</div><div className="text-xl font-bold flex items-center gap-1.5">{result.violation.points} {result.violation.fap && <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">FaP {result.violation.fap}</span>}</div></div>
                                     <div><div className="text-[10px] text-slate-400 uppercase font-bold">Fahrverbot</div><div className="text-xl font-bold">{result.violation.ban}</div></div>
                                     <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-sm font-mono bg-slate-700 px-2 py-0.5 rounded inline-block mt-0.5">{result.violation.id}</div></div>
                                 </div>
                             </div>
-                        ) : (<div className="bg-green-50 text-green-700 p-3 rounded-xl text-center text-xs font-bold border border-green-200">Keine Maßnahmen im hinterlegten Bereich (&lt; 16 km/h)</div>)}
+                        ) : (<div className="bg-green-50 text-green-700 p-3 rounded-xl text-center text-xs font-bold border border-green-200">{vehicleType === 'pkw_trailer' && location !== 'autobahn' ? 'Tatbestände für PKW mit Anhänger nur für Autobahn verfügbar' : (location === 'igo' ? 'Keine Maßnahmen im hinterlegten Bereich' : 'Keine Maßnahmen im hinterlegten Bereich (< 16 km/h)')}</div>)}
                     </div>
                 )}
             </div>
@@ -5696,7 +5772,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 2.3: Reiter Rauchverbot gemäß LNRSchG implementiert";
+    const updateText = "🚀 Update 2.4: Reiter Rauchverbot gemäß LNRSchG BW implementiert, Erweiterung im Geschwindigkeitsrechner (i.g.O; a.g.O; BAB)";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
