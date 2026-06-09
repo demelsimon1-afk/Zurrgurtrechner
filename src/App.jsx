@@ -792,6 +792,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                                 onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
                             >
+<option value="" disabled>Bitte zGm. Fahrzeug wählen.</option>
                                 <option value="2000">0 - 2.000 kg</option>
                                 <option value="3000">&gt; 2.000 - 3.000 kg</option>
                                 <option value="4500">&gt; 3.000 - 4.500 kg</option>
@@ -801,6 +802,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                                 onChange={(e) => onUpdate({ ...car, angle: e.target.value })}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
                             >
+<option value="" disabled>Bitte Winkel der Ladefläche wählen</option>
                                 <option value="25">Winkel ±25°</option>
                                 <option value="10_25">Winkel +10°/-25°</option>
                                 <option value="10">Winkel ±10°</option>
@@ -818,7 +820,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                                 className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.isLast ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                                 title="Masseschwerpunkt hinter der letzten Achse des Transportfahrzeugs/Anhängers"
                             >
-                                Schwerpunkt hint. Achse
+                                Letztes Fahrzeug auf Ladefläche
                             </button>
                             <button
                                 onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
@@ -2350,7 +2352,7 @@ function LashingCalculator({ onOpenKnowledge }) {
   
   const createNewCar = () => ({
       id: Date.now() + Math.random(),
-      weightClass: '2000',
+      weightClass: 'winkel',
       angle: '25',
       orientation: 'forward',
       isLast: false,
