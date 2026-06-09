@@ -544,78 +544,170 @@ const AnglePictogram = ({ highlight }) => (
 
 // --- PKW TRANSPORTER HELPER COMPONENTS ---
 
+const getRecommendedCarConfig = (car) => {
+    const rec = { ...car, wheels: JSON.parse(JSON.stringify(car.wheels)) };
+    const w = rec.weightClass;
+    const a = rec.angle;
+    
+    const setWheels = (fl, fr, rl, rr) => {
+        rec.wheels = { fl, fr, rl, rr };
+    };
+
+    if (rec.noChocks) {
+        setWheels({ strap: true, chock: 'none' }, { strap: true, chock: 'none' }, { strap: true, chock: 'none' }, { strap: true, chock: 'none' });
+        return rec;
+    }
+
+    if (rec.isLast || (w === '4500' && a === '10')) {
+        // VB 5
+        setWheels({ strap: true, chock: 'both' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
+        if (rec.orientation === 'backward') {
+            setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
+        }
+        return rec;
+    }
+
+    if (w === '3000') {
+        if (a === '25') {
+            // VB 6
+            setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
+            if (rec.orientation === 'backward') {
+                setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' }, { strap: true, chock: 'back' });
+            }
+            return rec;
+        }
+        if (a === '10_25') {
+            // VB 3
+            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
+            if (rec.orientation === 'backward') {
+                setWheels({ strap: true, chock: 'both' }, { strap: true, chock: 'both' }, { strap: false, chock: 'none' }, { strap: false, chock: 'none' });
+            }
+            return rec;
+        }
+        return rec;
+    }
+
+    // 2000 kg - Default
+    if (a === '25') {
+        // VB 1
+        setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' });
+        if (rec.orientation === 'backward') {
+            // VB 2 
+            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'none' });
+        }
+    } else if (a === '10_25') {
+        if (rec.orientation === 'backward') {
+            // VB 2
+            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'none' });
+        } else {
+            // VB 3
+            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
+        }
+    } else if (a === '10') {
+        // VB 4 (4 Gurte, keine Keile)
+        setWheels({ strap: true, chock: 'none' }, { strap: true, chock: 'none' }, { strap: true, chock: 'none' }, { strap: true, chock: 'none' });
+    }
+
+    return rec;
+};
+
 const validateCarSecuring = (car) => {
     const { fl, fr, rl, rr } = car.wheels;
-    const hasStrap = (w) => w.strap === true;
-    const hasFront = (w) => w.chock === 'front' || w.chock === 'both';
-    const hasBoth = (w) => w.chock === 'both';
+    const w_fl = { strap: fl.strap, c: (fl.chock === 'both' || fl.chock === 'mulde') ? 2 : fl.chock === 'none' ? 0 : 1 };
+    const w_fr = { strap: fr.strap, c: (fr.chock === 'both' || fr.chock === 'mulde') ? 2 : fr.chock === 'none' ? 0 : 1 };
+    const w_rl = { strap: rl.strap, c: (rl.chock === 'both' || rl.chock === 'mulde') ? 2 : rl.chock === 'none' ? 0 : 1 };
+    const w_rr = { strap: rr.strap, c: (rr.chock === 'both' || rr.chock === 'mulde') ? 2 : rr.chock === 'none' ? 0 : 1 };
 
-    // Ausnahme: Keine Keile möglich (Sonderregel bis 1.500 kg -> 4 Gurte)
+    // Orientierungsunabhängige Prüfung: Wir definieren Achse 1 und Achse 2 anhand der Position auf dem LKW
+    let axleDir = [w_fl, w_fr]; // Achse in Fahrtrichtung (vorne auf dem LKW)
+    let axleOpp = [w_rl, w_rr]; // Achse gegen Fahrtrichtung (hinten auf dem LKW)
+
+    // VB 1: 1 Gurt+Keil in FR, 1 Gurt+2 Keile (diagonal) gegen FR
+    const isVB1 = (
+        (axleDir[0].strap && axleDir[0].c >= 1 && axleOpp[1].strap && axleOpp[1].c >= 2) ||
+        (axleDir[1].strap && axleDir[1].c >= 1 && axleOpp[0].strap && axleOpp[0].c >= 2)
+    );
+
+    // VB 2: Achse in FR (1 Keil). Achse gegen FR (2 Gurte + 1 Reifen beidseitig gekeilt).
+    const isVB2 = (
+        (axleDir[0].c >= 1 || axleDir[1].c >= 1) &&
+        (axleOpp[0].strap && axleOpp[1].strap) &&
+        (axleOpp[0].c >= 2 || axleOpp[1].c >= 2)
+    );
+
+    // VB 3: Achsweise gegen FR (beide Räder Gurt+2 Keile gegen FR)
+    const isVB3 = (axleOpp[0].strap && axleOpp[0].c >= 2 && axleOpp[1].strap && axleOpp[1].c >= 2);
+
+    // VB 4: Flacher Winkel (Alle 4 Räder mit Gurt gesichert, Keile nicht zwingend)
+    const isVB4 = (axleDir[0].strap && axleDir[1].strap && axleOpp[0].strap && axleOpp[1].strap);
+
+    // VB 5: Maximale Sicherung (An 3 Rädern jeweils Gurt + 2 Keile beidseitig)
+    const wheelsVB5Count = [w_fl, w_fr, w_rl, w_rr].filter(w => w.strap && w.c >= 2).length;
+    const isVB5 = wheelsVB5Count >= 3;
+
+    // VB 6: Schwere PKW (1 Gurt+Keil in FR, beide Räder Gurt+2 Keile gegen FR)
+    const isVB6 = ((axleDir[0].strap && axleDir[0].c >= 1) || (axleDir[1].strap && axleDir[1].c >= 1)) &&
+                   (axleOpp[0].strap && axleOpp[0].c >= 2 && axleOpp[1].strap && axleOpp[1].c >= 2);
+
+    const activeVBs = [];
+    if (isVB1) activeVBs.push(1);
+    if (isVB2) activeVBs.push(2);
+    if (isVB3) activeVBs.push(3);
+    if (isVB4) activeVBs.push(4);
+    if (isVB5) activeVBs.push(5);
+    if (isVB6) activeVBs.push(6);
+
+    const allStrapped = w_fl.strap && w_fr.strap && w_rl.strap && w_rr.strap;
+
     if (car.noChocks) {
         if (car.weightClass === '2000') {
-            if (hasStrap(fl) && hasStrap(fr) && hasStrap(rl) && hasStrap(rr)) {
-                return { valid: true, msg: "Korrekt: 4 Gurte ohne Keile (Sonderregel bis 1500 kg)." };
-            }
-            return { valid: false, msg: "Fehler: Ohne Keile müssen zwingend alle 4 Räder mit Gurten gesichert sein." };
+            if (allStrapped) return { valid: true, msg: "Sonderregel (Fußnote *): Keile durch weitere Gurte ersetzt (4 Gurte)." };
+            return { valid: false, msg: "Ohne Keile müssen zwingend alle 4 Räder mit Gurten gesichert sein." };
         }
-        return { valid: false, msg: "Fehler: Sicherung gänzlich ohne Keile ist nur bei Fahrzeugen bis 1.500 kg zulässig." };
+        return { valid: false, msg: "Sicherung gänzlich ohne Keile ist nur bei Fahrzeugen bis 2.000 kg zulässig." };
     }
 
-    // Letztes Fahrzeug (bzw. Schräge)
     if (car.isLast) {
-        const frontValid = (hasStrap(fl) && hasBoth(fl)) || (hasStrap(fr) && hasBoth(fr));
-        const rearValid = (hasStrap(rl) && hasBoth(rl)) && (hasStrap(rr) && hasBoth(rr));
-        if (frontValid && rearValid) {
-            return { valid: true, msg: "Korrekt: Letztes Fahrzeug (Vorne 1x Gurt+2 Keile, Hinten 2x Gurt+2 Keile)." };
-        }
-        return { valid: false, msg: "Fehler: Letztes Fzg benötigt an Achse in FR 1 Rad (Gurt+2 Keile) und an Achse gegen FR beide Räder (Gurt+2 Keile)." };
+        if (car.weightClass === '4500') return { valid: false, msg: "Fahrzeuge > 3.000 kg am Ende des Zuges (Schwerpunkt hinten) laut Tabelle nicht definiert!" };
+        if (isVB5) return { valid: true, msg: "Korrekt: Max. Sicherung (Schwerpunkt hinten) erfüllt (VB 5)." };
+        return { valid: false, msg: "Schwerpunkt hinter letzter Achse: Zwingend mind. 3 Räder mit Gurt & 2 Keilen sichern (VB 5)!" };
     }
 
-    // Fahrzeuge von 2.000 bis 3.000 kg
-    if (car.weightClass === '3000') {
-        const rearValid = (hasStrap(rl) && hasBoth(rl)) && (hasStrap(rr) && hasBoth(rr));
-        const frontValid = (hasStrap(fl) && hasFront(fl)) || (hasStrap(fr) && hasFront(fr));
-        
-        if (rearValid) {
-            return { valid: true, msg: frontValid ? "Korrekt: 2000-3000kg (Vorne 1x Gurt+Keil, Hinten 2x Gurt+2 Keile)." : "Korrekt: 2000-3000kg (VB 3 - Hinterachse komplett gesichert)." };
+    const angle = car.angle || '25';
+    
+    const isVBAllowed = (vb) => {
+        if (car.weightClass === '4500') {
+            if (angle !== '10') return false;
+            return vb === 5;
         }
-        return { valid: false, msg: "Fehler: 2000-3000kg benötigt an der Hinterachse zwingend 2x(Gurt+2 Keile)." };
+        if (car.weightClass === '3000') {
+            if (angle === '25') return vb === 6 || vb === 5;
+            if (angle === '10_25') return vb === 3;
+            if (angle === '10') return false;
+        }
+        if (car.weightClass === '2000') {
+            if (angle === '25') return vb === 1 || vb === 5;
+            if (angle === '10_25') return vb === 2 || vb === 3;
+            if (angle === '10') return vb === 4;
+        }
+        return false;
+    };
+
+    const validVBs = activeVBs.filter(isVBAllowed);
+
+    if (validVBs.length > 0) {
+        const bestVb = Math.min(...validVBs); 
+        return { valid: true, msg: `Korrekt gesichert (Anforderungen für VB ${bestVb} erfüllt).` };
     }
 
-    // Fahrzeuge bis 2.000 kg
-    if (car.weightClass === '2000') {
-        // Übersicherung (alle 4 Räder gesichert)
-        const allStraps = hasStrap(fl) && hasStrap(fr) && hasStrap(rl) && hasStrap(rr);
-        
-        // Verladebild 1: Diagonalsicherung (2 Gurte)
-        const isDiag1 = hasStrap(fl) && hasFront(fl) && hasStrap(rr) && hasBoth(rr) && !hasStrap(fr) && !hasStrap(rl);
-        const isDiag2 = hasStrap(fr) && hasFront(fr) && hasStrap(rl) && hasBoth(rl) && !hasStrap(fl) && !hasStrap(rr);
-        
-        // Verladebild 2: Vorne 1 Rad NUR Keil (vorne), Hinten BEIDE Räder Gurt, diagonal zum vorderen Keil 2 Keile
-        const isVB2_1 = hasFront(fl) && hasStrap(rl) && hasStrap(rr) && hasBoth(rr);
-        const isVB2_2 = hasFront(fr) && hasStrap(rr) && hasStrap(rl) && hasBoth(rl);
-        
-        // Verladebild 3: Achse gegen FR komplett gesichert (beide Räder Gurt + 2 Keile), vorne nichts
-        const isVB3 = hasStrap(rl) && hasBoth(rl) && hasStrap(rr) && hasBoth(rr);
-
-        if (allStraps) {
-            return { valid: true, msg: "Korrekt: Übersicherung (4 Gurte)." };
-        }
-        if (isVB3) {
-            return { valid: true, msg: "Korrekt: Bis 2000kg (VB 3 - Hinterachse komplett gesichert)." };
-        }
-        if (isVB2_1 || isVB2_2) {
-            return { valid: true, msg: "Korrekt: Bis 2000kg (VB 2 - Hinten 2 Gurte)." };
-        }
-        if (isDiag1 || isDiag2 || (hasStrap(fl) && hasFront(fl) && hasStrap(rr) && hasBoth(rr)) || (hasStrap(fr) && hasFront(fr) && hasStrap(rl) && hasBoth(rl))) {
-            // Fallback für Diagonalsicherung mit zusätzlichen Keilen/Gurten, die nicht genau VB2/3 entsprechen
-            return { valid: true, msg: "Korrekt: Bis 2000kg (Diagonalsicherung / VB 1)." };
-        }
-
-        return { valid: false, msg: "Fehler: Benötigt VB1 (Diagonal), VB2 (Hinten 2 Gurte) oder VB3 (Hinterachse komplett)." };
+    if (car.weightClass === '4500' && angle !== '10') return { valid: false, msg: "Gewicht >3.000kg: Anstellwinkel über/unter 10° unzulässig!" };
+    if (car.weightClass === '3000' && angle === '10') return { valid: false, msg: "Gewicht >2.000-3.000kg bei max +/-10° ist in VDI 2700 Tab. nicht definiert. Bitte strengere Winkel annehmen." };
+    
+    if (allStrapped && !car.noChocks) {
+        return { valid: true, msg: "Übersicherung (4 Gurte) erkannt. Grundsätzlich okay." };
     }
 
-    return { valid: false, msg: "Ungültige Konfiguration." };
+    return { valid: false, msg: "Sicherung unzureichend für Gewicht/Winkel (Kein zulässiges Verladebild erreicht)." };
 };
 
 const PkwWheelConfig = ({ label, wheelData, onChange }) => (
@@ -635,10 +727,11 @@ const PkwWheelConfig = ({ label, wheelData, onChange }) => (
                 onChange={(e) => onChange({ ...wheelData, chock: e.target.value })}
                 className={`flex-1 w-full text-[9px] font-bold py-1 px-0.5 rounded-md border focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors appearance-none text-center ${wheelData.chock !== 'none' ? 'bg-yellow-200 border-yellow-400 text-yellow-900 shadow-sm' : 'bg-white border-slate-200 text-slate-500'}`}
             >
-                <option value="none">- Keil -</option>
+                <option value="none">Kein Keil</option>
                 <option value="front">Vorne</option>
                 <option value="back">Hinten</option>
                 <option value="both">Beidseitig</option>
+                <option value="mulde">Mulde</option>
             </select>
         </div>
     </div>
@@ -670,7 +763,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                         {validation.valid ? <CheckCircle className="w-4 h-4" /> : index + 1}
                     </div>
                     <div className="flex flex-col truncate">
-                        <span className="font-bold text-slate-700 uppercase tracking-wide text-[11px] truncate">PKW {index + 1} {isExpanded ? '' : <span className="text-slate-400 font-medium ml-1">• {car.weightClass === '2000' ? '≤ 2t' : '> 2t'} • {car.orientation === 'forward' ? 'Vorwärts' : 'Rückwärts'}</span>}</span>
+                        <span className="font-bold text-slate-700 uppercase tracking-wide text-[11px] truncate">PKW {index + 1} {isExpanded ? '' : <span className="text-slate-400 font-medium ml-1">• {car.weightClass === '2000' ? '≤ 2t' : car.weightClass === '3000' ? '> 2-3t' : '> 3-4,5t'} • {car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10°/-25°' : '±10°'} • {car.orientation === 'forward' ? 'Vorwärts' : 'Rückwärts'}</span>}</span>
                         {!isExpanded && !validation.valid && <span className="text-[9px] text-red-500 font-bold truncate">Fehlerhafte Sicherung!</span>}
                     </div>
                 </div>
@@ -692,33 +785,48 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
 
                     {/* Compact Toolbar */}
-                    <div className="grid grid-cols-4 gap-1 mb-2">
-                        <select 
-                            value={car.weightClass} 
-                            onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
-                        >
-                            <option value="2000">≤ 2.000 kg</option>
-                            <option value="3000">&gt; 2.000 kg</option>
-                        </select>
-                        <button
-                            onClick={() => onUpdate({ ...car, orientation: car.orientation === 'backward' ? 'forward' : 'backward' })}
-                            className="w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm truncate"
-                        >
-                            {car.orientation === 'backward' ? 'Rückwärts' : 'Vorwärts'}
-                        </button>
-                        <button
-                            onClick={() => onUpdate({ ...car, isLast: !car.isLast })}
-                            className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.isLast ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                        >
-                            Letztes Fzg.
-                        </button>
-                        <button
-                            onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
-                            className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.noChocks ? 'bg-red-100 text-red-800 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                        >
-                            Ohne Keile
-                        </button>
+                    <div className="flex flex-col gap-1.5 mb-2">
+                        <div className="grid grid-cols-3 gap-1">
+                            <select 
+                                value={car.weightClass} 
+                                onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
+                            >
+                                <option value="2000">0 - 2.000 kg</option>
+                                <option value="3000">&gt; 2.000 - 3.000 kg</option>
+                                <option value="4500">&gt; 3.000 - 4.500 kg</option>
+                            </select>
+                            <select 
+                                value={car.angle || '25'} 
+                                onChange={(e) => onUpdate({ ...car, angle: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
+                            >
+                                <option value="25">Winkel ±25°</option>
+                                <option value="10_25">Winkel +10°/-25°</option>
+                                <option value="10">Winkel ±10°</option>
+                            </select>
+                            <button
+                                onClick={() => onUpdate({ ...car, orientation: car.orientation === 'backward' ? 'forward' : 'backward' })}
+                                className="w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm truncate"
+                            >
+                                {car.orientation === 'backward' ? 'Rückwärts' : 'Vorwärts'}
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                            <button
+                                onClick={() => onUpdate({ ...car, isLast: !car.isLast })}
+                                className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.isLast ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                                title="Masseschwerpunkt hinter der letzten Achse des Transportfahrzeugs/Anhängers"
+                            >
+                                Schwerpunkt hint. Achse
+                            </button>
+                            <button
+                                onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
+                                className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.noChocks ? 'bg-red-100 text-red-800 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                Keine Keile möglich
+                            </button>
+                        </div>
                     </div>
 
                     {/* Wheels 2x2 Grid */}
@@ -767,45 +875,28 @@ const SvgPkwTransporter = ({ deckName, cars }) => {
 
                 {/* Render Cars */}
                 {cars.map((car, idx) => {
-                    const tilt = 0; // Schräge Darstellung entfernt
                     const yOffset = 70 + (idx * carHeight);
 
-                    const renderWheelFeatures = (x, y, data) => (
+                    const renderWheelFeatures = (x, y, data, noChocks) => (
                         <g transform={`translate(${x}, ${y})`}>
-                            {/* Rad */}
                             <rect x="0" y="0" width="10" height="25" fill="#0f172a" rx="1" />
-                            
-                            {/* Keile (Gelb) */}
-                            {!car.noChocks && (data.chock === 'front' || data.chock === 'both') && <line x1="-6" y1="-2" x2="16" y2="-2" stroke="#fde047" strokeWidth="2.5" />}
-                            {!car.noChocks && (data.chock === 'back' || data.chock === 'both') && <line x1="-6" y1="27" x2="16" y2="27" stroke="#fde047" strokeWidth="2.5" />}
-                            
-                            {/* Gurt (Blau) */}
+                            {!noChocks && data.chock === 'mulde' && <path d="M-4 -2 L-4 27 L14 27 L14 -2" fill="none" stroke="#94a3b8" strokeWidth="2" />}
+                            {!noChocks && (data.chock === 'front' || data.chock === 'both') && <line x1="-6" y1="-2" x2="16" y2="-2" stroke="#fde047" strokeWidth="2.5" />}
+                            {!noChocks && (data.chock === 'back' || data.chock === 'both') && <line x1="-6" y1="27" x2="16" y2="27" stroke="#fde047" strokeWidth="2.5" />}
                             {data.strap && <line x1="5" y1="-10" x2="5" y2="35" stroke="#3b82f6" strokeWidth="3" opacity="0.9" />}
                         </g>
                     );
 
                     return (
                         <g key={car.id} transform={`translate(15, ${yOffset})`}>
-                            <g transform={`rotate(${tilt} 50 55)`}>
-                                {/* Car Body */}
-                                <rect x="0" y="0" width="100" height="110" fill="#e2e8f0" stroke="#64748b" strokeWidth="1" rx="4" />
-                                
-                                {/* Orientation Indicator (Windshield & Arrow) */}
-                                <g transform={`rotate(${car.orientation === 'backward' ? 180 : 0} 50 55)`}>
-                                    <path d="M 20 30 L 80 30 L 75 15 L 25 15 Z" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
-                                    <path d="M 45 20 L 50 12 L 55 20" fill="none" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </g>
+                            {/* Schwarzer Kasten ohne Windschutzscheibe / Richtungspfeile */}
+                            <rect x="25" y="10" width="50" height="90" fill="#1e293b" rx="2" />
 
-                                {/* Achsen Labels */}
-                                <text x="50" y="45" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse in FR</text>
-                                <text x="50" y="72" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse gegen FR</text>
-
-                                {/* Wheels */}
-                                {renderWheelFeatures(8, 10, car.wheels.fl)}
-                                {renderWheelFeatures(82, 10, car.wheels.fr)}
-                                {renderWheelFeatures(8, 65, car.wheels.rl)}
-                                {renderWheelFeatures(82, 65, car.wheels.rr)}
-                            </g>
+                            {/* Wheels */}
+                            {renderWheelFeatures(8, 10, car.wheels.fl, car.noChocks)}
+                            {renderWheelFeatures(82, 10, car.wheels.fr, car.noChocks)}
+                            {renderWheelFeatures(8, 65, car.wheels.rl, car.noChocks)}
+                            {renderWheelFeatures(82, 65, car.wheels.rr, car.noChocks)}
                         </g>
                     );
                 })}
@@ -2260,6 +2351,7 @@ function LashingCalculator({ onOpenKnowledge }) {
   const createNewCar = () => ({
       id: Date.now() + Math.random(),
       weightClass: '2000',
+      angle: '25',
       orientation: 'forward',
       isLast: false,
       noChocks: false,
@@ -2563,7 +2655,9 @@ function LashingCalculator({ onOpenKnowledge }) {
                          <td style={{ border: 'none', padding: '2px' }}>Radkeil</td>
                         <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '4px', backgroundColor: '#3b82f6', border: '1px solid #1d4ed8' }}></div></td>
                         <td style={{ border: 'none', padding: '2px' }}>Autotransportgurt</td>
-                        <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '10px', backgroundColor: '#0f172a' }}></div></td>
+                        <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '20px', height: '10px', border: '2px solid #94a3b8', borderTop: 'none' }}></div></td>
+                        <td style={{ border: 'none', padding: '2px' }}>Mulde / Brille</td>
+                        <td style={{ border: 'none', padding: '2px' }}><div style={{ width: '10px', height: '20px', backgroundColor: '#0f172a', borderRadius: '2px' }}></div></td>
                         <td style={{ border: 'none', padding: '2px' }}>Rad</td>
                     </tr>
                 </tbody>
@@ -3014,24 +3108,54 @@ function LashingCalculator({ onOpenKnowledge }) {
                    </button>
                </div>
   
-                {/* LIVE PREVIEW (SCREEN ONLY) */}
+                {/* LIVE PREVIEW & EMPFEHLUNG (SCREEN ONLY) */}
                {(carsTop.length > 0 || carsBottom.length > 0) && (
                    <div className="mt-8 pt-6 border-t border-slate-200 animate-in fade-in">
                        <div className="flex items-center justify-center gap-2 mb-4 text-indigo-700">
                            <Eye className="w-5 h-5" />
-                           <h3 className="font-black uppercase tracking-wide text-sm">Live-Vorschau Beladung</h3>
+                           <h3 className="font-black uppercase tracking-wide text-sm">Ist-Zustand vs. Empfehlung</h3>
                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start">
-                           {carsTop.length > 0 && (
-                                <div className="w-full max-w-[220px]">
-                                    <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
-                                </div>
-                           )}
-                           {carsBottom.length > 0 && (
-                                <div className="w-full max-w-[220px]">
-                                   <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
-                                </div>
-                           )}
+                       
+                       <div className="flex flex-row gap-2 sm:gap-4 justify-center items-stretch w-full">
+                           {/* IST-Zustand */}
+                           <div className="flex-1 bg-slate-50 p-2 sm:p-4 rounded-xl border border-slate-200 flex flex-col items-center shadow-sm w-1/2 overflow-hidden">
+                               <div className="flex flex-col items-center gap-1 mb-4 text-slate-500 text-center">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    <h4 className="font-bold uppercase tracking-tight text-[10px] sm:text-xs">Ihre Eingabe</h4>
+                               </div>
+                               <div className="flex flex-col gap-4 justify-center w-full">
+                                   {carsTop.length > 0 && (
+                                        <div className="flex justify-center w-full">
+                                            <SvgPkwTransporter deckName="Oben" cars={carsTop} />
+                                        </div>
+                                   )}
+                                   {carsBottom.length > 0 && (
+                                        <div className="flex justify-center w-full">
+                                           <SvgPkwTransporter deckName="Unten" cars={carsBottom} />
+                                        </div>
+                                   )}
+                               </div>
+                           </div>
+
+                           {/* SOLL-Zustand */}
+                           <div className="flex-1 bg-emerald-50 p-2 sm:p-4 rounded-xl border border-emerald-200 flex flex-col items-center shadow-sm w-1/2 overflow-hidden">
+                               <div className="flex flex-col items-center gap-1 mb-4 text-emerald-700 text-center">
+                                    <CheckCircle className="w-4 h-4" />
+                                    <h4 className="font-bold uppercase tracking-tight text-[10px] sm:text-xs">Empfehlung</h4>
+                               </div>
+                               <div className="flex flex-col gap-4 justify-center w-full">
+                                   {carsTop.length > 0 && (
+                                        <div className="flex justify-center w-full">
+                                            <SvgPkwTransporter deckName="Oben" cars={carsTop.map(getRecommendedCarConfig)} />
+                                        </div>
+                                   )}
+                                   {carsBottom.length > 0 && (
+                                        <div className="flex justify-center w-full">
+                                           <SvgPkwTransporter deckName="Unten" cars={carsBottom.map(getRecommendedCarConfig)} />
+                                        </div>
+                                   )}
+                               </div>
+                           </div>
                        </div>
                    </div>
                 )}
@@ -3079,18 +3203,14 @@ function LashingCalculator({ onOpenKnowledge }) {
     </div>
   );
 }
-// --- KNOWLEDGE BASE VIEW (NEW) ---
-const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
+
+const StaticCarDiagram = ({ carConfig }) => {
     const renderWheelFeatures = (x, y, data) => (
         <g transform={`translate(${x}, ${y})`}>
-            {/* Rad */}
             <rect x="0" y="0" width="10" height="25" fill="#0f172a" rx="1" />
-            
-            {/* Keile (Gelb) */}
+            {data.chock === 'mulde' && <path d="M-4 -2 L-4 27 L14 27 L14 -2" fill="none" stroke="#94a3b8" strokeWidth="2" />}
             {(data.chock === 'front' || data.chock === 'both') && <line x1="-6" y1="-2" x2="16" y2="-2" stroke="#fde047" strokeWidth="2.5" />}
             {(data.chock === 'back' || data.chock === 'both') && <line x1="-6" y1="27" x2="16" y2="27" stroke="#fde047" strokeWidth="2.5" />}
-            
-            {/* Gurt (Blau) */}
             {data.strap && <line x1="5" y1="-10" x2="5" y2="35" stroke="#3b82f6" strokeWidth="3" opacity="0.9" />}
         </g>
     );
@@ -3103,10 +3223,10 @@ const StaticCarDiagram = ({ carConfig, isTilted = false }) => {
                     <path d="M55 14 L60 6 L65 14" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     <line x1="60" y1="6" x2="60" y2="18" stroke="#ef4444" strokeWidth="2" />
                 </g>
-                <g transform={`translate(15, 35) ${isTilted ? 'rotate(-6 50 55)' : ''}`}>
-                    <rect x="0" y="0" width="100" height="110" fill="#e2e8f0" stroke="#64748b" strokeWidth="1" rx="4" />
-                    <text x="50" y="35" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse in FR</text>
-                    <text x="50" y="80" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#64748b">Achse gegen FR</text>
+                <g transform="translate(15, 35)">
+                    {/* Schwarzer Kasten ohne Windschutzscheibe / Richtungspfeile */}
+                    <rect x="25" y="10" width="50" height="90" fill="#1e293b" rx="2" />
+                    
                     {renderWheelFeatures(8, 10, carConfig.fl)}
                     {renderWheelFeatures(82, 10, carConfig.fr)}
                     {renderWheelFeatures(8, 65, carConfig.rl)}
@@ -5091,97 +5211,192 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-2 mb-6 text-teal-700 pb-2 border-b border-slate-50">
                             <Car className="w-5 h-5" />
-                            <h3 className="font-black uppercase tracking-wide text-xs">PKW-Transporter (Verladung)</h3>
+                            <h3 className="font-black uppercase tracking-wide text-xs">PKW-Transporter (VDI 2700 Blatt 8.1)</h3>
                         </div>
 
-                        {/* NEUE REGELN INFO */}
-                        <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mb-6">
-                            <h4 className="font-black text-teal-800 text-sm mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> Allgemeine Grundregeln</h4>
-                            <ul className="space-y-1.5 text-xs text-teal-900 font-medium list-disc list-inside">
-                                <li><strong>Es ist irrelevant</strong>, ob Fahrzeuge vorwärts oder rückwärts verladen werden. Die Achse in Fahrtrichtung ist ausschlaggebend.</li>
-                                <li>Die verwendeten Gurte müssen eine <strong>STF von mindestens 330 daN</strong> aufweisen.</li>
-                                <li>Die Radvorleger (Keile) müssen <strong>mindestens 12 cm hoch</strong> sein.</li>
-                            </ul>
+                        {/* TECHNISCHE DATEN (AUS PDF) */}
+                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-6">
+                            <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><Settings className="w-4 h-4 text-slate-500"/> Technische Vorgaben & Zertifikat</h4>
+                            
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-start gap-3 shadow-sm mb-4">
+                                <Info className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
+                                <div className="text-xs text-amber-900 font-medium">
+                                    <strong className="block mb-1 text-amber-800">Hinweis zum Zertifikat (Übereinstimmungserklärung)</strong>
+                                    Ein Zertifikat ist <strong>kein amtliches Dokument</strong> und es besteht <strong>keine behördliche Mitführpflicht</strong>! Es erleichtert lediglich die Kontrolle, um die Kompatibilität der Fahrbahnelemente mit den Sicherungsmitteln nachzuweisen.
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex gap-3 items-start bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                                    <div className="w-5 h-5 shrink-0 mt-0.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><path d="M2 12h20" /><rect x="8" y="7" width="8" height="10" rx="2" fill="currentColor" fillOpacity="0.1" /><path d="M8 12h8" /><path d="M2 12l2 2" /><path d="M22 12l-2 2" /></svg></div>
+                                    <div>
+                                        <span className="font-bold text-slate-800 text-xs uppercase block mb-1">Drei-Punkt-Zurrgurte & Controller</span>
+                                        <ul className="text-[11px] text-slate-600 list-disc list-inside space-y-0.5">
+                                            <li><strong className="text-slate-700">LC:</strong> mind. 1500 daN | <strong className="text-slate-700">STF:</strong> mind. 330 daN</li>
+                                            <li><strong className="text-slate-700">Gurtband-Dehnung:</strong> ≤ 4 %</li>
+                                            <li><strong className="text-slate-700">Controller (ETA-Wert):</strong> Übertragungswert η ≥ 0,5</li>
+                                            <li><strong className="text-slate-700">Controller-Länge:</strong> mind. halber Radumfang (180°)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 items-start bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                                    <div className="w-5 h-5 shrink-0 mt-0.5"><Box className="w-full h-full text-yellow-500"/></div>
+                                    <div>
+                                        <span className="font-bold text-slate-800 text-xs uppercase block mb-1">Radvorleger (Anfahrbügel)</span>
+                                        <ul className="text-[11px] text-slate-600 list-disc list-inside space-y-0.5">
+                                            <li><strong className="text-slate-700">Höhe:</strong> ≥ 1/6 des Raddurchmessers (mind. 120 mm)</li>
+                                            <li><strong className="text-slate-700">Blockierkraft (BC):</strong> ≥ 500 daN</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 items-start bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                                    <div className="w-5 h-5 shrink-0 mt-0.5"><ShieldCheck className="w-full h-full text-emerald-500"/></div>
+                                    <div className="w-full">
+                                        <span className="font-bold text-slate-800 text-xs uppercase block mb-1">Sicherungspunkte am Transporter</span>
+                                        <table className="w-full text-[10px] text-left text-slate-600 mt-1">
+                                            <thead className="text-slate-400 border-b border-slate-100">
+                                                <tr><th className="pb-1">Fahrzeugmasse</th><th className="pb-1">Gurtzug 0°</th><th className="pb-1">Gurtzug 45°</th><th className="pb-1">Gurtzug 90°</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr className="border-b border-slate-50"><td className="py-1">0 - 1500 kg</td><td className="py-1 font-bold text-slate-700">min. 500 daN</td><td className="py-1 font-bold text-slate-700">min. 500 daN</td><td className="py-1 font-bold text-slate-700">min. 500 daN</td></tr>
+                                                <tr><td className="py-1">&gt; 1500 - 4500 kg</td><td className="py-1 font-bold text-slate-700">min. 700 daN</td><td className="py-1 font-bold text-slate-700">min. 700 daN</td><td className="py-1 font-bold text-slate-700">min. 600 daN</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ZULÄSSIGE VERLADEBILDER TABELLE */}
+                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-8">
+                            <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><MapPin className="w-4 h-4 text-slate-500"/> Zulässige Verladebilder (Übersicht)</h4>
+                            <div className="overflow-x-auto custom-scrollbar">
+                                <table className="w-full text-[11px] text-left border-collapse border border-slate-200 min-w-[300px]">
+                                    <thead className="bg-slate-800 text-white font-bold uppercase tracking-wider text-[10px]">
+                                        <tr>
+                                            <th className="p-2 border border-slate-700 w-1/3">Masse des PKW</th>
+                                            <th className="p-2 border border-slate-700 w-1/3">Anstellwinkel d. Fahrbahn</th>
+                                            <th className="p-2 border border-slate-700 w-1/3">Mögliche Verladebilder</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        <tr>
+                                            <td className="p-2 border border-slate-200 font-bold" rowSpan="3">0 - 2000 kg</td>
+                                            <td className="p-2 border border-slate-200">max. +/- 25°</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 5**</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-2 border border-slate-200">max. +10° / -25°</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">2, 3</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-2 border border-slate-200">max. +/- 10°</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">4</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-2 border border-slate-200 font-bold" rowSpan="2">&gt; 2000 - 3000 kg</td>
+                                            <td className="p-2 border border-slate-200">max. +/- 25°</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">6, 5**</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-2 border border-slate-200">max. +10° / -25°</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">3</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-2 border border-slate-200 font-bold">&gt; 3000 - 4500 kg</td>
+                                            <td className="p-2 border border-slate-200">max. +/- 10° <br/><span className="font-normal text-[9px] text-slate-500">(Über/Unter 10° unzulässig!)</span></td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">5</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="mt-3 text-[10px] text-slate-500 leading-tight space-y-1">
+                                <p><strong className="text-slate-700">* Verladebild 1</strong> ist im Bereich bis 2000 kg grundsätzlich anzuwenden. Ausweichen auf andere nur, wenn technisch nicht machbar. Kann aus technischen Gründen kein Keil gesetzt werden, darf dieser durch einen weiteren Gurt ersetzt werden.</p>
+                                <p><strong className="text-slate-700">** Verladebild 5</strong> ist verpflichtend anzuwenden, wenn der Masseschwerpunkt des transportierten Fahrzeugs hinter der letzten Achse des Transportfahrzeugs/Anhängers liegt (0 - 3000 kg).</p>
+                            </div>
                         </div>
 
                         <div className="space-y-8">
                             
-                            {/* Bis 2.000 kg */}
+                            {/* Verladebilder Detailansicht - ALLE 6 BILDER */}
                             <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">1. Gewicht bis zu 2.000 kg</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
-                                    <div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Standard (VB 1)</div>
-                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: false, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Verladebild 2</div>
-                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-1 text-center tracking-widest">Verladebild 3</div>
-                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'none' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
-                                    </div>
-                                </div>
+                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">Alle 6 Verladebilder im Detail</h4>
                                 
-                                <div className="space-y-3">
-                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <strong className="text-slate-800">Standard (VB 1 - Diagonalsicherung):</strong> An der Achse in FR 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen FR (diagonal versetzt) 1 Gurt + <u>2 Vorleger (davor & dahinter)</u>.
-                                    </p>
-                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <strong className="text-slate-800">Verladebild 2:</strong> An der Achse in FR wird an <u>einem Reifen 1 Vorleger davor</u> angelegt (ohne Gurt). An der Achse gegen FR erhalten <strong>beide Reifen</strong> einen Gurt. Die <u>2 Vorleger (davor & dahinter)</u> kommen an den Reifen, der diagonal zum vorderen Vorleger liegt.
-                                    </p>
-                                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <strong className="text-slate-800">Verladebild 3 (Achsweise):</strong> An der Achse in FR wird <strong>nichts</strong> gesichert. An der Achse gegen FR (Richtung Heck) erhalten <strong>beide Reifen</strong> jeweils 1 Gurt + <u>2 Vorleger (davor & dahinter)</u>.
-                                    </p>
-                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                                    {/* VB 1 */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-full shadow-sm">
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 1</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: false, chock: 'none' }, rr: { strap: true, chock: 'both' } }} />
+                                        <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
+                                            <strong className="text-slate-800">Diagonalsicherung (0-2t):</strong><br/>1 Rad in FR (Gurt + 1 Keil).<br/>1 Rad diagonal gegen FR (Gurt + 2 Keile).
+                                        </p>
+                                    </div>
 
-                                <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 font-medium shadow-sm mt-3">
-                                    <Info className="w-4 h-4 inline-block mr-1 mb-0.5" />
-                                    <strong>Hinweis:</strong> Verladebild 2 und 3 dürfen in der Regel nur Anwendung finden, wenn VB 1 technisch nicht machbar ist (z.B. erste Position über dem Fahrerhaus).
-                                </div>
-                            </div>
-                            
-                            {/* 2.000 bis 3.000 kg */}
-                            <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">2. Gewicht von 2.000 bis 3.000 kg</h4>
-                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                    An der Achse in Fahrtrichtung: 1 Gurt + <u>1 Vorleger davor</u>. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit 1 Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. <br/><span className="text-xs opacity-80">(Alternativ reicht es auch, <i>nur</i> die Achse gegen die Fahrtrichtung an beiden Rädern mit Gurt + 2 Vorlegern zu sichern).</span>
-                                </p>
-                            </div>
-                            
-                            {/* Letztes Fahrzeug */}
-                            <div>
-                                <h4 className="font-black text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">3. Letztes Fahrzeug</h4>
-                                <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                    An der Achse in Fahrtrichtung muss 1 Reifen mit Gurt + <u>2 Vorlegern (davor & dahinter)</u> gesichert sein. An der Achse gegen Fahrtrichtung müssen <strong>beide Reifen</strong> mit Gurt + <u>2 Vorlegern</u> gesichert werden.
-                                </p>
-                            </div>
+                                    {/* VB 2 */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-full shadow-sm">
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 2</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'none' }, fr: { strap: false, chock: 'front' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'none' } }} />
+                                        <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
+                                            <strong className="text-slate-800">Alternative (0-2t):</strong><br/>Achse in FR: 1 Vorleger. Achse gegen FR: 2 Gurte + 1 Rad beidseitig gekeilt.
+                                        </p>
+                                    </div>
 
-                            {/* Ausnahme ohne Keile */}
-                            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mt-4">
-                                <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2"><Info className="w-5 h-5 text-indigo-500" /> Ausnahme ohne Keile (Bis 1.500 kg)</h4>
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                    Wenn ein Fahrzeug bauartbedingt <u>nicht</u> mit Keilen gesichert werden kann und <strong>maximal 1.500 kg</strong> wiegt, darf es alternativ auch an <strong>jedem der 4 Räder</strong> mit jeweils einem Gurt (ohne Radvorleger) gesichert werden.
-                                </p>
+                                    {/* VB 3 */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-full shadow-sm">
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 3</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'none' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                        <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
+                                            <strong className="text-slate-800">Achsweise (0-3t):</strong><br/>Beide Räder der Achse gegen FR erhalten Gurt + 2 Keile beidseitig. Vorne frei.
+                                        </p>
+                                    </div>
+
+                                    {/* VB 4 */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-full shadow-sm">
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 4</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'none' }, fr: { strap: true, chock: 'none' }, rl: { strap: true, chock: 'none' }, rr: { strap: true, chock: 'none' } }} />
+                                        <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
+                                            <strong className="text-slate-800">Flacher Winkel max ±10°:</strong><br/>Alle 4 Räder mit Gurt gesichert. Radvorleger nicht erforderlich.
+                                        </p>
+                                    </div>
+
+                                    {/* VB 5 */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-full shadow-sm">
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 5</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'both' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                        <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
+                                            <strong className="text-slate-800">Max. Sicherung (Zugende):</strong><br/>Mind. 3 Räder mit Gurt + je 2 Keilen beidseitig. (Pflicht bei Schwerpunkt ganz hinten!).
+                                        </p>
+                                    </div>
+
+                                    {/* VB 6 */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-full shadow-sm">
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 6</div>
+                                        <StaticCarDiagram carConfig={{ fl: { strap: true, chock: 'front' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
+                                        <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
+                                            <strong className="text-slate-800">Schwere PKW (&gt;2t - 3t):</strong><br/>1 Rad in FR (Gurt + Keil) & beide Räder gegen FR voll sichern (Gurt + 2 Keile).
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Legende */}
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <h5 className="font-black text-slate-800 text-sm mb-3">Legende:</h5>
+                                <h5 className="font-black text-slate-800 text-sm mb-3">Legende für Abbildungen:</h5>
                                 <ul className="space-y-3 text-sm text-slate-700 font-bold flex flex-wrap gap-x-6 gap-y-2">
                                     <li className="flex items-center gap-2">
-                                        <div className="w-6 h-2 bg-yellow-400 border border-yellow-500 shadow-sm"></div> 
+                                        <div className="w-5 h-1 bg-[#fde047] shadow-sm"></div>
                                         = Radkeil / Vorleger
                                     </li>
                                     <li className="flex items-center gap-2">
-                                        <div className="w-6 h-2 bg-blue-500 border border-blue-600 shadow-sm"></div> 
+                                        <div className="w-6 h-3 border-2 border-slate-400 border-t-0 rounded-b-sm shadow-sm"></div> 
+                                        = Mulde / Brille
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-6 h-1 bg-[#3b82f6] shadow-sm"></div> 
                                         = Autotransportgurt
                                     </li>
                                     <li className="flex items-center gap-2">
-                                        <div className="w-6 h-4 bg-black rounded-sm shadow-sm"></div> 
+                                        <div className="w-3 h-5 bg-[#0f172a] rounded-[2px] shadow-sm"></div>
                                         = Rad
                                     </li>
                                 </ul>
@@ -5805,7 +6020,7 @@ const HomeView = ({ onSelect }) => {
                         100% { transform: translateX(-100%); }
                     }
                     .animate-marquee {
-                        animation: marquee 15s linear infinite;
+                        animation: marquee 30s linear infinite;
                     }
                     .pause-marquee:hover .animate-marquee {
                         animation-play-state: paused;
