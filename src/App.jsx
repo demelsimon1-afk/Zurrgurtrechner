@@ -612,6 +612,10 @@ const getRecommendedCarConfig = (car) => {
 };
 
 const validateCarSecuring = (car) => {
+    if (car.exactAngle != null && car.exactAngle > 25) {
+        return { valid: false, msg: `Winkel zu steil (${car.exactAngle}°). Maximal ±25° zulässig.` };
+    }
+
     const { fl, fr, rl, rr } = car.wheels;
     const w_fl = { strap: fl.strap, c: (fl.chock === 'both' || fl.chock === 'mulde') ? 2 : fl.chock === 'none' ? 0 : 1 };
     const w_fr = { strap: fr.strap, c: (fr.chock === 'both' || fr.chock === 'mulde') ? 2 : fr.chock === 'none' ? 0 : 1 };
@@ -737,17 +741,21 @@ const PkwWheelConfig = ({ label, wheelData, onChange }) => (
     </div>
 );
 
-const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
+const PkwCarEditor = ({ car, index, onUpdate, onRemove, onMeasureAngle }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
     const updateWheel = (wheelId, data) => {
         onUpdate({ ...car, wheels: { ...car.wheels, [wheelId]: data } });
     };
 
-    const validation = validateCarSecuring(car);
+    const isConfigComplete = car.weightClass !== '' && car.angle !== '' && car.orientation !== '';
+    
+    const validation = isConfigComplete 
+        ? validateCarSecuring(car) 
+        : { valid: false, msg: "Bitte Gewicht, Winkel und Richtung angeben." };
 
     return (
-        <div className={`bg-white rounded-xl shadow-sm border-2 mb-2 transition-all duration-300 ${validation.valid ? 'border-emerald-300' : 'border-red-200'} ${isExpanded ? 'p-2.5' : 'p-0'}`}>
+        <div className={`bg-white rounded-xl shadow-sm border-2 mb-2 transition-all duration-300 ${!isConfigComplete ? 'border-slate-200' : validation.valid ? 'border-emerald-300' : 'border-red-200'} ${isExpanded ? 'p-2.5' : 'p-0'}`}>
             
             {/* HEADER (Clickable) */}
             <div 
@@ -759,12 +767,14 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                     <div className="text-slate-400 shrink-0">
                         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </div>
-                    <div className={`w-6 h-6 shrink-0 rounded-full text-white flex items-center justify-center text-xs font-black transition-colors ${validation.valid ? 'bg-emerald-500 shadow-emerald-200' : 'bg-red-500 shadow-red-200'} shadow-sm`}>
-                        {validation.valid ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                    <div className={`w-6 h-6 shrink-0 rounded-full text-white flex items-center justify-center text-xs font-black transition-colors ${!isConfigComplete ? 'bg-slate-400 shadow-slate-200' : validation.valid ? 'bg-emerald-500 shadow-emerald-200' : 'bg-red-500 shadow-red-200'} shadow-sm`}>
+                        {!isConfigComplete ? index + 1 : validation.valid ? <CheckCircle className="w-4 h-4" /> : index + 1}
                     </div>
                     <div className="flex flex-col truncate">
-                        <span className="font-bold text-slate-700 uppercase tracking-wide text-[11px] truncate">PKW {index + 1} {isExpanded ? '' : <span className="text-slate-400 font-medium ml-1">• {car.weightClass === '2000' ? '≤ 2t' : car.weightClass === '3000' ? '> 2-3t' : '> 3-4,5t'} • {car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10°/-25°' : '±10°'} • {car.orientation === 'forward' ? 'Vorwärts' : 'Rückwärts'}</span>}</span>
-                        {!isExpanded && !validation.valid && <span className="text-[9px] text-red-500 font-bold truncate">Fehlerhafte Sicherung!</span>}
+                        <span className="font-bold text-slate-700 uppercase tracking-wide text-[11px] truncate">
+                            PKW {index + 1} {isExpanded ? '' : <span className="text-slate-400 font-medium ml-1">• {!isConfigComplete ? 'Eingaben unvollständig' : `${car.weightClass === '2000' ? '≤ 2t' : car.weightClass === '3000' ? '> 2-3t' : '> 3-4,5t'} • ${car.exactAngle != null ? car.exactAngle + '°' : (car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10°/-25°' : '±10°')} • ${car.orientation === 'forward' ? 'Vorwärts' : 'Rückwärts'}`}</span>}
+                        </span>
+                        {!isExpanded && isConfigComplete && !validation.valid && <span className="text-[9px] text-red-500 font-bold truncate">Fehlerhafte Sicherung!</span>}
                     </div>
                 </div>
                 
@@ -790,60 +800,88 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove }) => {
                             <select 
                                 value={car.weightClass} 
                                 onChange={(e) => onUpdate({ ...car, weightClass: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
+                                className={`w-full border rounded-md py-1.5 text-[9px] font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate ${car.weightClass === '' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
                             >
-<option value="" disabled>Bitte zGm. Fahrzeug wählen.</option>
+                                <option value="" disabled>Gewicht?</option>
                                 <option value="2000">0 - 2.000 kg</option>
                                 <option value="3000">&gt; 2.000 - 3.000 kg</option>
                                 <option value="4500">&gt; 3.000 - 4.500 kg</option>
                             </select>
-                            <select 
-                                value={car.angle || '25'} 
-                                onChange={(e) => onUpdate({ ...car, angle: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 text-[9px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate"
+                            <div className="flex gap-0.5">
+                                <select 
+                                    value={car.angle} 
+                                    onChange={(e) => onUpdate({ ...car, angle: e.target.value, exactAngle: null })}
+                                    className={`w-full border rounded-md py-1.5 text-[9px] font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate ${car.angle === '' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                                >
+                                    <option value="" disabled>Winkel?</option>
+                                    <option value="25">Winkel ±25°</option>
+                                    <option value="10_25">Winkel +10°/-25°</option>
+                                    <option value="10">Winkel ±10°</option>
+                                </select>
+                                <button 
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMeasureAngle(); }}
+                                    className={`rounded-md px-1.5 flex items-center justify-center active:scale-95 transition-all border shrink-0 ${car.exactAngle != null ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'}`}
+                                    title="Winkel über Sensor messen"
+                                >
+                                    {car.exactAngle != null ? (
+                                        <span className="text-[9px] font-black w-4 text-center">{car.exactAngle}°</span>
+                                    ) : (
+                                        <SpiritLevelIcon className="w-3.5 h-3.5" />
+                                    )}
+                                </button>
+                            </div>
+                            <select
+                                value={car.orientation}
+                                onChange={(e) => onUpdate({ ...car, orientation: e.target.value })}
+                                className={`w-full border rounded-md py-1.5 text-[9px] font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate ${car.orientation === '' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
                             >
-<option value="" disabled>Bitte Winkel der Ladefläche wählen</option>
-                                <option value="25">Winkel ±25°</option>
-                                <option value="10_25">Winkel +10°/-25°</option>
-                                <option value="10">Winkel ±10°</option>
+                                <option value="" disabled>Richtung?</option>
+                                <option value="forward">Vorwärts</option>
+                                <option value="backward">Rückwärts</option>
                             </select>
-                            <button
-                                onClick={() => onUpdate({ ...car, orientation: car.orientation === 'backward' ? 'forward' : 'backward' })}
-                                className="w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm truncate"
-                            >
-                                {car.orientation === 'backward' ? 'Rückwärts' : 'Vorwärts'}
-                            </button>
                         </div>
-                        <div className="grid grid-cols-2 gap-1">
-                            <button
-                                onClick={() => onUpdate({ ...car, isLast: !car.isLast })}
-                                className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.isLast ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                                title="Masseschwerpunkt hinter der letzten Achse des Transportfahrzeugs/Anhängers"
-                            >
-                                Letztes Fahrzeug auf Ladefläche
-                            </button>
-                            <button
-                                onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
-                                className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.noChocks ? 'bg-red-100 text-red-800 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                            >
-                                Keine Keile möglich
-                            </button>
-                        </div>
+                        {isConfigComplete && (
+                            <div className="grid grid-cols-2 gap-1 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <button
+                                    onClick={() => onUpdate({ ...car, isLast: !car.isLast })}
+                                    className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.isLast ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                                    title="Masseschwerpunkt hinter der letzten Achse des Transportfahrzeugs/Anhängers"
+                                >
+                                    Letztes Fahrzeug auf Ladefläche
+                                </button>
+                                <button
+                                    onClick={() => onUpdate({ ...car, noChocks: !car.noChocks })}
+                                    className={`w-full py-1.5 px-0.5 flex items-center justify-center text-[9px] font-bold rounded-md transition-all border truncate ${car.noChocks ? 'bg-red-100 text-red-800 border-red-300 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    Keine Keile möglich
+                                </button>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Wheels 2x2 Grid */}
-                    <div className="grid grid-cols-2 gap-1.5 mb-2">
-                        <PkwWheelConfig label="Vorne Links" wheelData={car.wheels.fl} onChange={(d) => updateWheel('fl', d)} />
-                        <PkwWheelConfig label="Vorne Rechts" wheelData={car.wheels.fr} onChange={(d) => updateWheel('fr', d)} />
-                        <PkwWheelConfig label="Hinten Links" wheelData={car.wheels.rl} onChange={(d) => updateWheel('rl', d)} />
-                        <PkwWheelConfig label="Hinten Rechts" wheelData={car.wheels.rr} onChange={(d) => updateWheel('rr', d)} />
-                    </div>
+                    {isConfigComplete ? (
+                        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                            {/* Wheels 2x2 Grid */}
+                            <div className="grid grid-cols-2 gap-1.5 mb-2">
+                                <PkwWheelConfig label="Vorne Links" wheelData={car.wheels.fl} onChange={(d) => updateWheel('fl', d)} />
+                                <PkwWheelConfig label="Vorne Rechts" wheelData={car.wheels.fr} onChange={(d) => updateWheel('fr', d)} />
+                                <PkwWheelConfig label="Hinten Links" wheelData={car.wheels.rl} onChange={(d) => updateWheel('rl', d)} />
+                                <PkwWheelConfig label="Hinten Rechts" wheelData={car.wheels.rr} onChange={(d) => updateWheel('rr', d)} />
+                            </div>
 
-                    {/* Validation */}
-                    <div className={`p-1.5 rounded-lg text-[9px] leading-tight font-bold flex items-center gap-1.5 ${validation.valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
-                        {validation.valid ? <CheckCircle className="w-3.5 h-3.5 shrink-0" /> : <AlertTriangle className="w-3.5 h-3.5 shrink-0" />}
-                        <span>{validation.msg}</span>
-                    </div>
+                            {/* Validation */}
+                            <div className={`p-1.5 rounded-lg text-[9px] leading-tight font-bold flex items-center gap-1.5 ${validation.valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                                {validation.valid ? <CheckCircle className="w-3.5 h-3.5 shrink-0" /> : <AlertTriangle className="w-3.5 h-3.5 shrink-0" />}
+                                <span>{validation.msg}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg text-center mt-2 animate-in fade-in duration-300">
+                            <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">
+                                Bitte Gewicht, Winkel und Richtung wählen, um die Sicherung einzugeben.
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -2352,9 +2390,10 @@ function LashingCalculator({ onOpenKnowledge }) {
   
   const createNewCar = () => ({
       id: Date.now() + Math.random(),
-      weightClass: 'winkel',
-      angle: '25',
-      orientation: 'forward',
+      weightClass: '',
+      angle: '',
+      exactAngle: null,
+      orientation: '',
       isLast: false,
       noChocks: false,
       wheels: {
@@ -2692,6 +2731,19 @@ function LashingCalculator({ onOpenKnowledge }) {
          onApply={(a) => {
              if (activeAngleField === 'alpha') setAngle(a.toString());
              else if (activeAngleField === 'beta') setAngleBeta(a.toString());
+             else if (activeAngleField && activeAngleField.startsWith('pkw_')) {
+                 const parts = activeAngleField.split('_');
+                 const deck = parts[1]; // 'top' oder 'bottom'
+                 const carId = parseFloat(parts[2]);
+
+                 let mappedAngle = a <= 10 ? '10' : '25';
+
+                 if (deck === 'top') {
+                     setCarsTop(prev => prev.map(c => c.id === carId ? { ...c, angle: mappedAngle, exactAngle: a } : c));
+                 } else if (deck === 'bottom') {
+                     setCarsBottom(prev => prev.map(c => c.id === carId ? { ...c, angle: mappedAngle, exactAngle: a } : c));
+                 }
+             }
             setIsMeasureModalOpen(false);
             setActiveAngleField(null);
          }} 
@@ -3072,6 +3124,10 @@ function LashingCalculator({ onOpenKnowledge }) {
                            index={idx} 
                            onUpdate={(updatedCar) => setCarsTop(carsTop.map(c => c.id === car.id ? updatedCar : c))}
                            onRemove={() => setCarsTop(carsTop.filter(c => c.id !== car.id))}
+                           onMeasureAngle={() => {
+                               setActiveAngleField(`pkw_top_${car.id}`);
+                               setIsMeasureModalOpen(true);
+                           }}
                        />
                    ))}
   
@@ -3099,6 +3155,10 @@ function LashingCalculator({ onOpenKnowledge }) {
                            index={idx} 
                            onUpdate={(updatedCar) => setCarsBottom(carsBottom.map(c => c.id === car.id ? updatedCar : c))}
                            onRemove={() => setCarsBottom(carsBottom.filter(c => c.id !== car.id))}
+                           onMeasureAngle={() => {
+                               setActiveAngleField(`pkw_bottom_${car.id}`);
+                               setIsMeasureModalOpen(true);
+                           }}
                        />
                    ))}
   
