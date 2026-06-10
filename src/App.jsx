@@ -568,21 +568,11 @@ const getRecommendedCarConfig = (car) => {
     }
 
     if (w === '3000') {
-        if (a === '25') {
-            // VB 6
-            setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
-            if (rec.orientation === 'backward') {
-                setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
-            }
-            return rec;
-        }
-        if (a === '10_25') {
-            // VB 3
-            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
-            if (rec.orientation === 'backward') {
-                setWheels({ strap: true, chock: 'both' }, { strap: true, chock: 'both' }, { strap: false, chock: 'none' }, { strap: false, chock: 'none' });
-            }
-            return rec;
+        // Grundsätzlich VB 6 empfehlen für Fahrzeuge > 2.000 - 3.000 kg, unabhängig vom Winkel
+        setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
+        if (rec.orientation === 'backward') {
+            // Spiegelverkehrt: 1 Rad in FR mit 1 Keil, BEIDE Räder gegen FR mit Gurt & 2 Keilen
+            setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
         }
         return rec;
     }
@@ -667,6 +657,7 @@ const validateCarSecuring = (car) => {
     const angle = car.angle || '25';
     
     const isVBAllowed = (vb) => {
+        if (vb === 3 && car.orientation !== 'forward') return false;
         if (car.weightClass === '4500') {
             if (angle !== '10') return false;
             return vb === 5;
@@ -674,7 +665,7 @@ const validateCarSecuring = (car) => {
         if (car.weightClass === '3000') {
             if (angle === '25') return vb === 6 || vb === 5;
             if (angle === '10_25') return vb === 3 || vb === 6 || vb === 5;
-            if (angle === '10') return false;
+            if (angle === '10') return vb === 3 || vb === 6 || vb === 5; // Flacher Winkel = gleiche VBs wie 10_25 zulässig
         }
         if (car.weightClass === '2000') {
             // Ein stärkeres Verladebild deckt auch immer flachere Winkel ab
@@ -692,8 +683,11 @@ const validateCarSecuring = (car) => {
         return { valid: true, msg: `Korrekt gesichert (Anforderungen für VB ${bestVb} erfüllt).` };
     }
 
+    if (activeVBs.includes(3) && car.orientation === 'backward') {
+        return { valid: false, msg: "Verladebild 3 darf nicht bei rückwärts verladenen Fahrzeugen angewendet werden!" };
+    }
+
     if (car.weightClass === '4500' && angle !== '10') return { valid: false, msg: "Gewicht >3.000kg: Anstellwinkel über/unter 10° unzulässig!" };
-    if (car.weightClass === '3000' && angle === '10') return { valid: false, msg: "Gewicht >2.000-3.000kg bei max +/-10° ist in VDI 2700 Tab. nicht definiert. Bitte strengere Winkel annehmen." };
     
     if (allStrapped && !car.noChocks) {
         return { valid: true, msg: "Übersicherung (4 Gurte) erkannt. Grundsätzlich okay." };
@@ -5351,32 +5345,36 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                         </tr>
                                         <tr>
                                             <td className="p-2 border border-slate-200">max. +10° / -25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">2, 3</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 2, 3, 5**</td>
                                         </tr>
                                         <tr>
                                             <td className="p-2 border border-slate-200">max. +/- 10°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">4</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 2, 3, 4, 5**</td>
                                         </tr>
                                         <tr>
-                                            <td className="p-2 border border-slate-200 font-bold" rowSpan="2">&gt; 2000 - 3000 kg</td>
+                                            <td className="p-2 border border-slate-200 font-bold" rowSpan="3">&gt; 2000 - 3000 kg</td>
                                             <td className="p-2 border border-slate-200">max. +/- 25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">6, 5**</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 5**</td>
                                         </tr>
                                         <tr>
                                             <td className="p-2 border border-slate-200">max. +10° / -25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">3</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 3, 5**</td>
+                                        </tr>
+                                        <tr>
+                                         
                                         </tr>
                                         <tr>
                                             <td className="p-2 border border-slate-200 font-bold">&gt; 3000 - 4500 kg</td>
                                             <td className="p-2 border border-slate-200">max. +/- 10° <br/><span className="font-normal text-[9px] text-slate-500">(Über/Unter 10° unzulässig!)</span></td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">5</td>
+                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">5**</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div className="mt-3 text-[10px] text-slate-500 leading-tight space-y-1">
-                                <p><strong className="text-slate-700">* Verladebild 1</strong> ist im Bereich bis 2000 kg grundsätzlich anzuwenden. Ausweichen auf andere nur, wenn technisch nicht machbar. Kann aus technischen Gründen kein Keil gesetzt werden, darf dieser durch einen weiteren Gurt ersetzt werden.</p>
+                                <p><strong className="text-slate-700">* Verladebild 1 bzw. 6</strong> ist im Bereich bis 2000 kg (VB 1) bzw. bis 3000 kg (VB 6) grundsätzlich anzuwenden. Ausweichen auf andere nur, wenn technisch nicht machbar. Kann aus technischen Gründen kein Keil gesetzt werden, darf dieser durch einen weiteren Gurt ersetzt werden.</p>
                                 <p><strong className="text-slate-700">** Verladebild 5</strong> ist verpflichtend anzuwenden, wenn der Masseschwerpunkt des transportierten Fahrzeugs hinter der letzten Achse des Transportfahrzeugs/Anhängers liegt (0 - 3000 kg).</p>
+              
                             </div>
                         </div>
 
@@ -5410,7 +5408,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                         <div className="text-[10px] font-black text-indigo-600 uppercase mb-2 text-center tracking-widest">Verladebild 3</div>
                                         <StaticCarDiagram carConfig={{ fl: { strap: false, chock: 'none' }, fr: { strap: false, chock: 'none' }, rl: { strap: true, chock: 'both' }, rr: { strap: true, chock: 'both' } }} />
                                         <p className="text-[10px] text-slate-600 mt-2 text-center leading-snug flex-grow">
-                                            <strong className="text-slate-800">Achsweise (0-3t):</strong><br/>Beide Räder der Achse gegen FR erhalten Gurt + 2 Keile beidseitig. Vorne frei.
+                                            <strong className="text-slate-800">Achsweise (0-3t):</strong><br/>Beide Räder der Achse gegen FR erhalten Gurt + 2 Keile beidseitig. Vorne frei. Fahrzeug muss in Fahrtrichtung verladen sein.<br/>
+                                            <strong className="text-red-600 mt-1 block">Nur bei Vorwärtsverladung!</strong>
                                         </p>
                                     </div>
 
