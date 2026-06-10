@@ -328,7 +328,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 2.4
+        RoadTool v. 3.0
     </div>
 );
 
@@ -572,7 +572,7 @@ const getRecommendedCarConfig = (car) => {
             // VB 6
             setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
             if (rec.orientation === 'backward') {
-                setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' }, { strap: true, chock: 'back' });
+                setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
             }
             return rec;
         }
@@ -588,24 +588,11 @@ const getRecommendedCarConfig = (car) => {
     }
 
     // 2000 kg - Default
-    if (a === '25') {
-        // VB 1
-        setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' });
-        if (rec.orientation === 'backward') {
-            // VB 2 
-            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'none' });
-        }
-    } else if (a === '10_25') {
-        if (rec.orientation === 'backward') {
-            // VB 2
-            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'front' }, { strap: true, chock: 'both' }, { strap: true, chock: 'none' });
-        } else {
-            // VB 3
-            setWheels({ strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' }, { strap: true, chock: 'both' });
-        }
-    } else if (a === '10') {
-        // VB 4 (4 Gurte, keine Keile)
-        setWheels({ strap: true, chock: 'none' }, { strap: true, chock: 'none' }, { strap: true, chock: 'none' }, { strap: true, chock: 'none' });
+    // Grundsätzlich VB 1 empfehlen für Fahrzeuge bis 2.000 kg, unabhängig vom Winkel
+    setWheels({ strap: true, chock: 'front' }, { strap: false, chock: 'none' }, { strap: false, chock: 'none' }, { strap: true, chock: 'both' });
+    if (rec.orientation === 'backward') {
+        // VB 1 spiegelverkehrt (1 Rad in FR mit 1 Keil, 1 Rad diag. gegen FR mit 2 Keilen)
+        setWheels({ strap: false, chock: 'none' }, { strap: true, chock: 'front' }, { strap: true, chock: 'both' }, { strap: false, chock: 'none' });
     }
 
     return rec;
@@ -686,13 +673,14 @@ const validateCarSecuring = (car) => {
         }
         if (car.weightClass === '3000') {
             if (angle === '25') return vb === 6 || vb === 5;
-            if (angle === '10_25') return vb === 3;
+            if (angle === '10_25') return vb === 3 || vb === 6 || vb === 5;
             if (angle === '10') return false;
         }
         if (car.weightClass === '2000') {
+            // Ein stärkeres Verladebild deckt auch immer flachere Winkel ab
             if (angle === '25') return vb === 1 || vb === 5;
-            if (angle === '10_25') return vb === 2 || vb === 3;
-            if (angle === '10') return vb === 4;
+            if (angle === '10_25') return vb === 2 || vb === 3 || vb === 1 || vb === 5;
+            if (angle === '10') return vb === 4 || vb === 2 || vb === 3 || vb === 1 || vb === 5;
         }
         return false;
     };
@@ -951,7 +939,7 @@ const SvgPkwTransporter = ({ deckName, cars }) => {
 };
 
 // --- ANGLE MEASUREMENT MODAL ---
-const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
+const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
     const [step, setStep] = useState(1); 
     const referenceBetaRef = useRef(null); 
     const [currentBeta, setCurrentBeta] = useState(0);
@@ -989,6 +977,8 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
     const handleClose = () => { stopSensors(); onClose(); };
     const handleApply = () => { stopSensors(); onApply(measuredAngle); };
 
+    const isPkwMode = activeField && activeField.startsWith('pkw_');
+
     if (!isOpen) return null;
 
     return (
@@ -1015,9 +1005,9 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                                  <Smartphone className="w-12 h-12 text-slate-800 mx-auto relative z-10 bg-white p-1 rounded-lg border-2 border-slate-100" />
                              </div>
                              <div>
-                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: Ladefläche nullen</div>
+                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: {isPkwMode ? 'Fahrbahn nullen' : 'Ladefläche nullen'}</div>
                                  <h4 className="font-bold text-slate-700 text-lg">Sensor Nullen</h4>
-                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf den <strong>Ladeboden</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
+                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf den <strong>{isPkwMode ? 'Fahrbahnuntergrund' : 'Ladeboden'}</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
                              </div>
                              <button onClick={handleZero} className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all">Jetzt Nullen (Referenz)</button>
                           </div>
@@ -1025,7 +1015,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply }) => {
                     {step === 3 && (
                         <div className="text-center space-y-6">
                             <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Genau)</p></div>
-                            <div><p className="text-slate-500 text-sm leading-relaxed">Gerät nun <strong>entlang des Zurrgurts</strong> auflegen.</p></div>
+                            <div><p className="text-slate-500 text-sm leading-relaxed">Gerät nun {isPkwMode ? <strong>auf die Ladefläche</strong> : <strong>entlang des Zurrgurts</strong>} auflegen.</p></div>
                             <button onClick={handleApply} className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" />Wert übernehmen</button>
                         </div>
                     )}
@@ -2676,7 +2666,7 @@ function LashingCalculator({ onOpenKnowledge }) {
           <h1 className="print-title">LaSi-Protokoll (PKW-Transporter)</h1>
           <div className="print-meta">Erstellt am: {dateTime}</div>
   
-          <h2 className="print-section">Schematische Beladungsübersicht</h2>
+          <h2 className="print-section">Ihre Eingabe (Ist-Zustand)</h2>
           
           <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'center', marginTop: '20px', pageBreakInside: 'avoid' }}>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
@@ -2687,6 +2677,17 @@ function LashingCalculator({ onOpenKnowledge }) {
              </div>
           </div>
   
+          <h2 className="print-section" style={{ marginTop: '30px' }}>Empfehlung nach VDI 2700 (Soll-Zustand)</h2>
+          
+          <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'center', marginTop: '20px', pageBreakInside: 'avoid' }}>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                 <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop.map(getRecommendedCarConfig)} />
+             </div>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                 <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom.map(getRecommendedCarConfig)} />
+             </div>
+          </div>
+
           <div className="print-result-box" style={{ pageBreakInside: 'avoid', marginTop: '30px' }}>
              <div className="print-result-header">Legende</div>
              <table className="print-table" style={{ border: 'none', fontSize: '9pt' }}>
@@ -2723,7 +2724,8 @@ function LashingCalculator({ onOpenKnowledge }) {
       </div>
   
      <AngleMeasureModal 
-        isOpen={isMeasureModalOpen} 
+         isOpen={isMeasureModalOpen} 
+         activeField={activeAngleField}
          onClose={() => {
             setIsMeasureModalOpen(false);
             setActiveAngleField(null);
@@ -6049,7 +6051,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 2.4: Reiter Rauchverbot gemäß LNRSchG BW implementiert, Erweiterung im Geschwindigkeitsrechner (i.g.O; a.g.O; BAB)";
+    const updateText = "🚀 Update 3.0: Reiter Rauchverbot gemäß LNRSchG BW implementiert, Erweiterung im Geschwindigkeitsrechner (i.g.O; a.g.O; BAB), PKW-Transporter nach VDI 2700 Blatt 8.1 implementiert";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
