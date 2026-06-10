@@ -870,7 +870,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove, onMeasureAngle }) => {
     );
 };
 
-const SvgPkwTransporter = ({ deckName, cars }) => {
+const SvgPkwTransporter = ({ deckName, cars, showOrientation = false }) => {
     const carHeight = 130;
     const padding = 20;
     const svgHeight = Math.max(200, cars.length * carHeight + 80);
@@ -913,6 +913,14 @@ const SvgPkwTransporter = ({ deckName, cars }) => {
                         <g key={car.id} transform={`translate(15, ${yOffset})`}>
                             {/* Schwarzer Kasten ohne Windschutzscheibe / Richtungspfeile */}
                             <rect x="25" y="10" width="50" height="90" fill="#1e293b" rx="2" />
+
+                            {/* Optionale Fahrtrichtungsanzeige auf dem PKW */}
+                            {showOrientation && car.orientation === 'forward' && (
+                                <path d="M50 75 L50 35 M42 45 L50 35 L58 45" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            )}
+                            {showOrientation && car.orientation === 'backward' && (
+                                <path d="M50 35 L50 75 M42 65 L50 75 L58 65" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            )}
 
                             {/* Wheels */}
                             {renderWheelFeatures(8, 10, car.wheels.fl, car.noChocks)}
@@ -2664,10 +2672,10 @@ function LashingCalculator({ onOpenKnowledge }) {
           
           <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'center', marginTop: '20px', pageBreakInside: 'avoid' }}>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                 <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} />
+                 <SvgPkwTransporter deckName="Obere Ebene" cars={carsTop} showOrientation={true} />
              </div>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                 <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} />
+                 <SvgPkwTransporter deckName="Untere Ebene" cars={carsBottom} showOrientation={true} />
              </div>
           </div>
   
@@ -3184,12 +3192,12 @@ function LashingCalculator({ onOpenKnowledge }) {
                                <div className="flex flex-col gap-4 justify-center w-full">
                                    {carsTop.length > 0 && (
                                         <div className="flex justify-center w-full">
-                                            <SvgPkwTransporter deckName="Oben" cars={carsTop} />
+                                            <SvgPkwTransporter deckName="Oben" cars={carsTop} showOrientation={true} />
                                         </div>
                                    )}
                                    {carsBottom.length > 0 && (
                                         <div className="flex justify-center w-full">
-                                           <SvgPkwTransporter deckName="Unten" cars={carsBottom} />
+                                           <SvgPkwTransporter deckName="Unten" cars={carsBottom} showOrientation={true} />
                                         </div>
                                    )}
                                </div>
