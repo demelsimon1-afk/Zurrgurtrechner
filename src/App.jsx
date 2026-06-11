@@ -2578,16 +2578,16 @@ function LashingCalculator({ onOpenKnowledge }) {
         <>
             <h2 className="print-section">Ergebnis: Erforderliche Gurte</h2>
             <table className="print-table">
-               <thead><tr><th>Richtung</th><th>Berechnungsfaktor (c)</th><th>Mindestanzahl Gurte</th></tr></thead>
+               <thead><tr><th>Richtung</th><th>Berechnungsfaktor (c)</th><th>Winkel (α)</th><th>Mindestanzahl Gurte</th></tr></thead>
                <tbody>
-                   <tr><td>Sicherung nach Vorne</td><td>{lashingResult.factorForward}g</td><td><strong>{lashingResult.forward}</strong></td></tr>
-                   <tr><td>Sicherung zur Seite</td><td>{lashingResult.factorSide}g</td><td><strong>{lashingResult.side}</strong></td></tr>
-                   <tr><td>Sicherung nach Hinten</td><td>{lashingResult.factorRear}g</td><td><strong>{lashingResult.rear}</strong></td></tr>
+                   <tr><td>Sicherung nach Vorne</td><td>{lashingResult.factorForward}g</td><td>{angle}°</td><td><strong>{lashingResult.forward}</strong></td></tr>
+                   <tr><td>Sicherung zur Seite</td><td>{lashingResult.factorSide}g</td><td>{angle}°</td><td><strong>{lashingResult.side}</strong></td></tr>
+                   <tr><td>Sicherung nach Hinten</td><td>{lashingResult.factorRear}g</td><td>{angle}°</td><td><strong>{lashingResult.rear}</strong></td></tr>
                </tbody>
            </table>
             <div className="print-result-box">
                <div className="print-result-header">Gesamtempfehlung</div>
-               <div>Es sind mindestens <strong>{Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)}</strong> Zurrgurte (Niederzurren) zu verwenden, um die Ladung in alle Richtungen zu sichern.</div>
+               <div>Es sind mindestens <strong>{Math.max(lashingResult.forward, lashingResult.side, lashingResult.rear)}</strong> Zurrgurte (Niederzurren) bei einem Vertikalwinkel von <strong>{angle}°</strong> zu verwenden, um die Ladung in alle Richtungen zu sichern.</div>
            </div>
 
            {/* --- START: NEUER BERECHNUNGSNACHWEIS FÜR AUSDRUCK (NIEDERZURREN) --- */}
@@ -2599,11 +2599,11 @@ function LashingCalculator({ onOpenKnowledge }) {
                <p className="font-semibold">Verfahren: Kraftschlüssige Ladungssicherung (Niederzurren)</p>
                <div className="font-mono text-sm p-4 bg-slate-50 rounded border border-slate-200">
                  <p className="font-bold mb-1 text-slate-500">Angewandte Formel:</p>
-                 <p className="text-base mb-4">n = (m · g · (c - μ)) / (k · μ · SFT · sin(α))</p>
+                 <p className="text-base mb-4">n = ((m · g · c) - F_Form - (m · g · μ)) / (k · μ · STF · sin(α))</p>
                  
                  <div className="pt-4 border-t border-slate-300">
-                   <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Sicherung nach vorn):</p>
-                   <p>n = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (1,5) · {friction.toFixed(2)} · {stf || 0} · sin({angle || 0}°))</p>
+                   <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Sicherung nach vorn, Winkel α = {angle}°):</p>
+                   <p>n = (({loadWeight || 0} · 9,81 · {lashingResult.factorForward}) - {fitFront ? wallFront * 10 : 0} - ({loadWeight || 0} · 9,81 · {friction.toFixed(2)})) / ({(!allowedWeight || allowedWeight <= 3500) ? '1,8' : '2'} · {friction.toFixed(2)} · {(stf || 0) * 10} · sin({angle || 0}°))</p>
                  </div>
                </div>
              </div>
@@ -2650,7 +2650,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                 <p className="text-base mb-4">LC = (m · g · (c_x - μ_D)) / (2 · (μ_D · cos(α) · cos(β) + sin(α)))</p>
                 
                 <div className="pt-4 border-t border-slate-300">
-                  <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Längsrichtung):</p>
+                  <p className="font-bold mb-1 text-slate-500">Eingesetzte Werte (z.B. Längsrichtung, Winkel α = {angle}°, Winkel β = {angleBeta}°):</p>
                   <p>LC = ({loadWeight || 0} · 9,81 · ({lashingResult.factorForward} - {friction.toFixed(2)})) / (2 · ({friction.toFixed(2)} · cos({angle || 0}°) · cos({angleBeta || 0}°) + sin({angle || 0}°)))</p>
                 </div>
               </div>
@@ -2669,6 +2669,35 @@ function LashingCalculator({ onOpenKnowledge }) {
           <div className="print-meta">Erstellt am: {dateTime}</div>
   
           <h2 className="print-section">Ihre Eingabe (Ist-Zustand)</h2>
+          
+          <table className="print-table" style={{ marginTop: '15px' }}>
+              <thead>
+                  <tr><th>Ebene / Pos.</th><th>Gewicht</th><th>Winkel</th><th>Richtung</th><th>Besonderheiten</th></tr>
+              </thead>
+              <tbody>
+                  {carsTop.map((car, idx) => (
+                      <tr key={car.id}>
+                          <td>Oben - PKW {idx + 1}</td>
+                          <td>{car.weightClass === '2000' ? '≤ 2.000 kg' : car.weightClass === '3000' ? '> 2.000 - 3.000 kg' : car.weightClass === '4500' ? '> 3.000 - 4.500 kg' : '-'}</td>
+                          <td>{car.exactAngle != null ? `${car.exactAngle}°` : (car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10° / -25°' : car.angle === '10' ? '±10°' : '-')}</td>
+                          <td>{car.orientation === 'forward' ? 'Vorwärts' : car.orientation === 'backward' ? 'Rückwärts' : '-'}</td>
+                          <td>{[car.isLast ? 'Letztes Fzg.' : '', car.noChocks ? 'Keine Keile' : ''].filter(Boolean).join(', ') || '-'}</td>
+                      </tr>
+                  ))}
+                  {carsBottom.map((car, idx) => (
+                      <tr key={car.id}>
+                          <td>Unten - PKW {idx + 1}</td>
+                          <td>{car.weightClass === '2000' ? '≤ 2.000 kg' : car.weightClass === '3000' ? '> 2.000 - 3.000 kg' : car.weightClass === '4500' ? '> 3.000 - 4.500 kg' : '-'}</td>
+                          <td>{car.exactAngle != null ? `${car.exactAngle}°` : (car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10° / -25°' : car.angle === '10' ? '±10°' : '-')}</td>
+                          <td>{car.orientation === 'forward' ? 'Vorwärts' : car.orientation === 'backward' ? 'Rückwärts' : '-'}</td>
+                          <td>{[car.isLast ? 'Letztes Fzg.' : '', car.noChocks ? 'Keine Keile' : ''].filter(Boolean).join(', ') || '-'}</td>
+                      </tr>
+                  ))}
+                  {carsTop.length === 0 && carsBottom.length === 0 && (
+                      <tr><td colSpan="5" style={{ textAlign: 'center', fontStyle: 'italic', color: '#666' }}>Keine Fahrzeuge erfasst</td></tr>
+                  )}
+              </tbody>
+          </table>
           
           <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'center', marginTop: '20px', pageBreakInside: 'avoid' }}>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
