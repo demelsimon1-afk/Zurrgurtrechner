@@ -961,7 +961,8 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
                  let diff = beta - referenceBetaRef.current;
                  if (diff > 180) diff -= 360;
                  if (diff < -180) diff += 360;
-                 setMeasuredAngle(Math.round(diff));
+                 // Vorzeichen für die Live-Vorschau und spätere Übernahme tauschen (-diff)
+                 setMeasuredAngle(Math.round(-diff));
             }
         }
     };
@@ -2782,8 +2783,8 @@ function LashingCalculator({ onOpenKnowledge }) {
 
                  const updateCar = (c) => {
                      if (c.id === carId) {
-                         // Vorzeichen getauscht, wie gewünscht: Aus + wird - und aus - wird +
-                         let finalAngle = -a;
+                         // Wert direkt übernehmen, da er in der Live-Vorschau bereits getauscht wurde
+                         let finalAngle = a;
 
                          let mappedAngle = '10';
                          if (finalAngle > 10) {
