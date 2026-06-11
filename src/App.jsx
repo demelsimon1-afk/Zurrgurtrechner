@@ -589,8 +589,8 @@ const getRecommendedCarConfig = (car) => {
 };
 
 const validateCarSecuring = (car) => {
-    if (car.exactAngle != null && car.exactAngle > 25) {
-        return { valid: false, msg: `Winkel zu steil (${car.exactAngle}°). Maximal ±25° zulässig.` };
+    if (car.exactAngle != null && Math.abs(car.exactAngle) > 25) {
+        return { valid: false, msg: `Winkel zu steil (${car.exactAngle > 0 ? '+' : ''}${car.exactAngle}°). Maximal ±25° zulässig.` };
     }
 
     const { fl, fr, rl, rr } = car.wheels;
@@ -754,7 +754,7 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove, onMeasureAngle }) => {
                     </div>
                     <div className="flex flex-col truncate">
                         <span className="font-bold text-slate-700 uppercase tracking-wide text-[11px] truncate">
-                            PKW {index + 1} {isExpanded ? '' : <span className="text-slate-400 font-medium ml-1">• {!isConfigComplete ? 'Eingaben unvollständig' : `${car.weightClass === '2000' ? '≤ 2t' : car.weightClass === '3000' ? '> 2-3t' : '> 3-4,5t'} • ${car.exactAngle != null ? car.exactAngle + '°' : (car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10°/-25°' : '±10°')} • ${car.orientation === 'forward' ? 'Vorwärts' : 'Rückwärts'}`}</span>}
+                            PKW {index + 1} {isExpanded ? '' : <span className="text-slate-400 font-medium ml-1">• {!isConfigComplete ? 'Eingaben unvollständig' : `${car.weightClass === '2000' ? '≤ 2t' : car.weightClass === '3000' ? '> 2-3t' : '> 3-4,5t'} • ${car.exactAngle != null ? (car.exactAngle > 0 ? '+' : '') + car.exactAngle + '°' : (car.angle === '25' ? '±25°' : car.angle === '10_25' ? '+10°/-25°' : '±10°')} • ${car.orientation === 'forward' ? 'Vorwärts' : 'Rückwärts'}`}</span>}
                         </span>
                         {!isExpanded && isConfigComplete && !validation.valid && <span className="text-[9px] text-red-500 font-bold truncate">Fehlerhafte Sicherung!</span>}
                     </div>
@@ -801,12 +801,13 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove, onMeasureAngle }) => {
                                     <option value="10">Winkel ±10°</option>
                                 </select>
                                 <button 
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMeasureAngle(); }}
-                                    className={`rounded-md px-1.5 flex items-center justify-center active:scale-95 transition-all border shrink-0 ${car.exactAngle != null ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'}`}
-                                    title="Winkel über Sensor messen"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); if(car.orientation) onMeasureAngle(); }}
+                                    disabled={!car.orientation}
+                                    className={`rounded-md px-1.5 flex items-center justify-center transition-all border shrink-0 ${car.exactAngle != null ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'} ${!car.orientation ? 'opacity-50 cursor-not-allowed grayscale' : 'active:scale-95'}`}
+                                    title={!car.orientation ? "Bitte zuerst Fahrtrichtung wählen" : "Winkel über Sensor messen"}
                                 >
                                     {car.exactAngle != null ? (
-                                        <span className="text-[9px] font-black w-4 text-center">{car.exactAngle}°</span>
+                                        <span className="text-[9px] font-black w-4 text-center">{car.exactAngle > 0 ? '+' : ''}{car.exactAngle}°</span>
                                     ) : (
                                         <SpiritLevelIcon className="w-3.5 h-3.5" />
                                     )}
@@ -957,8 +958,9 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
         if (beta !== null) {
             setCurrentBeta(beta);
             if (referenceBetaRef.current !== null) {
-                 let diff = Math.abs(beta - referenceBetaRef.current);
-                 if (diff > 90) diff = 90;
+                 let diff = beta - referenceBetaRef.current;
+                 if (diff > 180) diff -= 360;
+                 if (diff < -180) diff += 360;
                  setMeasuredAngle(Math.round(diff));
             }
         }
@@ -1007,17 +1009,26 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
                                  <Smartphone className="w-12 h-12 text-slate-800 mx-auto relative z-10 bg-white p-1 rounded-lg border-2 border-slate-100" />
                              </div>
                              <div>
-                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: {isPkwMode ? 'Fahrbahn nullen' : 'Ladefläche nullen'}</div>
+                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: {isPkwMode ? 'Ladefläche nullen' : 'Referenz nullen'}</div>
                                  <h4 className="font-bold text-slate-700 text-lg">Sensor Nullen</h4>
-                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf den <strong>{isPkwMode ? 'Fahrbahnuntergrund' : 'Ladeboden'}</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
+                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf die <strong>{isPkwMode ? 'Ladefläche' : 'Ladefläche / den Boden'}</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
                              </div>
                              <button onClick={handleZero} className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all">Jetzt Nullen (Referenz)</button>
                           </div>
                     )}
                     {step === 3 && (
                         <div className="text-center space-y-6">
-                            <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Genau)</p></div>
-                            <div><p className="text-slate-500 text-sm leading-relaxed">Gerät nun {isPkwMode ? <strong>auf die Ladefläche</strong> : <strong>entlang des Zurrgurts</strong>} auflegen.</p></div>
+                            <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle > 0 ? '+' : ''}{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Genau)</p></div>
+                            <div>
+                                {isPkwMode ? (
+                                    <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-sm leading-relaxed shadow-sm text-left">
+                                        <strong className="block mb-1 text-center">WICHTIG:</strong>
+                                        Lege das Smartphone flach auf die <strong>Ladefläche</strong>, auf der der PKW steht. Die obere Kante (Kamera) muss zwingend in <strong>Fahrtrichtung des LKW</strong> zeigen.
+                                    </div>
+                                ) : (
+                                    <p className="text-slate-500 text-sm leading-relaxed">Gerät nun entlang des Zurrgurts auflegen.</p>
+                                )}
+                            </div>
                             <button onClick={handleApply} className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" />Wert übernehmen</button>
                         </div>
                     )}
@@ -2762,19 +2773,40 @@ function LashingCalculator({ onOpenKnowledge }) {
             setActiveAngleField(null);
          }} 
          onApply={(a) => {
-             if (activeAngleField === 'alpha') setAngle(a.toString());
-             else if (activeAngleField === 'beta') setAngleBeta(a.toString());
+             if (activeAngleField === 'alpha') setAngle(Math.abs(a).toString());
+             else if (activeAngleField === 'beta') setAngleBeta(Math.abs(a).toString());
              else if (activeAngleField && activeAngleField.startsWith('pkw_')) {
                  const parts = activeAngleField.split('_');
                  const deck = parts[1]; // 'top' oder 'bottom'
                  const carId = parseFloat(parts[2]);
 
-                 let mappedAngle = a <= 10 ? '10' : '25';
+                 const updateCar = (c) => {
+                     if (c.id === carId) {
+                         let finalAngle = a;
+                         
+                         // Umrechnung des Vorzeichens abhängig von der Laderichtung
+                         if (c.orientation === 'forward') {
+                             finalAngle = a * -1;
+                         }
+
+                         let mappedAngle = '10';
+                         if (finalAngle > 10) {
+                             mappedAngle = '25'; // z.B. +15° -> ±25°
+                         } else if (finalAngle < -10) {
+                             mappedAngle = '10_25'; // z.B. -15° -> +10° / -25°
+                         } else {
+                             mappedAngle = '10'; // z.B. 5° -> ±10°
+                         }
+
+                         return { ...c, angle: mappedAngle, exactAngle: finalAngle };
+                     }
+                     return c;
+                 };
 
                  if (deck === 'top') {
-                     setCarsTop(prev => prev.map(c => c.id === carId ? { ...c, angle: mappedAngle, exactAngle: a } : c));
+                     setCarsTop(prev => prev.map(updateCar));
                  } else if (deck === 'bottom') {
-                     setCarsBottom(prev => prev.map(c => c.id === carId ? { ...c, angle: mappedAngle, exactAngle: a } : c));
+                     setCarsBottom(prev => prev.map(updateCar));
                  }
              }
             setIsMeasureModalOpen(false);
@@ -5352,61 +5384,42 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                             <thead className="text-slate-400 border-b border-slate-100">
                                                 <tr><th className="pb-1">Fahrzeugmasse</th><th className="pb-1">Gurtzug 0°</th><th className="pb-1">Gurtzug 45°</th><th className="pb-1">Gurtzug 90°</th></tr>
                                             </thead>
-                                            <tbody>
-                                                <tr className="border-b border-slate-50"><td className="py-1">0 - 1500 kg</td><td className="py-1 font-bold text-slate-700">min. 500 daN</td><td className="py-1 font-bold text-slate-700">min. 500 daN</td><td className="py-1 font-bold text-slate-700">min. 500 daN</td></tr>
-                                                <tr><td className="py-1">&gt; 1500 - 4500 kg</td><td className="py-1 font-bold text-slate-700">min. 700 daN</td><td className="py-1 font-bold text-slate-700">min. 700 daN</td><td className="py-1 font-bold text-slate-700">min. 600 daN</td></tr>
+                                            <tbody className="bg-white">
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200 font-bold" rowSpan="3">0 - 2000 kg</td>
+                                                    <td className="p-2 border border-slate-200">max. +/- 25°</td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 5**</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200">max. +10° / -25°</td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 2, 3, 5**</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200">max. +/- 10°</td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 2, 3, 4, 5**</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200 font-bold" rowSpan="3">&gt; 2000 - 3000 kg</td>
+                                                    <td className="p-2 border border-slate-200">max. +/- 25°</td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 5**</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200">max. +10° / -25°</td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 3, 5**</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200">max. +/- 10°</td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 4, 5**</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-2 border border-slate-200 font-bold">&gt; 3000 - 4500 kg</td>
+                                                    <td className="p-2 border border-slate-200">max. +/- 10° <br/><span className="font-normal text-[9px] text-slate-500">(Über/Unter 10° unzulässig!)</span></td>
+                                                    <td className="p-2 border border-slate-200 font-black text-indigo-600">5**</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* ZULÄSSIGE VERLADEBILDER TABELLE */}
-                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-8">
-                            <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><MapPin className="w-4 h-4 text-slate-500"/> Zulässige Verladebilder (Übersicht)</h4>
-                            <div className="overflow-x-auto custom-scrollbar">
-                                <table className="w-full text-[11px] text-left border-collapse border border-slate-200 min-w-[300px]">
-                                    <thead className="bg-slate-800 text-white font-bold uppercase tracking-wider text-[10px]">
-                                        <tr>
-                                            <th className="p-2 border border-slate-700 w-1/3">Masse des PKW</th>
-                                            <th className="p-2 border border-slate-700 w-1/3">Anstellwinkel d. Fahrbahn</th>
-                                            <th className="p-2 border border-slate-700 w-1/3">Mögliche Verladebilder</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                        <tr>
-                                            <td className="p-2 border border-slate-200 font-bold" rowSpan="3">0 - 2000 kg</td>
-                                            <td className="p-2 border border-slate-200">max. +/- 25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 5**</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="p-2 border border-slate-200">max. +10° / -25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 2, 3, 5**</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="p-2 border border-slate-200">max. +/- 10°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">1*, 2, 3, 4, 5**</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="p-2 border border-slate-200 font-bold" rowSpan="3">&gt; 2000 - 3000 kg</td>
-                                            <td className="p-2 border border-slate-200">max. +/- 25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 5**</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="p-2 border border-slate-200">max. +10° / -25°</td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">6*, 3, 5**</td>
-                                        </tr>
-                                        <tr>
-                                         
-                                        </tr>
-                                        <tr>
-                                            <td className="p-2 border border-slate-200 font-bold">&gt; 3000 - 4500 kg</td>
-                                            <td className="p-2 border border-slate-200">max. +/- 10° <br/><span className="font-normal text-[9px] text-slate-500">(Über/Unter 10° unzulässig!)</span></td>
-                                            <td className="p-2 border border-slate-200 font-black text-indigo-600">5**</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
                             </div>
                             <div className="mt-3 text-[10px] text-slate-500 leading-tight space-y-1">
                                 <p><strong className="text-slate-700">* Verladebild 1 bzw. 6</strong> ist im Bereich bis 2000 kg (VB 1) bzw. bis 3000 kg (VB 6) grundsätzlich anzuwenden. Ausweichen auf andere nur, wenn technisch nicht machbar. Kann aus technischen Gründen kein Keil gesetzt werden, darf dieser durch einen weiteren Gurt ersetzt werden.</p>
