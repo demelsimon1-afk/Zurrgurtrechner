@@ -789,6 +789,15 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove, onMeasureAngle }) => {
                                 <option value="3000">&gt; 2.000 - 3.000 kg</option>
                                 <option value="4500">&gt; 3.000 - 4.500 kg</option>
                             </select>
+                            <select
+                                value={car.orientation}
+                                onChange={(e) => onUpdate({ ...car, orientation: e.target.value })}
+                                className={`w-full border rounded-md py-1.5 text-[9px] font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate ${car.orientation === '' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                            >
+                                <option value="" disabled>Richtung?</option>
+                                <option value="forward">Vorwärts</option>
+                                <option value="backward">Rückwärts</option>
+                            </select>
                             <div className="flex gap-0.5">
                                 <select 
                                     value={car.angle} 
@@ -813,15 +822,6 @@ const PkwCarEditor = ({ car, index, onUpdate, onRemove, onMeasureAngle }) => {
                                     )}
                                 </button>
                             </div>
-                            <select
-                                value={car.orientation}
-                                onChange={(e) => onUpdate({ ...car, orientation: e.target.value })}
-                                className={`w-full border rounded-md py-1.5 text-[9px] font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-center appearance-none truncate ${car.orientation === '' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                            >
-                                <option value="" disabled>Richtung?</option>
-                                <option value="forward">Vorwärts</option>
-                                <option value="backward">Rückwärts</option>
-                            </select>
                         </div>
                         {isConfigComplete && (
                             <div className="grid grid-cols-2 gap-1 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -1009,9 +1009,9 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
                                  <Smartphone className="w-12 h-12 text-slate-800 mx-auto relative z-10 bg-white p-1 rounded-lg border-2 border-slate-100" />
                              </div>
                              <div>
-                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: {isPkwMode ? 'Ladefläche nullen' : 'Referenz nullen'}</div>
+                                 <div className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide mb-2">Wichtig: {isPkwMode ? 'Fahrbahn nullen' : 'Referenz nullen'}</div>
                                  <h4 className="font-bold text-slate-700 text-lg">Sensor Nullen</h4>
-                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf die <strong>{isPkwMode ? 'Ladefläche' : 'Ladefläche / den Boden'}</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
+                                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">Gerät flach auf die <strong>{isPkwMode ? 'Fahrbahn / das Lochblech' : 'Ladefläche / den Boden'}</strong> bzw. waagerecht ausrichten, um die Neigung auszugleichen.</p>
                              </div>
                              <button onClick={handleZero} className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all">Jetzt Nullen (Referenz)</button>
                           </div>
@@ -1023,7 +1023,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
                                 {isPkwMode ? (
                                     <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-sm leading-relaxed shadow-sm text-left">
                                         <strong className="block mb-1 text-center">WICHTIG:</strong>
-                                        Lege das Smartphone flach auf die <strong>Ladefläche</strong>, auf der der PKW steht. Die obere Kante (Kamera) muss zwingend in <strong>Fahrtrichtung des LKW</strong> zeigen.
+                                        Lege das Smartphone flach auf die <strong>Fahrbahn / das Lochblech</strong>, auf der der PKW steht. Die obere Kante (Kamera) muss zwingend in <strong>Fahrtrichtung des LKW</strong> zeigen.
                                     </div>
                                 ) : (
                                     <p className="text-slate-500 text-sm leading-relaxed">Gerät nun entlang des Zurrgurts auflegen.</p>
@@ -2782,12 +2782,10 @@ function LashingCalculator({ onOpenKnowledge }) {
 
                  const updateCar = (c) => {
                      if (c.id === carId) {
+                         // Geniale Physik: Die physikalische Neigung der Ladefläche bestimmt den Winkel, völlig unabhängig von der Laderichtung des PKW.
+                         // Neigt sich die Fahrbahn nach vorne (Sensor = positiv), zieht das Auto nach vorne = positiver Winkel (+).
+                         // Neigt sich die Fahrbahn nach hinten (Sensor = negativ), zieht das Auto nach hinten = negativer Winkel (-).
                          let finalAngle = a;
-                         
-                         // Umrechnung des Vorzeichens abhängig von der Laderichtung
-                         if (c.orientation === 'forward') {
-                             finalAngle = a * -1;
-                         }
 
                          let mappedAngle = '10';
                          if (finalAngle > 10) {
