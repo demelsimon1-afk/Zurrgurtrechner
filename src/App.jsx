@@ -2782,10 +2782,8 @@ function LashingCalculator({ onOpenKnowledge }) {
 
                  const updateCar = (c) => {
                      if (c.id === carId) {
-                         // Geniale Physik: Die physikalische Neigung der Ladefläche bestimmt den Winkel, völlig unabhängig von der Laderichtung des PKW.
-                         // Neigt sich die Fahrbahn nach vorne (Sensor = positiv), zieht das Auto nach vorne = positiver Winkel (+).
-                         // Neigt sich die Fahrbahn nach hinten (Sensor = negativ), zieht das Auto nach hinten = negativer Winkel (-).
-                         let finalAngle = a;
+                         // Vorzeichen getauscht, wie gewünscht: Aus + wird - und aus - wird +
+                         let finalAngle = -a;
 
                          let mappedAngle = '10';
                          if (finalAngle > 10) {
