@@ -328,7 +328,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.0
+        RoadTool v. 3.1
     </div>
 );
 
@@ -3437,6 +3437,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const [escooterOrigin, setEscooterOrigin] = useState('de'); // State für E-Scooter Herkunft
   const [kindersitzView, setKindersitzView] = useState('sitz'); // State für Kindersitze Untermenü
   const [ebikeView, setEbikeView] = useState('pedelec25'); // State für E-Bike Untermenü
+  const [taxiView, setTaxiView] = useState('taxi'); // State für Taxi/Mietwagen Untermenü
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [reifenExpanded, setReifenExpanded] = useState({ profil: true, winter: false, spikes: false }); // State für Reifen-Tatbestände
 
@@ -3447,7 +3448,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
   useEffect(() => {
       window.scrollTo(0, 0);
-  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView]);
+  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView, taxiView]);
 
   const tabs = [
       { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
@@ -3464,7 +3465,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
       { id: 'ebike', label: 'Pedelec & E-Bike', icon: Bike, color: 'text-green-500', bg: 'bg-green-50' },
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
       { id: 'rauchverbot', label: 'Rauchverbot', icon: CigaretteOff, color: 'text-slate-500', bg: 'bg-slate-100' },
-      { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' }
+      { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' },
+      { id: 'taxi', label: 'Taxi / Mietwagen', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-50' }
   ];
 
   return (
@@ -5701,6 +5703,160 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                     </div>
                  </div>
             )}
+
+            {/* TAXI / MIETWAGEN */}
+            {view === 'taxi' && (
+                 <div className="space-y-4 animate-in fade-in">
+                    {/* Sub-Navigation */}
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {[
+                            { id: 'taxi', label: 'Taxi (§ 47 PBefG)' },
+                            { id: 'mietwagen', label: 'Mietwagen (§ 49 PBefG)' }
+                        ].map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={() => setTaxiView(sub.id)}
+                                className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all border ${taxiView === sub.id ? (sub.id === 'taxi' ? 'bg-yellow-400 text-slate-900 border-yellow-400 shadow-md' : 'bg-blue-600 text-white border-blue-600 shadow-md') : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {sub.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
+                        
+                        {/* 1. TAXI */}
+                        {taxiView === 'taxi' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
+                                    <Car className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Verkehr mit Taxen (§ 47 PBefG)</h3>
+                                </div>
+                                
+                                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl mb-5 text-sm text-yellow-900 leading-relaxed shadow-sm">
+                                    <strong>Definition:</strong> Taxenverkehr ist die Beförderung von Personen mit Personenkraftwagen, die der Unternehmer an behördlich zugelassenen Stellen bereithält und mit denen er Fahrten zu einem vom Fahrgast bestimmten Ziel durchführt.
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="bg-white border border-slate-200 p-3.5 rounded-xl flex items-start gap-3 shadow-sm">
+                                        <MapPin className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm mb-1">Bereithalten an Taxiständen</h4>
+                                            <p className="text-xs text-slate-600">Taxen dürfen sich nur an behördlich zugelassenen Stellen innerhalb der Betriebssitzgemeinde zum Einsteigen bereithalten.</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white border border-slate-200 p-3.5 rounded-xl flex items-start gap-3 shadow-sm">
+                                        <CreditCard className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm mb-1">Tarifpflicht (§ 51 PBefG)</h4>
+                                            <p className="text-xs text-slate-600">Es gelten die behördlich festgelegten Beförderungsentgelte. Die Nutzung eines geeichten <strong>Fahrpreisanzeigers (Taxameter)</strong> ist zwingend vorgeschrieben, wenn die Beförderung innerhalb der Genehmigungsgemeine erfolgt. Falls nicht, können auch Fixpreise vereint werden.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-6">Dokumente & Fahrerlaubnis</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Führerschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '204100', cost: '10 €' }]} />
+                                    <BkatRow title="Führerschein zur Fahrgastbeförderung nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '248100', cost: '10 €' }]} />
+                                    <BkatRow title="Fahrzeugschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '811100', cost: '10 €' }]} />
+                                    <BkatRow title="Genehmigungsurkunde (Gelb) nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: 'P21800', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Genehmigungsurkunde (Gelb) abgelaufen / nicht vorhanden" fines={[{ role: 'Fahrer', tbnr: 'P20600', cost: 'Anzeige' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="Fahren ohne Führerschein zur Fahrgastbeförderung (Weiterfahrt untersagen!)" fines={[{ role: 'Fahrer', tbnr: '248600', cost: '75 €' }, { role: 'Halter', tbnr: '248606', cost: '75 €' }]} />
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Verhalten & Beförderung</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Taxischild beleuchtet, obwohl Fahrgast im Taxi" fines={[{ role: 'Fahrer', tbnr: 'P26000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Taxischild unbeleuchtet, obwohl kein Fahrgast im Taxi" fines={[{ role: 'Fahrer', tbnr: 'P25700', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Unerlaubtes Bereithalten außerhalb Betriebssitzgemeinde" fines={[{ role: 'Fahrer', tbnr: 'P22400', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Rauchen im Taxi" fines={[{ role: 'Fahrer', tbnr: 'Z60002', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Taxiverordnung (z.B. Lörrach) nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="Alkoholeinwirkung bis 0,249 mg/l (0,5 Promille)" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Alkoholeinwirkung ab 0,25 mg/l" fines={[{ role: 'Fahrer', tbnr: '424612', cost: '500 €', points: '2 Pkt.' }]} />
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Fahrzeug & Ausrüstung</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Taxischild fehlt / defekt" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Unvorschriftsmäßiges / ungeeichtes Taxameter" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Ordnungsnummer (Gelb) nicht / falsch angebracht" fines={[{ role: 'Halter', tbnr: 'P21600', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Taxi ohne wirksame Alarmanlage" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 2. MIETWAGEN */}
+                        {taxiView === 'mietwagen' && (
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-blue-700 pb-2 border-b border-slate-50">
+                                    <Briefcase className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Verkehr mit Mietwagen (§ 49 PBefG)</h3>
+                                </div>
+                                
+                                <div className="bg-slate-800 text-white p-4 rounded-xl mb-5 text-sm leading-relaxed shadow-sm">
+                                    <strong>Definition:</strong> Mietwagenverkehr ist die Beförderung von Personen, bei der der Fahrgast das Fahrzeug als Ganzes mietet und den Zweck, das Ziel sowie den Ablauf der Fahrt bestimmt.
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-xl flex items-start gap-3 shadow-sm">
+                                        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-amber-900 text-sm mb-1">Rückkehrpflicht</h4>
+                                            <p className="text-xs text-amber-800">Nach Beförderung hat der Mietwagen <strong>unverzüglich zum Betriebssitz zurückzukehren</strong>, es sei denn, es ist vorher ein neuer Auftrag eingegangen.</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl flex items-start gap-3 shadow-sm">
+                                        <X className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-red-900 text-sm mb-1">Kein Bereithalten</h4>
+                                            <p className="text-xs text-red-800">Mietwagen dürfen nicht auf öffentlichen Straßen und Plätzen bereitgehalten werden. Aufträge dürfen nicht direkt vom Fahrer angenommen werden.</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white border border-slate-200 p-3.5 rounded-xl flex items-start gap-3 shadow-sm">
+                                        <Gauge className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm mb-1">Wegstreckenzähler vs. Taxameter</h4>
+                                            <p className="text-xs text-slate-600">Zur Berechnung (sofern kein Pauschalpreis) muss ein geeichter <strong>Wegstreckenzähler</strong> vorhanden sein. Ein Taxameter ist nicht zulässig!</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-6">Dokumente & Fahrerlaubnis</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Führerschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '204100', cost: '10 €' }]} />
+                                    <BkatRow title="Führerschein zur Fahrgastbeförderung nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '248100', cost: '10 €' }]} />
+                                    <BkatRow title="Fahrzeugschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '811100', cost: '10 €' }]} />
+                                    <BkatRow title="Genehmigungsurkunde (Blau) nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: 'P21800', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Genehmigungsurkunde (Blau) abgelaufen" fines={[{ role: 'Fahrer', tbnr: 'P22000', cost: 'Anzeige' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="Fahren ohne Führerschein zur Fahrgastbeförderung (Weiterfahrt untersagen!)" fines={[{ role: 'Fahrer', tbnr: '248600', cost: '75 €' }, { role: 'Halter', tbnr: '248606', cost: '75 €' }]} />
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Verhalten & Beförderung</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Warten auf Fahrgäste ohne Auftrag / unerlaubtes Bereithalten" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Mietwagen nicht im Ganzen vermietet (mehrere Aufträge)" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Beförderungsauftrag nicht am Betriebssitz eingegangen" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Rauchen im Mietwagen" fines={[{ role: 'Fahrer', tbnr: 'Z60002', cost: 'Anzeige' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                    <BkatRow title="Alkoholeinwirkung bis 0,249 mg/l (0,5 Promille)" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Alkoholeinwirkung ab 0,25 mg/l" fines={[{ role: 'Fahrer', tbnr: '424612', cost: '500 €', points: '2 Pkt.' }]} />
+                                </div>
+
+                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Fahrzeug & Ausrüstung</h4>
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                    <BkatRow title="Verwendung von Taxi-Zeichen (Dachreling / Ordnungsnummer (gelb))" fines={[{ role: 'Halter', tbnr: 'P22700', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Unvorschriftsmäßiger / ungeeichter Wegstreckenzähler" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
+                                    <BkatRow title="Mietwagen ohne wirksame Alarmanlage" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
+                                </div>
+                            </div>
+                        )}
+                        
+                    </div>
+                 </div>
+            )}
       </div>
       <AppVersionFooter />
     </div>
@@ -6097,7 +6253,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 3.0: Reiter Rauchverbot gemäß LNRSchG BW implementiert, Erweiterung im Geschwindigkeitsrechner (i.g.O; a.g.O; BAB), PKW-Transporter nach VDI 2700 Blatt 8.1 implementiert";
+    const updateText = "🚀 Update 3.1: Taxi-/Mietwagen Reiter implementiert";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
