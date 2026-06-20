@@ -1158,13 +1158,37 @@ function SpeedCalculator() {
         const allowed = parseFloat(allowedSpeed);
         if (!measured || !allowed) { setResult(null); return; }
         let netSpeed = 0, tolerance = 0, formula = '';
+        let calcDetails = [];
         if (mode === 'laser') {
-            if (measured <= 100) tolerance = 3; else if (measured <= 133) tolerance = 4; else if (measured <= 166) tolerance = 5; else if (measured <= 206) tolerance = 6; else tolerance = 7;
+            if (measured <= 100) {
+                tolerance = 3;
+                calcDetails.push({ label: 'Bruttowert', value: `${measured} km/h` });
+                calcDetails.push({ label: 'Toleranzabzug (pauschal)', value: `- 3 km/h` });
+                calcDetails.push({ label: 'Vorwerfbar (Netto)', value: `= ${measured - tolerance} km/h`, isBold: true });
+            } else {
+                tolerance = Math.ceil(measured * 0.03);
+                const tolRaw = (measured * 0.03).toFixed(2).replace('.', ',');
+                calcDetails.push({ label: 'Bruttowert', value: `${measured} km/h` });
+                calcDetails.push({ label: `Toleranz (3% von ${measured})`, value: `${tolRaw} ➔ - ${tolerance} km/h` });
+                calcDetails.push({ label: 'Vorwerfbar (Netto)', value: `= ${measured - tolerance} km/h`, isBold: true });
+            }
             netSpeed = measured - tolerance;
             formula = `${measured} - ${tolerance} (Tol.) = ${netSpeed}`;
         } else {
-            const step1 = measured - (measured * 0.10); const step2 = step1 - 4; const step3 = step2 - (step2 * 0.03);
-            netSpeed = Math.floor(step3); tolerance = measured - netSpeed; 
+            const tol1 = (measured * 0.10);
+            const step1 = measured - tol1; 
+            const step2 = step1 - 4; 
+            const tol3 = (step2 * 0.03);
+            const step3 = step2 - tol3;
+            netSpeed = Math.floor(step3); 
+            tolerance = measured - netSpeed; 
+            
+            calcDetails.push({ label: 'Abgelesener Tacho-Wert', value: `${measured} km/h` });
+            calcDetails.push({ label: '1. Abzug (10%)', value: `- ${tol1.toFixed(1).replace('.', ',')} km/h` });
+            calcDetails.push({ label: '2. Abzug (pauschal)', value: `- 4,0 km/h` });
+            calcDetails.push({ label: `3. Abzug (3% von ${step2.toFixed(1).replace('.', ',')})`, value: `- ${tol3.toFixed(2).replace('.', ',')} km/h` });
+            calcDetails.push({ label: 'Vorwerfbar (abgerundet)', value: `= ${netSpeed} km/h`, isBold: true });
+            
             formula = `((${measured} - 10%) - 4) - 3% = ${netSpeed.toFixed(0)}`;
         }
         const exceedance = Math.max(0, netSpeed - allowed);
@@ -1175,7 +1199,7 @@ function SpeedCalculator() {
         const gaugePercentNet = Math.min(100, (netSpeed / gaugeMax) * 100);
         const gaugePercentAllowed = Math.min(100, (allowed / gaugeMax) * 100);
         
-        setResult({ netSpeed: Math.round(netSpeed), tolerance: tolerance, exceedance: Math.round(exceedance), violation: violation, formula: formula, gaugePercentNet, gaugePercentAllowed });
+        setResult({ netSpeed: Math.round(netSpeed), tolerance: tolerance, exceedance: Math.round(exceedance), violation: violation, formula: formula, gaugePercentNet, gaugePercentAllowed, calcDetails });
     }, [mode, location, allowedSpeed, measuredSpeedRaw, vehicleType]);
 
     return (
@@ -1243,7 +1267,19 @@ function SpeedCalculator() {
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Vorwerfbar</span>
                                 <span className="text-3xl font-black text-amber-600">{result.netSpeed} <span className="text-sm text-slate-400">km/h</span></span>
                             </div>
-                            <div className="bg-slate-50 rounded-lg p-2 mb-3 text-xs font-mono text-center text-slate-500 border border-slate-100">{result.formula}</div>
+                            
+                            <div className="bg-slate-50 rounded-xl p-3 mb-3 text-xs text-slate-600 border border-slate-100">
+                                <div className="font-bold text-slate-400 uppercase mb-2 text-[10px] flex items-center gap-1.5"><Calculator className="w-3 h-3"/> Detaillierte Toleranzberechnung</div>
+                                <div className="space-y-1.5 font-mono">
+                                    {result.calcDetails.map((step, idx) => (
+                                        <div key={idx} className={`flex justify-between items-center ${step.isBold ? 'pt-1.5 mt-1.5 border-t border-slate-200 font-bold text-slate-800' : ''}`}>
+                                            <span>{step.label}:</span>
+                                            <span className="text-right">{step.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
                             <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-100 mt-2">
                                 <span className="text-xs font-bold text-red-400 uppercase">Überschreitung</span>
                                 <span className="text-xl font-black text-red-600">+{result.exceedance} km/h</span>
@@ -5879,10 +5915,6 @@ function InfoView() {
             <button onClick={() => setView('impressum')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'impressum' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Impressum</button>
             <button onClick={() => setView('privacy')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'privacy' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Datenschutz</button>
             <button onClick={() => setView('notes')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${view === 'notes' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Haftung</button>
-            <button onClick={() => setView('donate')} className={`flex-1 whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${view === 'donate' ? 'bg-white shadow text-pink-600' : 'text-slate-500 hover:text-pink-600'}`}>
-                <Heart className="w-3 h-3" />
-                Spenden
-            </button>
           </div>
           
           <div className="animate-in fade-in duration-300 pb-20 no-print">
@@ -5943,37 +5975,51 @@ function InfoView() {
                     </div>
                 </div>
             )}
-
-            {view === 'donate' && (
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
-                    <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Heart className="w-8 h-8 fill-current" />
-                    </div>
-                    <h3 className="font-black uppercase tracking-wide text-slate-700 mb-2">Unterstützen Sie das Projekt</h3>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                        Diese App wurde mit viel Herzblut entwickelt und wird kostenlos zur Verfügung gestellt. 
-                        Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
-                    </p>
-                    <a 
-                        href="https://www.paypal.com/paypalme/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block w-full py-3.5 bg-[#0070BA] text-white font-bold rounded-xl shadow-lg hover:bg-[#003087] transition-all flex items-center justify-center gap-2"
-                    >
-                        <span className="fill-white"><svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M7.076 21.337l.486-3.08c.133-.84.852-1.464 1.703-1.464h1.725c3.55 0 6.315-1.44 7.15-5.698.417-2.126-.41-4.144-2.85-5.228-2.073-.92-4.947-.64-7.98 1.285l-.57-.027c-.89 0-1.666.626-1.83 1.503L2.83 19.34c-.08.43.25.823.69.823h2.95c.345 0 .64-.236.696-.576l.006-.03z"/></svg></span>
-                        <span>Spende per PayPal</span>
-                    </a>
-                    <p className="text-[10px] text-slate-400 mt-3 mb-4">Sie werden zu PayPal weitergeleitet.</p>
-                    
-                    <div className="pt-4 border-t border-slate-100">
-                        <p className="text-xs text-slate-500 mb-2">Falls der Link nicht funktioniert (manuelle Eingabe):</p>
-                        <div className="inline-block bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono font-bold text-slate-700 select-all cursor-text shadow-sm">
-                            simondemel@gmx.de
-                        </div>
-                    </div>
-                </div>
-            )}
           </div>
+      </div>
+      <AppVersionFooter />
+    </div>
+  );
+}
+
+// --- DONATE VIEW (NEU) ---
+function DonateView() {
+  const dateTime = useDateTime();
+
+  return (
+    <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
+      <div className="bg-pink-600/95 backdrop-blur-md p-4 text-white flex items-center justify-between sticky top-0 z-20 shadow-lg shadow-pink-900/10 no-print">
+        <div><h1 className="text-xl font-bold flex items-center gap-2 leading-tight tracking-tight"><Heart className="w-6 h-6 shrink-0" />Spenden</h1><p className="text-pink-100 text-xs opacity-90 mt-0.5 font-mono flex items-center gap-1.5 ml-8"><Clock className="w-3 h-3" />{dateTime}</p></div>
+        <HeaderLogo />
+      </div>
+      <div className="p-4 animate-in fade-in duration-300 pb-24 no-print">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+            <div className="w-20 h-20 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <Heart className="w-10 h-10 fill-current" />
+            </div>
+            <h3 className="font-black uppercase tracking-wide text-slate-800 mb-3 text-lg">Unterstützen Sie das Projekt</h3>
+            <p className="text-slate-600 text-sm leading-relaxed mb-8">
+                Diese App wurde mit viel Herzblut entwickelt und wird kostenlos zur Verfügung gestellt. 
+                Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
+            </p>
+            <a 
+                href="https://www.paypal.com/donate/?business=simondemel@gmx.de&currency_code=EUR" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block w-full py-4 bg-[#0070BA] text-white font-bold rounded-xl shadow-lg hover:bg-[#003087] active:scale-95 transition-all flex items-center justify-center gap-2"
+            >
+                <span className="fill-white"><svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M7.076 21.337l.486-3.08c.133-.84.852-1.464 1.703-1.464h1.725c3.55 0 6.315-1.44 7.15-5.698.417-2.126-.41-4.144-2.85-5.228-2.073-.92-4.947-.64-7.98 1.285l-.57-.027c-.89 0-1.666.626-1.83 1.503L2.83 19.34c-.08.43.25.823.69.823h2.95c.345 0 .64-.236.696-.576l.006-.03z"/></svg></span>
+                <span className="text-lg">Spende per PayPal</span>
+            </a>
+            <p className="text-[11px] text-slate-400 font-medium mt-3 mb-6">Sie werden sicher zu PayPal weitergeleitet.</p>
+            
+            <div className="pt-5 border-t border-slate-100">
+                <p className="text-xs text-slate-500 font-medium mb-2">Alternativ (Manuelle Eingabe bei PayPal):</p>
+                <div className="inline-block bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono font-bold text-slate-700 select-all cursor-text shadow-sm">
+                    simondemel@gmx.de
+                </div>
+            </div>
+        </div>
       </div>
       <AppVersionFooter />
     </div>
@@ -6372,17 +6418,21 @@ export default function App() {
             <div className={activeTab === 'knowledge' ? 'block' : 'hidden'}><KnowledgeBaseView key={knowledgeResetKey} initialView={knowledgeView} onBack={returnTab ? () => handleTabChange(returnTab) : null} /></div>
             <div className={activeTab === 'license' ? 'block' : 'hidden'}><DriverLicenseModule /></div>
             <div className={activeTab === 'info' ? 'block' : 'hidden'}><InfoView /></div>
+            <div className={activeTab === 'donate' ? 'block' : 'hidden'}><DonateView /></div>
             <div className={activeTab === 'lashing' ? 'block' : 'hidden'}><LashingCalculator onOpenKnowledge={handleNavigateKnowledge} /></div>
           </div>
           <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50 no-print transition-colors duration-300">
             <div className="max-w-md mx-auto flex justify-evenly items-center p-2">
-              <button onClick={() => handleTabChange('home')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'home' ? 'text-indigo-600 bg-indigo-50 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+              <button onClick={() => handleTabChange('home')} className={`w-20 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'home' ? 'text-indigo-600 bg-indigo-50 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <Home className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">Home</span>
               </button>
-              <button onClick={() => handleTabChange('info')} className={`w-24 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'info' ? 'text-slate-800 bg-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+              <button onClick={() => handleTabChange('info')} className={`w-20 flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${activeTab === 'info' ? 'text-slate-800 bg-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
                 <FileText className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">Infos</span>
+              </button>
+              <button onClick={() => handleTabChange('donate')} className={`w-20 flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 ${activeTab === 'donate' ? 'text-pink-600 bg-pink-50 shadow-sm' : 'text-slate-400 hover:text-pink-500 hover:bg-slate-50'}`}>
+                <Heart className="w-6 h-6" />
               </button>
             </div>
           </div>
