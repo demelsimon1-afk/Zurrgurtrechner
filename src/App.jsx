@@ -328,7 +328,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.1
+        RoadTool v. 3.2
     </div>
 );
 
@@ -693,7 +693,58 @@ const validateCarSecuring = (car) => {
         return { valid: true, msg: "Übersicherung (4 Gurte) erkannt. Grundsätzlich okay." };
     }
 
-    return { valid: false, msg: "Sicherung unzureichend für Gewicht/Winkel (Kein zulässiges Verladebild erreicht)." };
+    // Präzise Differenz-Auswertung (Ist vs. Soll)
+    const getMissingMsg = () => {
+        // Bewertet, ob die Standard-Empfehlung oder die gespiegelte Variante näher dran ist
+        const score = (req) => {
+            let s = 0;
+            ['fl', 'fr', 'rl', 'rr'].forEach(w => {
+                if (car.wheels[w].strap === req.wheels[w].strap) s += 2;
+                const c1 = car.wheels[w].chock === 'none' ? 0 : (car.wheels[w].chock === 'both' || car.wheels[w].chock === 'mulde' ? 2 : 1);
+                const c2 = req.wheels[w].chock === 'none' ? 0 : (req.wheels[w].chock === 'both' || req.wheels[w].chock === 'mulde' ? 2 : 1);
+                if (c1 === c2) s += 1;
+                else if (c1 > c2) s += 1; // Übersicherung ist in Ordnung
+            });
+            return s;
+        };
+
+        const stdRec = getRecommendedCarConfig(car);
+        const mirRec = JSON.parse(JSON.stringify(stdRec));
+        // Links und Rechts tauschen für die gespiegelte Variante (Diagonalzurren)
+        let tempFl = mirRec.wheels.fl; mirRec.wheels.fl = mirRec.wheels.fr; mirRec.wheels.fr = tempFl;
+        let tempRl = mirRec.wheels.rl; mirRec.wheels.rl = mirRec.wheels.rr; mirRec.wheels.rr = tempRl;
+
+        const bestRec = score(mirRec) > score(stdRec) ? mirRec : stdRec;
+
+        let missing = [];
+        const diffWheel = (curr, req, label) => {
+            const currStrap = curr.strap;
+            const reqStrap = req.strap;
+            const currChocks = (curr.chock === 'both' || curr.chock === 'mulde') ? 2 : (curr.chock === 'none' ? 0 : 1);
+            const reqChocks = (req.chock === 'both' || req.chock === 'mulde') ? 2 : (req.chock === 'none' ? 0 : 1);
+
+            let m = [];
+            if (!currStrap && reqStrap) m.push("+Gurt");
+            if (currChocks < reqChocks) {
+                const diff = reqChocks - currChocks;
+                m.push(`+${diff} Keil${diff > 1 ? 'e' : ''}`);
+            }
+
+            if (m.length > 0) missing.push(`${label} (${m.join(', ')})`);
+        };
+
+        diffWheel(car.wheels.fl, bestRec.wheels.fl, "VL");
+        diffWheel(car.wheels.fr, bestRec.wheels.fr, "VR");
+        diffWheel(car.wheels.rl, bestRec.wheels.rl, "HL");
+        diffWheel(car.wheels.rr, bestRec.wheels.rr, "HR");
+
+        if (missing.length > 0) {
+            return `Falsch gesichert! Es fehlt noch: ${missing.join(' | ')}`;
+        }
+        return "Falsch gesichert (Anforderungen nicht erfüllt).";
+    };
+
+    return { valid: false, msg: getMissingMsg() };
 };
 
 const PkwWheelConfig = ({ label, wheelData, onChange }) => (
@@ -2414,6 +2465,10 @@ function LashingCalculator({ onOpenKnowledge }) {
   const [lashingResult, setLashingResult] = useState(null);
   const [fineGroups, setFineGroups] = useState([]);
   
+  // --- NEU: STATES FÜR KONTROLL-MODUS ---
+  const [showUnsecuredCalc, setShowUnsecuredCalc] = useState(false);
+  const [actualStraps, setActualStraps] = useState('');
+
   // State für die mathematische Berechnung von Winkel Beta
   const [distX, setDistX] = useState('');
   const [distY, setDistY] = useState('');
@@ -2555,6 +2610,29 @@ function LashingCalculator({ onOpenKnowledge }) {
     const nSide = calculateN(accSide, fitSide ? wallSide : 0, 'side');
     const nRear = calculateN(accRear, fitRear ? wallRear : 0, 'rear');
   
+    // --- BERECHNUNG FÜR KONTROLL-MODUS (ROHKRÄFTE) ---
+    const getStrapForce = (direction) => {
+        const base = stfInNewton * mu * Math.sin(alphaRad);
+        if (!maxWeight || maxWeight <= 3500) {
+            return 1.8 * base;
+        } else {
+            let safety = direction === 'forward' ? 1.25 : 1.1;
+            return (2 * base) / safety;
+        }
+    };
+    const strapForceFwd = getStrapForce('forward');
+    const strapForceSide = getStrapForce('side');
+    const strapForceRear = getStrapForce('rear');
+
+    const getNumerator = (acc, blockingDaN) => {
+        const weightForce = m * g;
+        const blockingForce = (parseFloat(blockingDaN) || 0) * 10; 
+        return (weightForce * acc) - blockingForce - (weightForce * mu);
+    };
+    const numFwd = getNumerator(accFwd, fitFront ? wallFront : 0);
+    const numSide = getNumerator(accSide, fitSide ? wallSide : 0);
+    const numRear = getNumerator(accRear, fitRear ? wallRear : 0);
+
     // --- DIAGONALZURREN CALCULATION ---
     const calcDiagLC = (c, isSide) => {
         const f_mu = mu * 0.75; // Anpassung: Reibbeiwert * 0.75
@@ -2582,6 +2660,8 @@ function LashingCalculator({ onOpenKnowledge }) {
       weightClassInfo: !maxWeight ? '< 2000 kg (Standard)' : maxWeight <= 1999 ? '< 2000 kg' : maxWeight <= 3500 ? '2000 - 3500 kg' : '> 3500 kg',
       displayValues: { weightForceN: m * g, c: accFwd, formForceN: (parseFloat(fitFront ? wallFront : 0) * 10), mu, alphaRad, stfNewton: stfInNewton },
       weightClass: maxWeight,
+      numFwd, numSide, numRear,
+      strapForceFwd, strapForceSide, strapForceRear,
       lcDiagFwd, lcDiagSide, lcDiagRear,
       diagonalLC: diagLC,
       detailRows: [
@@ -2592,6 +2672,59 @@ function LashingCalculator({ onOpenKnowledge }) {
     });
   }, [loadWeight, friction, stf, angle, angleBeta, allowedWeight, emptyWeight, fitFront, fitSide, fitRear, wallFront, wallSide, wallRear, bodyCert]);
   
+  const renderUnsecured = (directionLabel, numN, strapForceN, c, muVal, loadWeightStr) => {
+      if (numN <= 0) return null; 
+      
+      const appliedStraps = parseInt(actualStraps) || 0;
+      const missingForceN = numN - (appliedStraps * strapForceN);
+      
+      if (missingForceN <= 0) {
+          return (
+              <div className="flex flex-col justify-center items-center bg-emerald-50 text-emerald-700 p-3 rounded-xl border border-emerald-100 text-xs font-bold shadow-sm h-full text-center">
+                  <span className="uppercase mb-1 opacity-70 text-[10px] tracking-wide">{directionLabel}</span>
+                  <CheckCircle className="w-6 h-6 mb-1"/>
+                  <span>0 % ungesichert</span>
+              </div>
+          );
+      }
+
+      const g = 9.81;
+      const unsecuredMassKg = missingForceN / (g * (c - muVal));
+      const totalMassKg = parseFloat(loadWeightStr) || 0;
+      let percentage = totalMassKg > 0 ? (unsecuredMassKg / totalMassKg) * 100 : 0;
+      if (percentage > 100) percentage = 100;
+
+      const isEinziehung = percentage >= 30; // Ab 30% droht Einziehung
+      const missingForceDaN = missingForceN / 10;
+
+      return (
+          <div className={`flex flex-col border p-3 rounded-xl shadow-sm h-full ${isEinziehung ? 'bg-red-50 border-red-300 shadow-red-100' : 'bg-white border-slate-200'}`}>
+              <div className={`font-bold text-center uppercase tracking-wide text-[10px] mb-2 pb-1 border-b ${isEinziehung ? 'text-red-800 border-red-200' : 'text-slate-500 border-slate-100'}`}>
+                  {directionLabel}
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center items-center mb-3">
+                  <span className={`font-black text-3xl tracking-tighter ${isEinziehung ? 'text-red-600' : (percentage > 0 ? 'text-amber-500' : 'text-emerald-600')}`}>
+                      {percentage.toFixed(1)} <span className="text-sm">%</span>
+                  </span>
+                  {isEinziehung && (
+                      <span className="mt-1 bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm flex items-center gap-1 animate-pulse">
+                          <AlertTriangle className="w-3 h-3"/> Einziehung!
+                      </span>
+                  )}
+              </div>
+              
+              <div className={`text-[9px] font-mono space-y-1 ${isEinziehung ? 'text-red-900' : 'text-slate-500'}`}>
+                  <div className="flex justify-between"><span>Gesamtlücke:</span><span className="font-bold">{Math.round(numN / 10).toLocaleString()} daN</span></div>
+                  <div className="flex justify-between"><span>{appliedStraps} Gurte:</span><span className="font-bold">- {Math.round((appliedStraps * strapForceN) / 10).toLocaleString()} daN</span></div>
+                  <div className={`flex justify-between border-t pt-1 mt-1 font-bold ${isEinziehung ? 'border-red-200 text-red-700' : 'border-slate-100 text-slate-700'}`}>
+                      <span>Rest:</span><span>{Math.round(missingForceDaN).toLocaleString()} daN</span>
+                  </div>
+              </div>
+          </div>
+      );
+  };
+
   return (
     <div className="max-w-md mx-auto bg-slate-50 min-h-screen">
       
@@ -2657,6 +2790,66 @@ function LashingCalculator({ onOpenKnowledge }) {
              </div>
            </div>
            {/* --- ENDE: NEUER BERECHNUNGSNACHWEIS --- */}
+
+           {/* NEU: DRUCK-ANSICHT FÜR EINZIEHUNG */}
+           {showUnsecuredCalc && (
+               <>
+                   <h2 className="print-section" style={{ marginTop: '30px' }}>Prüfung auf Einziehung (Ungesicherte Ladung)</h2>
+                   <table className="print-table">
+                       <tbody>
+                           <tr><th style={{ width: '40%' }}>Vor Ort angebrachte Gurte</th><td><strong>{actualStraps || 0}</strong></td></tr>
+                       </tbody>
+                   </table>
+                   <table className="print-table" style={{ marginTop: '10px' }}>
+                       <thead>
+                           <tr>
+                               <th>Richtung</th>
+                               <th>Fehlende Kraft (Gesamt)</th>
+                               <th>Durch Gurte gedeckt</th>
+                               <th>Ungesichert in %</th>
+                               <th>Einziehung?</th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           {(() => {
+                               const printUnsecuredRow = (label, numN, strapForceN, c, muVal, loadWeightStr) => {
+                                   if (numN <= 0) return null;
+                                   const appliedStraps = parseInt(actualStraps) || 0;
+                                   const missingForceN = numN - (appliedStraps * strapForceN);
+                                   
+                                   if (missingForceN <= 0) {
+                                       return <tr key={label}><td>{label}</td><td colSpan="4" style={{textAlign:'center', color: '#16a34a', fontWeight: 'bold'}}>0 % ungesichert (Ausreichend gesichert)</td></tr>;
+                                   }
+                                   
+                                   const g = 9.81;
+                                   const unsecuredMassKg = missingForceN / (g * (c - muVal));
+                                   const totalMassKg = parseFloat(loadWeightStr) || 0;
+                                   let percentage = totalMassKg > 0 ? (unsecuredMassKg / totalMassKg) * 100 : 0;
+                                   if (percentage > 100) percentage = 100;
+                                   const isEinziehung = percentage >= 30;
+
+                                   return (
+                                       <tr key={label}>
+                                           <td>{label}</td>
+                                           <td>{Math.round(numN / 10).toLocaleString()} daN</td>
+                                           <td>{Math.round((appliedStraps * strapForceN) / 10).toLocaleString()} daN</td>
+                                           <td className={isEinziehung ? 'print-warning' : ''}><strong>{percentage.toFixed(1)} %</strong></td>
+                                           <td className={isEinziehung ? 'print-warning' : ''}><strong>{isEinziehung ? '⚠️ JA (≥ 30%)' : 'NEIN'}</strong></td>
+                                       </tr>
+                                   );
+                               };
+                               
+                               return (
+                                   <>
+                                       {lashingResult.numFwd > 0 && printUnsecuredRow('Nach Vorne', lashingResult.numFwd, lashingResult.strapForceFwd, lashingResult.factorForward, friction, loadWeight)}
+                                       {lashingResult.numSide > 0 && printUnsecuredRow('Zur Seite', lashingResult.numSide, lashingResult.strapForceSide, lashingResult.factorSide, friction, loadWeight)}
+                                           </>
+                                       );
+                                   })()}
+                               </tbody>
+                           </table>
+                       </>
+                   )}
         </>
         )}
       </div>
@@ -3042,6 +3235,66 @@ function LashingCalculator({ onOpenKnowledge }) {
                   </div>
                    
                   <LashingFormulaDisplay values={lashingResult.displayValues} details={lashingResult.detailRows} weightClass={lashingResult.weightClass} />
+                  
+                  {/* KONTROLL-MODUS (UNGESICHERTE LADUNG IN %) */}
+                  <div className="mt-5 pt-4 border-t border-slate-200">
+                      <label className="flex items-center gap-3 cursor-pointer mb-3 bg-slate-50 p-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm">
+                          <input 
+                              type="checkbox" 
+                              checked={showUnsecuredCalc} 
+                              onChange={(e) => setShowUnsecuredCalc(e.target.checked)}
+                              className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          />
+                          <div className="flex flex-col">
+                              <span className="text-sm font-bold text-slate-700">Prüfung Einziehung aktivieren</span>
+                              <span className="text-[10px] text-slate-500">Prozentsatz der ungesicherten Ladung berechnen</span>
+                          </div>
+                      </label>
+
+                      {showUnsecuredCalc && (
+                          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 animate-in fade-in slide-in-from-top-2 shadow-inner">
+                              <div className="mb-4">
+                                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Vor Ort angebrachte Gurte</label>
+                                  <input 
+                                      type="number" 
+                                      value={actualStraps} 
+                                      onChange={(e) => setActualStraps(e.target.value)}
+                                      placeholder="z.B. 2"
+                                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-base focus:ring-2 focus:ring-indigo-500 font-bold text-slate-800 shadow-sm"
+                                  />
+                              </div>
+
+                              <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Ergebnisse: Ungesicherte Ladung</h4>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                  {lashingResult.numFwd > 0 && renderUnsecured('Nach Vorne', lashingResult.numFwd, lashingResult.strapForceFwd, lashingResult.factorForward, friction, loadWeight)}
+                                  {lashingResult.numSide > 0 && renderUnsecured('Zur Seite', lashingResult.numSide, lashingResult.strapForceSide, lashingResult.factorSide, friction, loadWeight)}
+                                  {lashingResult.numRear > 0 && renderUnsecured('Nach Hinten', lashingResult.numRear, lashingResult.strapForceRear, lashingResult.factorRear, friction, loadWeight)}
+                              </div>
+
+                              <div className="mt-4 bg-white p-3 rounded-xl border border-slate-200 text-xs text-slate-600 shadow-sm">
+                                  <div className="font-bold text-slate-500 uppercase mb-3 text-[10px] flex items-center gap-1.5">
+                                      <Calculator className="w-3 h-3"/> Berechnungsformel (Ungesicherte Masse)
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center mb-1">
+                                      <FormulaFraction 
+                                          label={<span className="italic">m<sub>ungesichert</sub></span>}
+                                          equals="=" 
+                                          numerator="Restliche fehlende Kraft (N)" 
+                                          denominator="g · (c - μ)" 
+                                      />
+                                      <FormulaFraction 
+                                          label={<span className="italic">Prozent (%)</span>}
+                                          equals="=" 
+                                          numerator={<><span className="italic">m<sub>ungesichert</sub></span> · 100</>}
+                                          denominator={<span className="italic">m<sub>gesamt</sub></span>}
+                                      />
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+                  </div>
+
                </div>
             </div>
             )}
@@ -6299,7 +6552,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 3.1: Taxi-/Mietwagen Reiter implementiert";
+    const updateText = "🚀 Update 3.2: Taxi-/Mietwagen Reiter implementiert; Erweiterung des Lasi-Niederzurrungrechners auf Prüfung Einziehung";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
