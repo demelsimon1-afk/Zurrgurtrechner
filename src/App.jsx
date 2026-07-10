@@ -4681,7 +4681,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                         <Gauge className="w-6 h-6 shrink-0 text-yellow-400 mt-0.5" />
                                         <div>
                                             <span className="font-bold text-sm">eKFV gilt nicht mehr!</span>
-                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 10 % Messtoleranz = eKFV gilt nur bis max. 23 km/h. Ab 24 km/h handelt es sich um ein reguläres Kfz.</p>
+                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 3 km/h Messtoleranz = eKFV gilt nur bis max. 23 km/h. Ab 24 km/h handelt es sich um ein reguläres Kfz.</p>
                                         </div>
                                     </div>
 
@@ -4736,7 +4736,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                         <Gauge className="w-6 h-6 shrink-0 text-yellow-400 mt-0.5" />
                                         <div>
                                             <span className="font-bold text-sm">eKFV gilt nicht mehr!</span>
-                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 10 % Messtoleranz = eKFV gilt nur bis 23 km/h.</p>
+                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 3 km/h Messtoleranz = eKFV gilt nur bis 23 km/h.</p>
                                         </div>
                                     </div>
 
