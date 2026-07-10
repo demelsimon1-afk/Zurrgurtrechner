@@ -678,6 +678,10 @@ const validateCarSecuring = (car) => {
 
     const validVBs = activeVBs.filter(isVBAllowed);
 
+    if (allStrapped && !car.noChocks) {
+        return { valid: false, msg: "Mangelhafte Sicherung. Nur okay, wenn keine Keile möglich." };
+    }
+
     if (validVBs.length > 0) {
         const bestVb = Math.min(...validVBs); 
         return { valid: true, msg: `Korrekt gesichert (Anforderungen für VB ${bestVb} erfüllt).` };
@@ -689,10 +693,6 @@ const validateCarSecuring = (car) => {
 
     if (car.weightClass === '4500' && angle !== '10') return { valid: false, msg: "Gewicht >3.000kg: Anstellwinkel über/unter 10° unzulässig!" };
     
-    if (allStrapped && !car.noChocks) {
-        return { valid: true, msg: "Übersicherung (4 Gurte) erkannt. Grundsätzlich okay." };
-    }
-
     // Präzise Differenz-Auswertung (Ist vs. Soll)
     const getMissingMsg = () => {
         // Bewertet, ob die Standard-Empfehlung oder die gespiegelte Variante näher dran ist
@@ -1070,7 +1070,7 @@ const AngleMeasureModal = ({ isOpen, onClose, onApply, activeField }) => {
                     )}
                     {step === 3 && (
                         <div className="text-center space-y-6">
-                            <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{measuredAngle > 0 ? '+' : ''}{measuredAngle}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Genau)</p></div>
+                            <div className="py-4"><span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums">{isPkwMode ? (measuredAngle > 0 ? '+' : '') + measuredAngle : Math.abs(measuredAngle)}°</span><p className="text-xs font-bold text-slate-400 uppercase mt-1 tracking-wide">Echtzeit (Genau)</p></div>
                             <div>
                                 {isPkwMode ? (
                                     <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-sm leading-relaxed shadow-sm text-left">
@@ -3247,7 +3247,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                           />
                           <div className="flex flex-col">
                               <span className="text-sm font-bold text-slate-700">Prüfung Einziehung aktivieren</span>
-                              <span className="text-[10px] text-slate-500">Prozentsatz der ungesicherten Ladung berechnen</span>
+                              <span className="text-[10px] text-slate-500">Prozentsatz der ungesicherten Ladung berechnen (Beta)</span>
                           </div>
                       </label>
 
@@ -3526,7 +3526,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                    <div className="mt-8 pt-6 border-t border-slate-200 animate-in fade-in">
                        <div className="flex items-center justify-center gap-2 mb-4 text-indigo-700">
                            <Eye className="w-5 h-5" />
-                           <h3 className="font-black uppercase tracking-wide text-sm">Ist-Zustand vs. Empfehlung</h3>
+                           <h3 className="font-black uppercase tracking-wide text-sm">Ist-Zustand vs. VDI 2700</h3>
                        </div>
                        
                        <div className="flex flex-row gap-2 sm:gap-4 justify-center items-stretch w-full">
@@ -3554,7 +3554,7 @@ function LashingCalculator({ onOpenKnowledge }) {
                            <div className="flex-1 bg-emerald-50 p-2 sm:p-4 rounded-xl border border-emerald-200 flex flex-col items-center shadow-sm w-1/2 overflow-hidden">
                                <div className="flex flex-col items-center gap-1 mb-4 text-emerald-700 text-center">
                                     <CheckCircle className="w-4 h-4" />
-                                    <h4 className="font-bold uppercase tracking-tight text-[10px] sm:text-xs">Empfehlung</h4>
+                                    <h4 className="font-bold uppercase tracking-tight text-[10px] sm:text-xs">VDI 2700</h4>
                                </div>
                                <div className="flex flex-col gap-4 justify-center w-full">
                                    {carsTop.length > 0 && (
@@ -3717,18 +3717,23 @@ const FahrtzweckeDropdown = ({ purposes }) => {
 
 function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const dateTime = useDateTime();
-  const [view, setView] = useState(initialView); // Startet jetzt standardmäßig mit der Übersicht
-  const [kzView, setKzView] = useState('kurzzeit'); // State für die Sonderkennzeichen
-  const [alkDroView, setAlkDroView] = useState('ph1'); // State für Alkohol/Drogen Untermenü
-  const [kcangView, setKcangView] = useState('besitz'); // State für KCanG Untermenü
-  const [lasiAblegereife, setLasiAblegereife] = useState('gurte'); // State für LaSi Ablegereife Auswahl
-  const [escooterSpeed, setEscooterSpeed] = useState('bis22'); // State für E-Scooter bbH
-  const [escooterOrigin, setEscooterOrigin] = useState('de'); // State für E-Scooter Herkunft
-  const [kindersitzView, setKindersitzView] = useState('sitz'); // State für Kindersitze Untermenü
-  const [ebikeView, setEbikeView] = useState('pedelec25'); // State für E-Bike Untermenü
-  const [taxiView, setTaxiView] = useState('taxi'); // State für Taxi/Mietwagen Untermenü
+  const [view, setView] = useState(initialView); 
+  const [kzView, setKzView] = useState('kurzzeit'); 
+  const [alkDroView, setAlkDroView] = useState('ph1'); 
+  const [kcangView, setKcangView] = useState('besitz'); 
+  const [lasiAblegereife, setLasiAblegereife] = useState('gurte'); 
+  const [escooterSpeed, setEscooterSpeed] = useState('bis22'); 
+  const [escooterOrigin, setEscooterOrigin] = useState('de'); 
+  const [kindersitzView, setKindersitzView] = useState('sitz'); 
+  const [ebikeView, setEbikeView] = useState('pedelec25'); 
+  const [taxiView, setTaxiView] = useState('taxi'); 
+  
+  // NEUE STATES FÜR DEN ÜBERSETZUNGS-ASSISTENTEN
+  const [transTopic, setTransTopic] = useState(null); 
+  const [transLang, setTransLang] = useState(null); 
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [reifenExpanded, setReifenExpanded] = useState({ profil: true, winter: false, spikes: false }); // State für Reifen-Tatbestände
+  const [reifenExpanded, setReifenExpanded] = useState({ profil: true, winter: false, spikes: false });
 
   useEffect(() => {
       if (initialView) setView(initialView);
@@ -3737,7 +3742,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
   useEffect(() => {
       window.scrollTo(0, 0);
-  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView, taxiView]);
+  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView, taxiView, transTopic, transLang]);
 
   const tabs = [
       { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
@@ -3755,7 +3760,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
       { id: 'rauchverbot', label: 'Rauchverbot', icon: CigaretteOff, color: 'text-slate-500', bg: 'bg-slate-100' },
       { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' },
-      { id: 'taxi', label: 'Taxi / Mietwagen', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-50' }
+      { id: 'taxi', label: 'Taxi / Mietwagen', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-50' },
+      { id: 'uebersetzungen', label: 'Übersetzungen', icon: Globe, color: 'text-sky-500', bg: 'bg-sky-50' }
   ];
 
   return (
@@ -4565,8 +4571,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                     {/* Speed Navigation */}
                     <div className="flex gap-2">
                         {[
-                            { id: 'bis22', label: 'bbH bis 22 km/h' },
-                            { id: 'ab23', label: 'bbH ab 23 km/h' }
+                            { id: 'bis22', label: 'bbH bis 23 km/h' },
+                            { id: 'ab23', label: 'bbH ab 24 km/h' }
                         ].map(sub => (
                             <button
                                 key={sub.id}
@@ -4596,12 +4602,12 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
 
                     <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
                         
-                        {/* 1. bis 22 km/h (DE) */}
+                        {/* 1. bis 23 km/h (DE) */}
                         {escooterSpeed === 'bis22' && escooterOrigin === 'de' && (
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 22 km/h (Deutsche Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 23 km/h (Deutsche Zulassung)</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
@@ -4626,12 +4632,12 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             </div>
                         )}
 
-                        {/* 2. bis 22 km/h (Ausland) */}
+                        {/* 2. bis 23 km/h (Ausland) */}
                         {escooterSpeed === 'bis22' && escooterOrigin === 'aus' && (
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 22 km/h (Ausländische Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 23 km/h (Ausländische Zulassung)</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
@@ -4663,19 +4669,19 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             </div>
                         )}
 
-                        {/* 3. ab 23 km/h (DE) */}
+                        {/* 3. ab 24 km/h (DE) */}
                         {escooterSpeed === 'ab23' && escooterOrigin === 'de' && (
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 23 km/h (Deutsche Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 24 km/h (Deutsche Zulassung)</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="bg-slate-800 text-white p-3.5 rounded-xl shadow-sm text-xs flex items-start gap-3">
                                         <Gauge className="w-6 h-6 shrink-0 text-yellow-400 mt-0.5" />
                                         <div>
                                             <span className="font-bold text-sm">eKFV gilt nicht mehr!</span>
-                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 10 % Messtoleranz = eKFV gilt nur bis max. 22 km/h. Ab 23 km/h handelt es sich um ein reguläres Kfz.</p>
+                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 10 % Messtoleranz = eKFV gilt nur bis max. 23 km/h. Ab 24 km/h handelt es sich um ein reguläres Kfz.</p>
                                         </div>
                                     </div>
 
@@ -4718,19 +4724,19 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             </div>
                         )}
 
-                        {/* 4. ab 23 km/h (Ausland) */}
+                        {/* 4. ab 24 km/h (Ausland) */}
                         {escooterSpeed === 'ab23' && escooterOrigin === 'aus' && (
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 23 km/h (Schweizer Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 24 km/h (Schweizer Zulassung)</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="bg-slate-800 text-white p-3.5 rounded-xl shadow-sm text-xs flex items-start gap-3">
                                         <Gauge className="w-6 h-6 shrink-0 text-yellow-400 mt-0.5" />
                                         <div>
                                             <span className="font-bold text-sm">eKFV gilt nicht mehr!</span>
-                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 10 % Messtoleranz = eKFV gilt nur bis 22 km/h.</p>
+                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 10 % Messtoleranz = eKFV gilt nur bis 23 km/h.</p>
                                         </div>
                                     </div>
 
@@ -6107,45 +6113,294 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                         <Gauge className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                                         <div>
                                             <h4 className="font-bold text-slate-800 text-sm mb-1">Wegstreckenzähler vs. Taxameter</h4>
-                                            <p className="text-xs text-slate-600">Zur Berechnung (sofern kein Pauschalpreis) muss ein geeichter <strong>Wegstreckenzähler</strong> vorhanden sein. Ein Taxameter ist nicht zulässig!</p>
+                                            <p className="text-xs text-slate-600">Im Mietwagen ist ein (geeichter) Wegstreckenzähler vorgeschrieben (nicht zu verwechseln mit dem Taxameter).</p>
                                         </div>
                                     </div>
                                 </div>
-
-                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-6">Dokumente & Fahrerlaubnis</h4>
-                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
-                                    <BkatRow title="Führerschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '204100', cost: '10 €' }]} />
-                                    <BkatRow title="Führerschein zur Fahrgastbeförderung nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '248100', cost: '10 €' }]} />
-                                    <BkatRow title="Fahrzeugschein nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: '811100', cost: '10 €' }]} />
-                                    <BkatRow title="Genehmigungsurkunde (Blau) nicht mitgeführt" fines={[{ role: 'Fahrer', tbnr: 'P21800', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Genehmigungsurkunde (Blau) abgelaufen" fines={[{ role: 'Fahrer', tbnr: 'P22000', cost: 'Anzeige' }]} />
-                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
-                                    <BkatRow title="Fahren ohne Führerschein zur Fahrgastbeförderung (Weiterfahrt untersagen!)" fines={[{ role: 'Fahrer', tbnr: '248600', cost: '75 €' }, { role: 'Halter', tbnr: '248606', cost: '75 €' }]} />
-                                </div>
-
-                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Verhalten & Beförderung</h4>
-                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
-                                    <BkatRow title="Warten auf Fahrgäste ohne Auftrag / unerlaubtes Bereithalten" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Mietwagen nicht im Ganzen vermietet (mehrere Aufträge)" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Beförderungsauftrag nicht am Betriebssitz eingegangen" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Rauchen im Mietwagen" fines={[{ role: 'Fahrer', tbnr: 'Z60002', cost: 'Anzeige' }]} />
-                                    <div className="h-px bg-slate-200 w-full my-1.5"></div>
-                                    <BkatRow title="Alkoholeinwirkung bis 0,249 mg/l (0,5 Promille)" fines={[{ role: 'Fahrer', tbnr: '000000', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Alkoholeinwirkung ab 0,25 mg/l" fines={[{ role: 'Fahrer', tbnr: '424612', cost: '500 €', points: '2 Pkt.' }]} />
-                                </div>
-
-                                <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Fahrzeug & Ausrüstung</h4>
-                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
-                                    <BkatRow title="Verwendung von Taxi-Zeichen (Dachreling / Ordnungsnummer (gelb))" fines={[{ role: 'Halter', tbnr: 'P22700', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Unvorschriftsmäßiger / ungeeichter Wegstreckenzähler" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
-                                    <BkatRow title="Mietwagen ohne wirksame Alarmanlage" fines={[{ role: 'Halter', tbnr: '000000', cost: 'Anzeige' }]} />
-                                </div>
                             </div>
                         )}
-                        
                     </div>
                  </div>
             )}
+
+            {/* ÜBERSETZUNGEN (3-Stufen Assistent) */}
+            {view === 'uebersetzungen' && (() => {
+                const LANGS = [
+                    { id: 'EN', label: 'Englisch', flag: '🇬🇧' },
+                    { id: 'FR', label: 'Französisch', flag: '🇫🇷' },
+                    { id: 'ES', label: 'Spanisch', flag: '🇪🇸' },
+                    { id: 'IT', label: 'Italienisch', flag: '🇮🇹' },
+                    { id: 'RU', label: 'Russisch', flag: '🇷🇺' },
+                    { id: 'PL', label: 'Polnisch', flag: '🇵🇱' },
+                    { id: 'RO', label: 'Rumänisch', flag: '🇷🇴' },
+                    { id: 'TR', label: 'Türkisch', flag: '🇹🇷' },
+                    { id: 'SLO', label: 'Slowenisch', flag: '🇸🇮' },
+                    { id: 'HU', label: 'Ungarisch', flag: '🇭🇺' },
+                    { id: 'UK', label: 'Ukrainisch', flag: '🇺🇦' },
+                    { id: 'HI', label: 'Hindi (Indisch)', flag: '🇮🇳' },
+                ];
+
+                const TRANSLATIONS = {
+                    lasi: [
+                        {
+                            de: "Ihre Ladung ist nicht ausreichend gesichert.",
+                            EN: "Your load is not adequately secured.",
+                            FR: "Votre chargement n'est pas suffisamment arrimé.",
+                            ES: "Su carga no está suficientemente asegurada.",
+                            IT: "Il suo carico non è fissato adeguatamente.",
+                            RU: "Ваш груз недостаточно закреплен.",
+                            PL: "Pana ładunek nie jest odpowiednio zabezpieczony.",
+                            RO: "Încărcătura dvs. nu este asigurată corespunzător.",
+                            TR: "Yükünüz yeterince sabitlenmemiş.",
+                            SLO: "Vaš tovor ni ustrezno pritrjen.",
+                            HU: "A rakománya nincs megfelelően rögzítve.",
+                            UK: "Ваш вантаж недостатньо закріплений.",
+                            HI: "आपका माल ठीक से सुरक्षित नहीं है।"
+                        },
+                        {
+                            de: "Sie müssen weitere Zurrgurte anbringen.",
+                            EN: "You must attach additional lashing straps.",
+                            FR: "Vous devez attacher des sangles d'arrimage supplémentaires.",
+                            ES: "Debe colocar eslingas adicionales.",
+                            IT: "Deve applicare cinghie di ancoraggio aggiuntive.",
+                            RU: "Вы должны закрепить дополнительные ремни.",
+                            PL: "Musi pan założyć dodatkowe pasy mocujące.",
+                            RO: "Trebuie să atașați chingi suplimentare.",
+                            TR: "Ekstra gergi kayışı takmalısınız.",
+                            SLO: "Pritrditi morate dodatne povezovalne trakove.",
+                            HU: "További rögzítő hevedereket kell felhelyeznie.",
+                            UK: "Ви повинні закріпити додаткові ремені.",
+                            HI: "आपको अतिरिक्त पट्टियाँ लगानी होंगी।"
+                        },
+                        {
+                            de: "Weiterfahrt untersagt, bis die Ladung gesichert ist.",
+                            EN: "Further travel is prohibited until the load is secured.",
+                            FR: "Interdiction de poursuivre la route jusqu'à ce que le chargement soit arrimé.",
+                            ES: "Prohibido continuar el viaje hasta que la carga esté asegurada.",
+                            IT: "Divieto di proseguire il viaggio finché il carico non è fissato.",
+                            RU: "Дальнейшее движение запрещено до закрепления груза.",
+                            PL: "Zakaz dalszej jazdy do momentu zabezpieczenia ładunku.",
+                            RO: "Continuarea călătoriei este interzisă până la asigurarea încărcăturii.",
+                            TR: "Yük sabitlenene kadar yola devam etmeniz yasaktır.",
+                            SLO: "Nadaljnja vožnja je prepovedana, dokler tovor ni pritrjen.",
+                            HU: "A továbbhaladás tilos, amíg a rakomány nincs rögzítve.",
+                            UK: "Подальший рух заборонено до закріплення вантажу.",
+                            HI: "माल सुरक्षित होने तक आगे की यात्रा वर्जित है।"
+                        }
+                    ],
+                    ueberladung: [
+                        {
+                            de: "Ihr Fahrzeug ist überladen.",
+                            EN: "Your vehicle is overloaded.",
+                            FR: "Votre véhicule est en surcharge.",
+                            ES: "Su vehículo está sobrecargado.",
+                            IT: "Il suo veicolo è sovraccarico.",
+                            RU: "Ваше транспортное средство перегружено.",
+                            PL: "Pana pojazd jest przeładowany.",
+                            RO: "Vehiculul dumneavoastră este supraîncărcat.",
+                            TR: "Aracınız aşırı yüklü.",
+                            SLO: "Vaše vozilo je preobremenjeno.",
+                            HU: "A járműve túl van terhelve.",
+                            UK: "Ваш транспортний засіб перевантажений.",
+                            HI: "आपका वाहन ओवरलोड है।"
+                        },
+                        {
+                            de: "Sie müssen Ladung abladen oder umladen.",
+                            EN: "You must reload or unload the cargo.",
+                            FR: "Vous devez transborder ou décharger.",
+                            ES: "Debe recargar o descargar.",
+                            IT: "Deve ricaricare o scaricare il carico.",
+                            RU: "Вы должны перегрузить или выгрузить груз.",
+                            PL: "Musi pan przeładować lub rozładować ładunek.",
+                            RO: "Trebuie să reîncărcați sau să descărcați.",
+                            TR: "Yükü aktarmalı veya indirmelisiniz.",
+                            SLO: "Tovor morate preložiti ali razložiti.",
+                            HU: "Át kell raknia vagy le kell pakolnia a rakományt.",
+                            UK: "Ви повинні перевантажити або вивантажити вантаж.",
+                            HI: "आपको माल उतारना या फिर से लोड करना होगा।"
+                        },
+                        {
+                            de: "Sie müssen eine Sicherheitsleistung (Kaution) bezahlen.",
+                            EN: "You have to pay a security deposit (fine).",
+                            FR: "Vous devez payer une amende (caution).",
+                            ES: "Debe pagar una multa (fianza).",
+                            IT: "Deve pagare una multa (cauzione).",
+                            RU: "Вы должны уплатить штраф (залог).",
+                            PL: "Musi pan zapłacić mandat (kaucję).",
+                            RO: "Trebuie să plătiți o amendă (cauțiune).",
+                            TR: "Para cezası (depozito) ödemelisiniz.",
+                            SLO: "Plačati morate globo (kavcijo).",
+                            HU: "Bírságot (kauciót) kell fizetnie.",
+                            UK: "Ви повинні сплатити штраф (заставу).",
+                            HI: "आपको जुर्माना (जमानत) देना होगा।"
+                        }
+                    ],
+                    mangel: [
+                        {
+                            de: "An Ihrem Fahrzeug liegt ein technischer Mangel vor.",
+                            EN: "There is a technical defect on your vehicle.",
+                            FR: "Il y a un défaut technique sur votre véhicule.",
+                            ES: "Hay un defecto técnico en su vehículo.",
+                            IT: "C'è un difetto tecnico nel suo veicolo.",
+                            RU: "В вашем транспортном средстве имеется техническая неисправность.",
+                            PL: "W pańskim pojeździe wystąpiła usterka techniczna.",
+                            RO: "Există o defecțiune tehnică la vehiculul dumneavoastră.",
+                            TR: "Aracınızda teknik bir arıza var.",
+                            SLO: "Na vašem vozilu je tehnična napaka.",
+                            HU: "Műszaki hiba van a járművén.",
+                            UK: "У вашому транспортному засобі є технічна несправність.",
+                            HI: "आपके वाहन में एक तकनीकी खराबी है।"
+                        },
+                        {
+                            de: "Die Reifen haben zu wenig Profil.",
+                            EN: "The tires do not have enough tread.",
+                            FR: "Les pneus n'ont pas assez de bande de roulement.",
+                            ES: "Los neumáticos no tienen suficiente banda de rodadura.",
+                            IT: "I pneumatici non hanno abbastanza battistrada.",
+                            RU: "Шины имеют недостаточный протектор.",
+                            PL: "Opony mają za mało bieżnika.",
+                            RO: "Anvelopele nu au suficient profil.",
+                            TR: "Lastiklerin diş derinliği yetersiz.",
+                            SLO: "Pnevmatike nimajo dovolj profila.",
+                            HU: "A gumiabroncsok profilmélysége nem elegendő.",
+                            UK: "Шини мають недостатній протектор.",
+                            HI: "टायरों में पर्याप्त ट्रेड नहीं है।"
+                        },
+                        {
+                            de: "Die Bremsen sind defekt, die Weiterfahrt ist untersagt.",
+                            EN: "The brakes are defective, further travel is prohibited.",
+                            FR: "Les freins sont défectueux, il est interdit de continuer à rouler.",
+                            ES: "Los frenos están defectuosos, se prohíbe continuar el viaje.",
+                            IT: "I freni sono difettosi, è vietato proseguire il viaggio.",
+                            RU: "Тормоза неисправны, дальнейшее движение запрещено.",
+                            PL: "Hamulce są uszkodzone, zakaz dalszej jazdy.",
+                            RO: "Frânele sunt defecte, continuarea călătoriei este interzisă.",
+                            TR: "Frenler arızalı, yola devam etmeniz yasaktır.",
+                            SLO: "Zavore so pokvarjene, nadaljnja vožnja je prepovedana.",
+                            HU: "A fékek hibásak, a továbbhaladás tilos.",
+                            UK: "Гальма несправні, подальший рух заборонено.",
+                            HI: "ब्रेक खराब हैं, आगे की यात्रा वर्जित है।"
+                        }
+                    ]
+                };
+
+                // SCHRITT 1: Themengebiet wählen
+                if (!transTopic) {
+                    return (
+                        <div className="space-y-4 animate-in fade-in">
+                            <div className="flex items-center gap-2 mb-4 text-sky-700 pb-2 border-b border-slate-200">
+                                <Globe className="w-5 h-5" />
+                                <h3 className="font-black uppercase tracking-wide text-xs">Schritt 1: Thema wählen</h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 gap-3">
+                                <button onClick={() => setTransTopic('lasi')} className="bg-white border-2 border-slate-100 hover:border-indigo-400 p-4 rounded-2xl flex items-center gap-4 transition-all shadow-sm active:scale-95 group">
+                                    <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><LashingStrapIcon className="w-7 h-7" /></div>
+                                    <div className="text-left">
+                                        <h4 className="font-black text-slate-800 text-lg uppercase tracking-wide">Ladungssicherung</h4>
+                                        <p className="text-xs text-slate-500 font-medium">Gurte, Antirutschmatte, Weiterfahrt</p>
+                                    </div>
+                                </button>
+                                
+                                <button onClick={() => setTransTopic('ueberladung')} className="bg-white border-2 border-slate-100 hover:border-blue-400 p-4 rounded-2xl flex items-center gap-4 transition-all shadow-sm active:scale-95 group">
+                                    <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><Scale className="w-7 h-7" /></div>
+                                    <div className="text-left">
+                                        <h4 className="font-black text-slate-800 text-lg uppercase tracking-wide">Überladung</h4>
+                                        <p className="text-xs text-slate-500 font-medium">Abladen, Bußgeld, Kaution</p>
+                                    </div>
+                                </button>
+                                
+                                <button onClick={() => setTransTopic('mangel')} className="bg-white border-2 border-slate-100 hover:border-red-400 p-4 rounded-2xl flex items-center gap-4 transition-all shadow-sm active:scale-95 group">
+                                    <div className="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><AlertTriangle className="w-7 h-7" /></div>
+                                    <div className="text-left">
+                                        <h4 className="font-black text-slate-800 text-lg uppercase tracking-wide">Technischer Mangel</h4>
+                                        <p className="text-xs text-slate-500 font-medium">Reifen, Bremsen, Defekte</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // SCHRITT 2: Sprache wählen
+                if (transTopic && !transLang) {
+                    const topicName = transTopic === 'lasi' ? 'Ladungssicherung' : transTopic === 'ueberladung' ? 'Überladung' : 'Technischer Mangel';
+                    const iconColor = transTopic === 'lasi' ? 'text-indigo-600 bg-indigo-50' : transTopic === 'ueberladung' ? 'text-blue-600 bg-blue-50' : 'text-red-600 bg-red-50';
+                    
+                    return (
+                        <div className="space-y-4 animate-in slide-in-from-right-2">
+                            <button onClick={() => setTransTopic(null)} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-sm font-bold bg-white px-3 py-2 rounded-xl shadow-sm border border-slate-200 w-full transition-colors">
+                                <ChevronLeft className="w-5 h-5" /> Zurück zur Themenauswahl
+                            </button>
+                            
+                            <div className="flex items-center gap-3 mb-4 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconColor}`}>
+                                    {transTopic === 'lasi' ? <LashingStrapIcon className="w-5 h-5" /> : transTopic === 'ueberladung' ? <Scale className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Schritt 2: Sprache wählen für</span>
+                                    <h3 className="font-black uppercase tracking-wide text-slate-800 text-sm">{topicName}</h3>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                {LANGS.map(lang => (
+                                    <button
+                                        key={lang.id}
+                                        onClick={() => setTransLang(lang.id)}
+                                        className="bg-white border-2 border-slate-100 hover:border-sky-400 p-3 rounded-xl flex flex-col items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                                    >
+                                        <span className="text-3xl drop-shadow-sm">{lang.flag}</span>
+                                        <span className="font-bold text-slate-700 text-xs">{lang.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // SCHRITT 3: Fertige Sätze anzeigen
+                if (transTopic && transLang) {
+                    const topicName = transTopic === 'lasi' ? 'Ladungssicherung' : transTopic === 'ueberladung' ? 'Überladung' : 'Technischer Mangel';
+                    const currentLangObj = LANGS.find(l => l.id === transLang);
+                    const sentences = TRANSLATIONS[transTopic];
+
+                    return (
+                        <div className="space-y-4 animate-in slide-in-from-right-2">
+                            <button onClick={() => setTransLang(null)} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-sm font-bold bg-white px-3 py-2 rounded-xl shadow-sm border border-slate-200 w-full transition-colors">
+                                <ChevronLeft className="w-5 h-5" /> Zurück zur Sprachauswahl
+                            </button>
+                            
+                            <div className="flex items-center justify-between mb-4 bg-sky-50 border border-sky-200 p-3 rounded-xl shadow-sm">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-sky-600 font-bold uppercase block mb-0.5">{topicName}</span>
+                                    <h3 className="font-black text-sky-900 text-lg flex items-center gap-2">
+                                        <span className="text-2xl leading-none">{currentLangObj.flag}</span> {currentLangObj.label}
+                                    </h3>
+                                </div>
+                                <Globe className="w-8 h-8 text-sky-200" />
+                            </div>
+                            
+                            <div className="space-y-3">
+                                {sentences.map((sentence, idx) => (
+                                    <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                                        <div className="text-xs text-slate-500 font-medium mb-3 pb-2 border-b border-slate-100 flex items-start gap-2">
+                                            <span className="text-slate-300 font-black">DE</span>
+                                            {sentence.de}
+                                        </div>
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-sky-600 font-black mt-0.5">{currentLangObj.id}</span>
+                                            <div className="font-black text-slate-800 text-base leading-snug">
+                                                {sentence[transLang]}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+            })()}
       </div>
       <AppVersionFooter />
     </div>
@@ -6694,3 +6949,4 @@ export default function App() {
     </ThemeContext.Provider>
   );
 }
+
