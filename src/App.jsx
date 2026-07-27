@@ -278,6 +278,110 @@ const AutobahnIcon = ({ className }) => (
     </svg>
 );
 
+const Sign237 = ({ className }) => (
+    <svg viewBox="0 0 100 100" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#005293"/>
+        <g transform="translate(10, 15) scale(0.8)" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="28" cy="65" r="14"/>
+            <circle cx="72" cy="65" r="14"/>
+            <path d="M28 65 L45 38 L65 38 L72 65"/>
+            <path d="M28 65 L65 38"/>
+            <path d="M45 38 L40 25 M33 25 L45 25"/>
+            <path d="M65 38 L60 20 M53 25 L65 15"/>
+        </g>
+    </svg>
+);
+
+const Sign239 = ({ className }) => (
+    <svg viewBox="0 0 100 100" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#005293"/>
+        <g fill="#fff">
+            <circle cx="40" cy="30" r="6" />
+            <path d="M40 40 C35 40 30 45 30 55 L35 80 L42 80 L42 60 L45 60 L45 80 L52 80 L50 55 C50 45 45 40 40 40 Z" />
+            <circle cx="65" cy="45" r="5" />
+            <path d="M65 53 C62 53 58 56 58 63 L61 80 L66 80 L66 68 L68 68 L68 80 L73 80 L71 63 C71 56 68 53 65 53 Z" />
+        </g>
+    </svg>
+);
+
+const Sign240 = ({ className }) => (
+    <svg viewBox="0 0 100 100" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#005293"/>
+        <line x1="15" y1="50" x2="85" y2="50" stroke="#fff" strokeWidth="3" />
+        <g transform="translate(30, -10) scale(0.55)" fill="#fff">
+            <circle cx="40" cy="30" r="6" />
+            <path d="M40 40 C35 40 30 45 30 55 L35 80 L42 80 L42 60 L45 60 L45 80 L52 80 L50 55 C50 45 45 40 40 40 Z" />
+            <circle cx="65" cy="45" r="5" />
+            <path d="M65 53 C62 53 58 56 58 63 L61 80 L66 80 L66 68 L68 68 L68 80 L73 80 L71 63 C71 56 68 53 65 53 Z" />
+        </g>
+        <g transform="translate(30, 48) scale(0.55)" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="28" cy="65" r="14"/><circle cx="72" cy="65" r="14"/>
+            <path d="M28 65 L45 38 L65 38 L72 65"/><path d="M28 65 L65 38"/>
+            <path d="M45 38 L40 25 M33 25 L45 25"/><path d="M65 38 L60 20 M53 25 L65 15"/>
+        </g>
+    </svg>
+);
+
+const Sign241 = ({ className }) => (
+    <svg viewBox="0 0 100 100" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#005293"/>
+        <line x1="50" y1="15" x2="50" y2="85" stroke="#fff" strokeWidth="3" />
+        <g transform="translate(-10, 15) scale(0.55)" fill="#fff">
+            <circle cx="40" cy="30" r="6" />
+            <path d="M40 40 C35 40 30 45 30 55 L35 80 L42 80 L42 60 L45 60 L45 80 L52 80 L50 55 C50 45 45 40 40 40 Z" />
+            <circle cx="65" cy="45" r="5" />
+            <path d="M65 53 C62 53 58 56 58 63 L61 80 L66 80 L66 68 L68 68 L68 80 L73 80 L71 63 C71 56 68 53 65 53 Z" />
+        </g>
+        <g transform="translate(45, 20) scale(0.55)" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="28" cy="65" r="14"/><circle cx="72" cy="65" r="14"/>
+            <path d="M28 65 L45 38 L65 38 L72 65"/><path d="M28 65 L65 38"/>
+            <path d="M45 38 L40 25 M33 25 L45 25"/><path d="M65 38 L60 20 M53 25 L65 15"/>
+        </g>
+    </svg>
+);
+
+const Sign244_1 = ({ className }) => (
+    <svg viewBox="0 0 100 100" className={className}>
+        <rect x="2" y="2" width="96" height="96" fill="#fff" stroke="#000" strokeWidth="2" rx="4"/>
+        <circle cx="50" cy="40" r="32" fill="#005293"/>
+        <g transform="translate(18, 10) scale(0.65)" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="28" cy="65" r="14"/><circle cx="72" cy="65" r="14"/>
+            <path d="M28 65 L45 38 L65 38 L72 65"/><path d="M28 65 L65 38"/>
+            <path d="M45 38 L40 25 M33 25 L45 25"/><path d="M65 38 L60 20 M53 25 L65 15"/>
+        </g>
+        <text x="50" y="86" fontSize="12" fontFamily="sans-serif" textAnchor="middle" fill="#000" fontWeight="bold">Fahrradstraße</text>
+    </svg>
+);
+
+const Sign242_1 = ({ className }) => (
+    <svg viewBox="0 0 100 100" className={className}>
+        <rect x="2" y="2" width="96" height="96" fill="#fff" stroke="#000" strokeWidth="2" rx="4"/>
+        <circle cx="50" cy="40" r="32" fill="#005293"/>
+        <g transform="translate(20, 7) scale(0.6)" fill="#fff">
+            <circle cx="40" cy="30" r="6" />
+            <path d="M40 40 C35 40 30 45 30 55 L35 80 L42 80 L42 60 L45 60 L45 80 L52 80 L50 55 C50 45 45 40 40 40 Z" />
+            <circle cx="65" cy="45" r="5" />
+            <path d="M65 53 C62 53 58 56 58 63 L61 80 L66 80 L66 68 L68 68 L68 80 L73 80 L71 63 C71 56 68 53 65 53 Z" />
+        </g>
+        <text x="50" y="82" fontSize="10.5" fontFamily="sans-serif" textAnchor="middle" fill="#000" fontWeight="bold">Fußgänger-</text>
+        <text x="50" y="94" fontSize="10.5" fontFamily="sans-serif" textAnchor="middle" fill="#000" fontWeight="bold">zone</text>
+    </svg>
+);
+
+const Sign1010_66 = ({ className }) => (
+    <svg viewBox="0 0 100 80" className={className}>
+        <rect x="2" y="2" width="96" height="76" fill="#fff" stroke="#000" strokeWidth="2" rx="4"/>
+        <g transform="translate(15, 5) scale(0.7)" stroke="#000" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="25" cy="45" r="6" />
+            <circle cx="75" cy="45" r="6" />
+            <path d="M25 45 L75 45" />
+            <path d="M65 45 L55 15" />
+            <path d="M45 15 L65 15" />
+        </g>
+        <text x="50" y="65" fontSize="18" fontFamily="sans-serif" textAnchor="middle" fill="#000" fontWeight="bold">frei</text>
+    </svg>
+);
+
 const TrafficSign = ({ value, selected, onClick }) => {
     if (value === 'VB') {
         return (
@@ -4607,26 +4711,98 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 23 km/h (Deutsche Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 23 km/h (eKFV) - DE</h3>
                                 </div>
                                 <div className="space-y-4">
+                                    <div className="bg-slate-800 text-white p-4 rounded-xl shadow-sm text-sm leading-relaxed">
+                                        Fahrzeuge in dieser Kategorie fallen unter die Elektrokleinstfahrzeuge-Verordnung (eKFV).<br/>
+                                        <strong>Rechtliche Einstufung:</strong> E-Scooter mit bbH mehr als 6 km/h und max. 20 km/h (inkl. Toleranz 23 km/h). Leistung max. 500 W.
+                                    </div>
                                     <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
                                         <User className="w-5 h-5 text-blue-500 shrink-0" />
-                                        <span className="text-sm text-blue-900"><strong>Mindestalter: 14 Jahre</strong> (§ 3 eKFZ)</span>
+                                        <span className="text-sm text-blue-900"><strong>Mindestalter: 14 Jahre</strong> (§ 3 eKFV)</span>
                                     </div>
 
                                     <div className="bg-red-50 border border-red-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
                                         <AlertTriangle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
                                         <div>
-                                            <span className="font-bold text-red-800 text-sm">Straftat</span>
-                                            <p className="text-xs text-red-900 mt-1">Kein Versicherungsschutz nach §§ 1, 6, 30 PflVG</p>
+                                            <span className="font-bold text-red-800 text-sm">Kfz-Haftpflichtversicherung</span>
+                                            <p className="text-xs text-red-900 mt-1">Die Versicherungsplakette ist obligatorisch. Bei Fehlen liegt <strong>kein</strong> Verstoß nach dem Pflichtversicherungsgesetz vor (sofern Vertrag existiert), sondern eine Owi nach eKFV. Liegt kein Vertrag vor, liegt eine Straftat vor.</p>
                                         </div>
                                     </div>
+
+                                    <div className="bg-white border border-slate-200 p-3.5 rounded-xl shadow-sm">
+                                        <h4 className="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-slate-400"/> Pflichtausstattung</h4>
+                                        <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
+                                            <li>Weißer Scheinwerfer & Reflektor (vorne)</li>
+                                            <li>Rotes Rücklicht & Reflektor (hinten)</li>
+                                            <li>Zwei unabhängige Bremsen</li>
+                                            <li>Helltönende Glocke (Klingel)</li>
+                                        </ul>
+                                    </div>
                                     
-                                    <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Ordnungswidrigkeiten (BKat)</h4>
+                                    <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl shadow-sm">
+                                        <h4 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-2"><MapPin className="w-4 h-4"/> Erlaubte Verkehrsflächen</h4>
+                                        <p className="text-xs text-emerald-800 mb-2 font-medium"><strong>Zwingend zu benutzen:</strong></p>
+                                        <ul className="text-xs text-emerald-800 space-y-3">
+                                            <li className="flex items-center gap-2">
+                                                <Sign237 className="w-8 h-8 shrink-0" />
+                                                <span>Vz 237 (Radweg)</span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Sign240 className="w-8 h-8 shrink-0" />
+                                                <span>Vz 240 (Gemeinsamer Geh- und Radweg)</span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Sign241 className="w-8 h-8 shrink-0" />
+                                                <span>Vz 241 (Getrennter Rad- und Gehweg)</span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Sign244_1 className="w-8 h-8 shrink-0" />
+                                                <span>Vz 244.1 (Fahrradstraße)</span>
+                                            </li>
+                                        </ul>
+                                        <div className="mt-4 text-xs text-emerald-800 font-medium">
+                                            <strong>Ausnahme (Fahrbahn):</strong> Nur wenn diese Radverkehrsanlagen fehlen, darf die Fahrbahn genutzt werden.
+                                        </div>
+                                        <div className="mt-3 pt-3 border-t border-emerald-200 text-xs text-emerald-800 font-medium">
+                                            <strong>Befreiung durch Zusatzzeichen:</strong><br/>
+                                            <div className="flex flex-col sm:flex-row gap-2 my-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Sign242_1 className="w-8 h-8 shrink-0" />
+                                                    <span className="text-[10px]">Vz 242.1 (Fußgängerzone)</span>
+                                                </div>
+                                                <span className="hidden sm:inline">oder</span>
+                                                <div className="flex items-center gap-2">
+                                                    <Sign239 className="w-8 h-8 shrink-0" />
+                                                    <span className="text-[10px]">Vz 239 (Gehweg)</span>
+                                                </div>
+                                            </div>
+                                            dürfen nur befahren werden, wenn das Zusatzzeichen angebracht ist:<br/>
+                                            <div className="flex items-center gap-2 mt-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm w-max">
+                                                <Sign1010_66 className="w-14 h-10 shrink-0" />
+                                                <span className="text-[10px] font-bold">Vz 1010-66</span>
+                                            </div>
+                                            <span className="text-red-700 font-bold block mt-2">Wichtig: Das Schild "Radverkehr frei" reicht hierfür nicht aus!</span>
+                                        </div>
+                                    </div>
+
+                                    <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Wichtige Tatbestände (bis 23 km/h)</h4>
                                     <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
-                                        <BkatRow title="Versicherungsplakette nicht angebracht" fines={[{ role: 'Fahrer', tbnr: '602118', cost: '40 €' }, { role: 'Halter', tbnr: '602124', cost: '40 €' }]} />
-                                        <BkatRow title="Allgemeine Betriebserlaubnis liegt nicht vor" fines={[{ role: 'Fahrer', tbnr: '602606', cost: '70 €' }, { role: 'Halter', tbnr: '602612', cost: '70 €' }]} />
+                                        <BkatRow title="Defekte Bremse" fines={[{ role: 'Fahrer', tbnr: '602018', cost: '25 €' }, { role: 'Halter', tbnr: '602024', cost: '25 €' }]} />
+                                        <BkatRow title="Versicherungsplakette fehlt/ungültig" fines={[{ role: 'Fahrer', tbnr: '602118', cost: '40 €' }, { role: 'Halter', tbnr: '602124', cost: '40 €' }]} />
+                                        <BkatRow title="Defektes Licht" fines={[{ role: 'Fahrer', tbnr: '602130', cost: '20 €' }, { role: 'Halter', tbnr: '602030', cost: '20 €' }]} />
+                                        <BkatRow title="Defekte Klingel" fines={[{ role: 'Fahrer', tbnr: '602136', cost: '15 €' }, { role: 'Halter', tbnr: '602036', cost: '15 €' }]} />
+                                        <BkatRow title="Ohne Betriebserlaubnis" fines={[{ role: 'Fahrer', tbnr: '602606', cost: '70 €' }, { role: 'Halter', tbnr: '602612', cost: '70 €' }]} />
+                                        <BkatRow title="Zweite Person befördert" fines={[{ role: 'Fahrer', tbnr: '608000', cost: '10 €' }]} />
+                                        <BkatRow title="Nicht zulässige Verkehrsfläche i.g.O. befahren" fines={[{ role: 'Fahrer', tbnr: '610100', cost: '15 €' }]} />
+                                        <BkatRow title="Benutzen von Mobiltelefon" fines={[{ role: 'Fahrer', tbnr: '123624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet" fines={[{ role: 'Fahrer', tbnr: '137612', cost: '60 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet (> 1 Sek.)" fines={[{ role: 'Fahrer', tbnr: '137624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Fahrer unter 14 J. (Inbetriebnahme angeordnet)" fines={[{ role: 'Halter', tbnr: '331612', cost: '90 €', points: '1' }]} />
+                                    </div>
+                                    <div className="bg-slate-800 text-white p-3 rounded-xl text-xs font-bold text-center shadow-sm">
+                                        Promillegrenzen und BTM Grenzen gleich wie beim PKW!
                                     </div>
                                 </div>
                             </div>
@@ -4637,19 +4813,23 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 23 km/h (Ausländische Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter bis 23 km/h (eKFV) - Ausland</h3>
                                 </div>
                                 <div className="space-y-4">
+                                     <div className="bg-slate-800 text-white p-4 rounded-xl shadow-sm text-sm leading-relaxed">
+                                        Fahrzeuge in dieser Kategorie fallen im Grundsatz unter die Vorgaben für Elektrokleinstfahrzeuge in Deutschland, sofern sie hier betrieben werden.
+                                    </div>
+
                                     <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
                                         <User className="w-5 h-5 text-blue-500 shrink-0" />
-                                        <span className="text-sm text-blue-900"><strong>Mindestalter: 14 Jahre</strong> (§ 3 eKFZ)</span>
+                                        <span className="text-sm text-blue-900"><strong>Mindestalter: 14 Jahre</strong> (§ 3 eKFV)</span>
                                     </div>
 
                                     <div className="bg-red-50 border border-red-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
                                         <AlertTriangle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
                                         <div>
                                             <span className="font-bold text-red-800 text-sm">Straftat (Fehlende Versicherung)</span>
-                                            <p className="text-xs text-red-900 mt-1">Strafbarkeit ergibt sich aus <strong>§ 3 AuslPflVG</strong> und nicht aus dem PflVG!</p>
+                                            <p className="text-xs text-red-900 mt-1">Fehlt der Versicherungsschutz bei ausländischen Fahrzeugen, ergibt sich die Strafbarkeit aus <strong>§ 3 AuslPflVG</strong> und nicht aus dem PflVG!</p>
                                         </div>
                                     </div>
                                     
@@ -4658,12 +4838,31 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                         <p>Versicherungsschutz muss <strong>nachgewiesen, mitgeführt und ausgehändigt</strong> werden. Führt der Fahrer keinen Nachweis mit, ergibt sich die Owi aus <strong>§ 12 AuslPflVG</strong> (vgl. Kommentierung Hentschel).</p>
                                     </div>
 
+                                    <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl shadow-sm">
+                                        <h4 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-2"><MapPin className="w-4 h-4"/> Erlaubte Verkehrsflächen</h4>
+                                        <p className="text-xs text-emerald-800 mb-2 font-medium">Analog zur eKFV müssen Radverkehrsanlagen genutzt werden. Nur wenn diese fehlen, darf auf die Fahrbahn ausgewichen werden. Fußgängerzonen und Gehwege sind nur bei Freigabe für E-Scooter erlaubt.</p>
+                                    </div>
+
                                     <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Ordnungswidrigkeiten (BKat)</h4>
-                                    <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200">
-                                        <BkatRow title="Versicherungsplakette nicht angebracht" fines={[{ role: 'Fahrer', tbnr: '602118', cost: '40 €' }, { role: 'Halter', tbnr: '602124', cost: '40 €' }]} />
+                                    <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                        <BkatRow title="Defekte Bremse" fines={[{ role: 'Fahrer', tbnr: '602018', cost: '25 €' }, { role: 'Halter', tbnr: '602024', cost: '25 €' }]} />
+                                        <BkatRow title="Versicherungsplakette fehlt/ungültig" fines={[{ role: 'Fahrer', tbnr: '602118', cost: '40 €' }, { role: 'Halter', tbnr: '602124', cost: '40 €' }]} />
+                                        <BkatRow title="Defektes Licht" fines={[{ role: 'Fahrer', tbnr: '602130', cost: '20 €' }, { role: 'Halter', tbnr: '602030', cost: '20 €' }]} />
+                                        <BkatRow title="Defekte Klingel" fines={[{ role: 'Fahrer', tbnr: '602136', cost: '15 €' }, { role: 'Halter', tbnr: '602036', cost: '15 €' }]} />
+                                        <BkatRow title="Ohne Betriebserlaubnis" fines={[{ role: 'Fahrer', tbnr: '602606', cost: '70 €' }, { role: 'Halter', tbnr: '602612', cost: '70 €' }]} />
+                                        <BkatRow title="Zweite Person befördert" fines={[{ role: 'Fahrer', tbnr: '608000', cost: '10 €' }]} />
+                                        <BkatRow title="Nicht zulässige Verkehrsfläche i.g.O. befahren" fines={[{ role: 'Fahrer', tbnr: '610100', cost: '15 €' }]} />
+                                        <BkatRow title="Benutzen von Mobiltelefon" fines={[{ role: 'Fahrer', tbnr: '123624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet" fines={[{ role: 'Fahrer', tbnr: '137612', cost: '60 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet (> 1 Sek.)" fines={[{ role: 'Fahrer', tbnr: '137624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Fahrer unter 14 J. (Inbetriebnahme angeordnet)" fines={[{ role: 'Halter', tbnr: '331612', cost: '90 €', points: '1' }]} />
+                                        <div className="h-px bg-slate-200 w-full my-1.5"></div>
                                         <p className="text-[10px] text-slate-600 leading-relaxed mt-2.5 px-1 pb-1">
-                                            <strong>Hinweis zur Ahndung:</strong> Auch wenn die Ahndung bei Ausländern fraglich erscheint, begründet die fehlende Kennzeichnung nach eKFV die <strong>Untersagung der Weiterfahrt</strong>, da in diesem Zustand keine Ermittlung des Halters möglich ist. <strong>Beachte allerdings die Verhältnismäßigkeit!</strong>
+                                            <strong>Hinweis zur Ahndung (Ausstattung/Versicherung):</strong> Auch wenn die Ahndung bei Ausländern fraglich erscheint, begründet die fehlende Kennzeichnung/Versicherung nach eKFV die <strong>Untersagung der Weiterfahrt</strong>, da in diesem Zustand oft keine Ermittlung des Halters möglich ist oder Versicherungsschutz unklar ist. <strong>Beachte allerdings die Verhältnismäßigkeit!</strong>
                                         </p>
+                                    </div>
+                                    <div className="bg-slate-800 text-white p-3 rounded-xl text-xs font-bold text-center shadow-sm">
+                                        Promillegrenzen und BTM Grenzen gleich wie beim PKW!
                                     </div>
                                 </div>
                             </div>
@@ -4674,51 +4873,72 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 24 km/h (Deutsche Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 24 km/h - DE</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="bg-slate-800 text-white p-3.5 rounded-xl shadow-sm text-xs flex items-start gap-3">
                                         <Gauge className="w-6 h-6 shrink-0 text-yellow-400 mt-0.5" />
                                         <div>
-                                            <span className="font-bold text-sm">eKFV gilt nicht mehr!</span>
-                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 3 km/h Messtoleranz = eKFV gilt nur bis max. 23 km/h. Ab 24 km/h handelt es sich um ein reguläres Kfz.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-red-50 border border-red-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
-                                        <AlertTriangle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
-                                        <div>
-                                            <span className="font-bold text-red-800 text-sm">Straftat</span>
-                                            <p className="text-xs text-red-900 mt-1">Kein Versicherungsschutz nach §§ 1, 6, 30 PflVG</p>
+                                            <span className="font-bold text-sm text-yellow-400">eKFV gilt nicht mehr!</span>
+                                            <p className="font-normal opacity-90 mt-1 leading-relaxed">20 km/h bbH + 3 km/h Messtoleranz = eKFV gilt nur bis max. 23 km/h. <br/>Ab 24 km/h fallen sie aus der eKFV heraus und werden rechtlich als <strong>Kleinkrafträder</strong> eingestuft.</p>
                                         </div>
                                     </div>
 
                                     <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-start gap-3 shadow-sm text-xs text-indigo-900 font-medium">
                                         <CreditCard className="w-5 h-5 shrink-0 text-indigo-500 mt-0.5" />
-                                        <p><strong>Fahrerlaubnis Klasse B</strong> zwingend vonnöten, da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen. Auch ein Mofa muss einen Sitzplatz aufweisen (siehe VO (EG) 168/2013 ) somit scheidet auch die Mofaprüfbescheinigung aus.</p>
+                                        <div>
+                                             <strong className="block text-indigo-800 text-sm mb-1">Fahrerlaubnis Klasse B zwingend erforderlich</strong>
+                                             Da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen, scheiden diese aus. Auch ein Mofa muss einen Sitzplatz aufweisen (siehe VO (EG) 168/2013). Somit scheidet auch die Mofaprüfbescheinigung aus.
+                                        </div>
                                     </div>
 
+                                    <div className="bg-red-50 border border-red-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
+                                        <AlertTriangle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
+                                        <div className="text-xs text-red-900">
+                                            <strong className="text-red-800 text-sm block mb-1">Versicherung & Helmpflicht</strong>
+                                            Kfz-Haftpflichtversicherung ist zwingend. Ausstattungspflichten bleiben identisch (Licht, Bremse), <strong>zusätzlich greift die Helmpflicht</strong>.
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl shadow-sm">
+                                        <h4 className="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2"><MapPin className="w-4 h-4 text-slate-400"/> Erlaubte Verkehrsflächen</h4>
+                                        <p className="text-xs text-slate-600 font-bold">Es ist zwingend die Fahrbahn zu nutzen.</p>
+                                        <p className="text-xs text-red-600 mt-1 font-medium">Radwege, Gehwege sowie Kraftfahrstraßen/Autobahnen sind verboten.</p>
+                                    </div>
+                                    
                                     <div className="bg-orange-50 border border-orange-200 p-3.5 rounded-xl shadow-sm">
                                         <div className="flex items-center gap-2 mb-2 text-orange-800">
                                             <AlertCircle className="w-4 h-4" />
-                                            <strong className="text-xs">Sonderfall: Tuning & § 23 StVO</strong>
+                                            <strong className="text-xs">Sonderfall: Tuning & Verkehrssicherheit (§ 23 StVO)</strong>
                                         </div>
                                         <p className="text-[11px] text-orange-900 leading-relaxed">
-                                            Wird ein versicherter E-Scooter z.B. per Chip auf 35 km/h getunt, erlischt der Versicherungsvertrag <strong>nicht automatisch</strong> (die Versicherung kann nach AKB nur Leistung kürzen bzw. den Halter in Regress nehmen). Straftaten nach dem PflVG entfallen ggf. <br/><br/>
+                                            Wird ein versicherter E-Scooter z.B. per Chip auf 35 km/h getunt, erlischt der Versicherungsvertrag <strong>nicht automatisch</strong> (Leistungskürzung/Regress nach AKB möglich). Straftaten nach dem PflVG entfallen dann ggf. <br/><br/>
                                             <strong>Es greift jedoch § 23 StVO:</strong> Da die kleinen Reifen und Bremsen nicht für hohe Geschwindigkeiten ausgelegt sind, ist die Verkehrssicherheit wesentlich beeinträchtigt! (Ggf. Vorsatz prüfen).
                                         </p>
                                     </div>
 
-                                    <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Tatbestände (BKat)</h4>
-                                    <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-2">
-                                        <div>
-                                            <div className="mb-1.5 px-1 text-xs font-bold text-slate-700">Zulassung nach § 3 FZV nötig:</div>
-                                            <BkatRow title="Fahren ohne Zulassung" fines={[{ role: 'Fahrer', tbnr: '803600', cost: '70 €', points: '1 Pkt.' }, { role: 'Halter', tbnr: '803500', cost: '70 €', points: '1 Pkt.' }]} />
-                                        </div>
-                                        <div className="pt-2 border-t border-slate-200">
-                                            <div className="mb-1.5 px-1 text-xs font-bold text-slate-700">Verkehrssicherheit durch Tuning beeinträchtigt (§ 23 StVO):</div>
-                                            <BkatRow title="Wesentliche Beeinträchtigung d. Verkehrssicherheit" fines={[{ role: 'Fahrer', tbnr: '123600', cost: '80 €', points: '1 Pkt.' }]} />
-                                        </div>
+                                    <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Wichtige Tatbestände (über 23 km/h Inland)</h4>
+                                    <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                        <BkatRow title="Kleinkraftrad mit defekter Bremse" fines={[{ role: 'Fahrer', tbnr: '341000', cost: '25 €' }, { role: 'Halter', tbnr: '331024', cost: '35 €' }]} />
+                                        <BkatRow title="Kleinkraftrad ohne gültige Vers.Plakette" fines={[{ role: 'Fahrer', tbnr: '804118', cost: '40 €' }, { role: 'Halter', tbnr: '804006', cost: '40 €' }]} />
+                                        <BkatRow title="Kleinkraftrad mit defektem Licht" fines={[{ role: 'Fahrer', tbnr: '349430', cost: '5 €' }, { role: 'Halter', tbnr: '331054', cost: '15 €' }]} />
+                                        <BkatRow title="Kleinkraftrad mit defekter Klingel" fines={[{ role: 'Fahrer', tbnr: '355000', cost: '15 €' }, { role: 'Halter', tbnr: '602036', cost: '15 €' }]} />
+                                        <BkatRow title="Zweite Person befördert" fines={[{ role: 'Fahrer', tbnr: '121100', cost: '5 €' }]} />
+                                        <BkatRow title="Befahren des Gehwegs" fines={[{ role: 'Fahrer', tbnr: '102100', cost: '55 €' }]} />
+                                        <BkatRow title="Benutzen des Radwegs (Nichtberechtigter)" fines={[{ role: 'Fahrer', tbnr: '141154', cost: '15 €' }]} />
+                                        <BkatRow title="Linksseitigen Radweg entgegen Fahrtrichtung genutzt" fines={[{ role: 'Fahrer', tbnr: '102126', cost: '55 €' }]} />
+                                        <BkatRow title="Benutzen von Mobiltelefon" fines={[{ role: 'Fahrer', tbnr: '123624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet" fines={[{ role: 'Fahrer', tbnr: '137612', cost: '60 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet (> 1 Sek.)" fines={[{ role: 'Fahrer', tbnr: '137624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Führerscheinmitführpflicht" fines={[{ role: 'Fahrer', tbnr: '204100', cost: '10 €' }]} />
+                                        <BkatRow title="Helmpflicht" fines={[{ role: 'Fahrer', tbnr: '121178', cost: '15 €' }]} />
+                                        <BkatRow title="Inbetriebnahme angeordnet (Fahrer ohne FE)" fines={[{ role: 'Halter', tbnr: '331612', cost: '90 €', points: '1' }]} />
+                                        <div className="h-px bg-slate-200 w-full my-1.5"></div>
+                                        <div className="mb-1.5 px-1 text-[10px] font-bold text-slate-500 uppercase">Verkehrssicherheit durch Tuning beeinträchtigt (§ 23 StVO):</div>
+                                        <BkatRow title="Wesentliche Beeinträchtigung d. Verkehrssicherheit" fines={[{ role: 'Fahrer', tbnr: '123600', cost: '80 €', points: '1' }]} />
+                                    </div>
+                                    <div className="bg-slate-800 text-white p-3 rounded-xl text-xs font-bold text-center shadow-sm">
+                                        Zusätzliche Straftatbestände Inland: Fahren ohne Fahrerlaubnis (§ 21 StVG) & Fahren ohne Pflichtversicherung (§ 6 PflVG). Promillegrenzen und BTM Grenzen gleich wie beim PKW!
                                     </div>
                                 </div>
                             </div>
@@ -4729,14 +4949,14 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                             <div className="animate-in fade-in">
                                 <div className="flex items-center gap-2 mb-4 text-yellow-600 pb-2 border-b border-slate-50">
                                     <Zap className="w-5 h-5" />
-                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 24 km/h (Schweizer Zulassung)</h3>
+                                    <h3 className="font-black uppercase tracking-wide text-xs">E-Scooter ab 24 km/h - Ausland (z.B. Schweiz)</h3>
                                 </div>
                                 <div className="space-y-4">
-                                    <div className="bg-slate-800 text-white p-3.5 rounded-xl shadow-sm text-xs flex items-start gap-3">
+                                     <div className="bg-slate-800 text-white p-3.5 rounded-xl shadow-sm text-xs flex items-start gap-3">
                                         <Gauge className="w-6 h-6 shrink-0 text-yellow-400 mt-0.5" />
                                         <div>
-                                            <span className="font-bold text-sm">eKFV gilt nicht mehr!</span>
-                                            <p className="font-normal opacity-90 mt-1">20 km/h bbH + 3 km/h Messtoleranz = eKFV gilt nur bis 23 km/h.</p>
+                                            <span className="font-bold text-sm text-yellow-400">eKFV gilt nicht mehr!</span>
+                                            <p className="font-normal opacity-90 mt-1 leading-relaxed">20 km/h bbH + 3 km/h Messtoleranz = eKFV gilt nur bis 23 km/h. Sie gelten rechtlich als <strong>Kleinkrafträder</strong>.</p>
                                         </div>
                                     </div>
 
@@ -4758,36 +4978,45 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                             <CreditCard className="w-5 h-5 text-indigo-500" />
                                             <span className="font-black text-sm">Fahrerlaubnis Klasse B zwingend erforderlich</span>
                                         </div>
-                                        <p className="mb-2">Da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen, scheiden diese aus. Auch ein Mofa muss nach dieser VO (EG) einen Sitzplatz aufweisen. Somit genügt eine Mofaprüfbescheinigung nicht</p>
+                                        <p className="mb-2">Da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen, scheiden diese aus. Auch ein Mofa muss nach dieser VO (EG) einen Sitzplatz aufweisen. Somit genügt eine Mofaprüfbescheinigung nicht.</p>
                                         
                                         <div className="mt-3 bg-white p-3.5 rounded-xl border border-indigo-100 text-[11px] leading-relaxed text-slate-700 shadow-sm">
                                             <strong className="text-indigo-800 block mb-1">Besonderheit bei Schweizer Fahrern:</strong>
-                                            Bei ausländischen Führerscheininhabern wird grundsätzlich das Führerscheinrecht des Herkunftsstaats anerkannt (§ 28 FeV). In der Schweiz sind E-Scooter einem "Motorfahrrad" gleichgestellt und daher führerscheinfrei (unter 16 Jahren Fahrberechtigung M = dt. Mofaprüfbescheinigung). 
+                                            Bei ausländischen Führerscheininhabern wird grundsätzlich das Führerscheinrecht des Herkunftsstaats anerkannt (§ 28 FeV). In der Schweiz sind Kleinkrafträder einem "Motorfahrrad" gleichgestellt und daher führerscheinfrei (unter 16 Jahren Fahrberechtigung M = dt. Mofaprüfbescheinigung). 
                                             <br/><br/>
                                             <strong>ABER:</strong> Die Anerkennung nach § 28 FeV bezieht sich nur auf ausländische <i>Fahrerlaubnisse</i>. Andere Bescheinigungen sind nicht enthalten. Deutschland hat zudem als Sonderregelung zum Wiener Übereinkommen (1968) die Einstufung als führerscheinfreies "Motorfahrrad" nicht anerkannt und verlangt eine Fahrerlaubnis.
                                         </div>
                                     </div>
 
-                                    <div className="bg-orange-50 border border-orange-200 p-3.5 rounded-xl shadow-sm">
-                                        <div className="flex items-center gap-2 mb-2 text-orange-800">
-                                            <AlertCircle className="w-4 h-4" />
-                                            <strong className="text-xs">Tuning & Verkehrssicherheit (§ 23 StVO)</strong>
-                                        </div>
-                                        <p className="text-[11px] text-orange-900 leading-relaxed">
-                                            Wird ein ausländischer Scooter getunt, erlischt eine ggf. bestehende Haftpflicht nicht automatisch (Straftat PflVG fällt aus). Es bleibt jedoch der Verstoß gegen § 23 StVO, da die Verkehrssicherheit (Bremsen/Reifen) durch die bauliche Veränderung und höhere Geschwindigkeit wesentlich beeinträchtigt ist.
-                                        </p>
+                                    <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl shadow-sm">
+                                        <h4 className="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2"><MapPin className="w-4 h-4 text-slate-400"/> Erlaubte Verkehrsflächen</h4>
+                                        <p className="text-xs text-slate-600 font-bold">Es ist zwingend die Fahrbahn zu nutzen.</p>
+                                        <p className="text-xs text-red-600 mt-1 font-medium">Radwege, Gehwege sowie Kraftfahrstraßen/Autobahnen sind verboten.</p>
                                     </div>
 
-                                    <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Tatbestände (BKat)</h4>
-                                    <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-2">
-                                        <div>
-                                            <div className="mb-1.5 px-1 text-xs font-bold text-slate-700">Zulassung nach § 20 FZV nötig <br/><span className="font-normal text-[10px] text-slate-500">(Tatbestand nach § 3 FZV als Auffangtatbestand):</span></div>
-                                            <BkatRow title="Fahren ohne Zulassung" fines={[{ role: 'Fahrer', tbnr: '803600', cost: '70 €', points: '1 Pkt.' }, { role: 'Halter', tbnr: '803500', cost: '70 €', points: '1 Pkt.' }]} />
+                                    <h4 className="font-bold text-xs uppercase text-slate-500 mb-2 mt-4">Wichtige Tatbestände (über 23 km/h Ausland)</h4>
+                                    <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1">
+                                        <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-[10px] text-yellow-800 leading-snug">
+                                            <strong>Ahndung von Ausstattungsverstößen:</strong> Die StVZO ist in der Regel auf ausländische Fahrzeuge nicht anwendbar. Es muss auf die StVO ausgewichen werden (Auffangtatbestand TBNr. 123600). Bußgeld im Tele-Cash manuell von 80,00 € auf die StVZO-Buße reduzieren.
                                         </div>
-                                        <div className="pt-2 border-t border-slate-200">
-                                            <div className="mb-1.5 px-1 text-xs font-bold text-slate-700">Verkehrssicherheit durch Tuning beeinträchtigt (§ 23 StVO):</div>
-                                            <BkatRow title="Wesentliche Beeinträchtigung d. Verkehrssicherheit" fines={[{ role: 'Fahrer', tbnr: '123600', cost: '80 €', points: '1 Pkt.' }]} />
-                                        </div>
+                                        <BkatRow title="Kleinkraftrad mit defekter Bremse (StVO)" fines={[{ role: 'Fahrer', tbnr: '123600', cost: '25 €' }, { role: 'Halter', tbnr: '331621', cost: '35 €' }]} />
+                                        <BkatRow title="Kleinkraftrad ohne gültige Vers.Plakette" fines={[{ role: 'Fahrer', tbnr: '804118', cost: '40 €' }, { role: 'Halter', tbnr: '804006', cost: '40 €' }]} />
+                                        <BkatRow title="Kleinkraftrad mit defektem Licht (StVO)" fines={[{ role: 'Fahrer', tbnr: '123600', cost: '5 €' }, { role: 'Halter', tbnr: '331621', cost: '15 €' }]} />
+                                        <BkatRow title="Kleinkraftrad mit defekter Klingel (StVO)" fines={[{ role: 'Fahrer', tbnr: '123600', cost: '15 €' }, { role: 'Halter', tbnr: '331621', cost: '15 €' }]} />
+                                        <BkatRow title="Zweite Person befördert" fines={[{ role: 'Fahrer', tbnr: '121100', cost: '5 €' }]} />
+                                        <BkatRow title="Befahren des Gehwegs" fines={[{ role: 'Fahrer', tbnr: '102100', cost: '55 €' }]} />
+                                        <BkatRow title="Benutzen des Radwegs (Nichtberechtigter)" fines={[{ role: 'Fahrer', tbnr: '141154', cost: '15 €' }]} />
+                                        <BkatRow title="Linksseitigen Radweg entgegen Fahrtrichtung genutzt" fines={[{ role: 'Fahrer', tbnr: '102126', cost: '55 €' }]} />
+                                        <BkatRow title="Benutzen von Mobiltelefon" fines={[{ role: 'Fahrer', tbnr: '123624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet" fines={[{ role: 'Fahrer', tbnr: '137612', cost: '60 €', points: '1' }]} />
+                                        <BkatRow title="Rotlicht missachtet (> 1 Sek.)" fines={[{ role: 'Fahrer', tbnr: '137624', cost: '100 €', points: '1' }]} />
+                                        <BkatRow title="Führerscheinmitführpflicht" fines={[{ role: 'Fahrer', tbnr: '204100', cost: '10 €' }]} />
+                                        <BkatRow title="Helmpflicht" fines={[{ role: 'Fahrer', tbnr: '121178', cost: '15 €' }]} />
+                                        <BkatRow title="Fahrer ohne FE (Inbetriebnahme angeordnet)" fines={[{ role: 'Halter', tbnr: '331612', cost: '90 €', points: '1' }]} />
+                                        <BkatRow title="Fahrer nicht geeignet (Inbetriebnahme angeordnet)" fines={[{ role: 'Halter', tbnr: '331612', cost: '90 €', points: '1' }]} />
+                                    </div>
+                                    <div className="bg-slate-800 text-white p-3 rounded-xl text-xs font-bold text-center">
+                                        Zusätzliche Tatbestände Ausland: Fahren ohne Fahrerlaubnis (§ 21 StVG) & Fahren ohne Haftpflichtversicherung (§ 3 AuslPflVG). Promillegrenzen und BTM gleich wie PKW!
                                     </div>
                                 </div>
                             </div>
@@ -6949,4 +7178,3 @@ export default function App() {
     </ThemeContext.Provider>
   );
 }
-
