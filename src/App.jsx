@@ -432,7 +432,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.2
+        RoadTool v. 3.3
     </div>
 );
 
@@ -4979,13 +4979,6 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                             <span className="font-black text-sm">Fahrerlaubnis Klasse B zwingend erforderlich</span>
                                         </div>
                                         <p className="mb-2">Da nach der VO (EG) 168/2013 die FE-Klassen A, A1, A2, AM einen Sitzplatz aufweisen müssen, scheiden diese aus. Auch ein Mofa muss nach dieser VO (EG) einen Sitzplatz aufweisen. Somit genügt eine Mofaprüfbescheinigung nicht.</p>
-                                        
-                                        <div className="mt-3 bg-white p-3.5 rounded-xl border border-indigo-100 text-[11px] leading-relaxed text-slate-700 shadow-sm">
-                                            <strong className="text-indigo-800 block mb-1">Besonderheit bei Schweizer Fahrern:</strong>
-                                            Bei ausländischen Führerscheininhabern wird grundsätzlich das Führerscheinrecht des Herkunftsstaats anerkannt (§ 28 FeV). In der Schweiz sind Kleinkrafträder einem "Motorfahrrad" gleichgestellt und daher führerscheinfrei (unter 16 Jahren Fahrberechtigung M = dt. Mofaprüfbescheinigung). 
-                                            <br/><br/>
-                                            <strong>ABER:</strong> Die Anerkennung nach § 28 FeV bezieht sich nur auf ausländische <i>Fahrerlaubnisse</i>. Andere Bescheinigungen sind nicht enthalten. Deutschland hat zudem als Sonderregelung zum Wiener Übereinkommen (1968) die Einstufung als führerscheinfreies "Motorfahrrad" nicht anerkannt und verlangt eine Fahrerlaubnis.
-                                        </div>
                                     </div>
 
                                     <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl shadow-sm">
@@ -7036,7 +7029,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 3.2: Taxi-/Mietwagen Reiter implementiert; Erweiterung des Lasi-Niederzurrungrechners auf Prüfung Einziehung";
+    const updateText = "🚀 Update 3.3: Wissensdatenbank Reiter E-Scooter aktualisiert";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
