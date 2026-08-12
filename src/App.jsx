@@ -432,7 +432,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.3
+        RoadTool v. 3.4
     </div>
 );
 
@@ -3831,6 +3831,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   const [kindersitzView, setKindersitzView] = useState('sitz'); 
   const [ebikeView, setEbikeView] = useState('pedelec25'); 
   const [taxiView, setTaxiView] = useState('taxi'); 
+  const [sozialView, setSozialView] = useState('gueterverkehr'); 
   
   // NEUE STATES FÜR DEN ÜBERSETZUNGS-ASSISTENTEN
   const [transTopic, setTransTopic] = useState(null); 
@@ -3846,7 +3847,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
   // Automatisches Scrollen nach ganz oben, wenn das Register gewechselt wird
   useEffect(() => {
       window.scrollTo(0, 0);
-  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView, taxiView, transTopic, transLang]);
+  }, [view, kzView, alkDroView, kcangView, lasiAblegereife, escooterSpeed, escooterOrigin, kindersitzView, ebikeView, taxiView, sozialView, transTopic, transLang]);
 
   const tabs = [
       { id: 'blut', label: 'Blutentnahme', icon: Syringe, color: 'text-red-500', bg: 'bg-red-50' },
@@ -3864,6 +3865,7 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
       { id: 'pkw', label: 'PKW-Transporter', icon: Car, color: 'text-blue-500', bg: 'bg-blue-50' },
       { id: 'rauchverbot', label: 'Rauchverbot', icon: CigaretteOff, color: 'text-slate-500', bg: 'bg-slate-100' },
       { id: 'reifen', label: 'Reifen', icon: CircleDashed, color: 'text-slate-600', bg: 'bg-slate-100' },
+      { id: 'sozial', label: 'Sozialvorschriften', icon: Truck, color: 'text-orange-500', bg: 'bg-orange-50' },
       { id: 'taxi', label: 'Taxi / Mietwagen', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-50' },
       { id: 'uebersetzungen', label: 'Übersetzungen', icon: Globe, color: 'text-sky-500', bg: 'bg-sky-50' }
   ];
@@ -6345,6 +6347,54 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                  </div>
             )}
 
+            {/* SOZIALVORSCHRIFTEN */}
+            {view === 'sozial' && (
+                 <div className="space-y-4 animate-in fade-in">
+                    {/* Sub-Navigation */}
+                    <div className="flex overflow-x-auto gap-2 pb-3 mb-1 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {[
+                            { id: 'gueterverkehr', label: 'Güterverkehr' },
+                            { id: 'fahrer', label: 'Verstöße Fahrer' },
+                            { id: 'unternehmer', label: 'Verstöße Unternehmer' }
+                        ].map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={() => setSozialView(sub.id)}
+                                className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all border ${sozialView === sub.id ? 'bg-orange-600 text-white border-orange-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {sub.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
+                        {sozialView === 'gueterverkehr' && (
+                            <div className="animate-in fade-in text-center p-6 text-slate-400">
+                                <Clock className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                                <p className="text-sm font-bold uppercase">Inhalt folgt in Kürze</p>
+                                <p className="text-xs mt-1">Hier werden die Sozialvorschriften im Güterverkehr eingefügt.</p>
+                            </div>
+                        )}
+                        
+                        {sozialView === 'fahrer' && (
+                            <div className="animate-in fade-in text-center p-6 text-slate-400">
+                                <User className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                                <p className="text-sm font-bold uppercase">Inhalt folgt in Kürze</p>
+                                <p className="text-xs mt-1">Hier werden die Verstöße für den Fahrzeugführer eingefügt.</p>
+                            </div>
+                        )}
+                        
+                        {sozialView === 'unternehmer' && (
+                            <div className="animate-in fade-in text-center p-6 text-slate-400">
+                                <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                                <p className="text-sm font-bold uppercase">Inhalt folgt in Kürze</p>
+                                <p className="text-xs mt-1">Hier werden die Verstöße für den Unternehmer eingefügt.</p>
+                            </div>
+                        )}
+                    </div>
+                 </div>
+            )}
+
             {/* ÜBERSETZUNGEN (3-Stufen Assistent) */}
             {view === 'uebersetzungen' && (() => {
                 const LANGS = [
@@ -7029,7 +7079,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 3.3: Wissensdatenbank Reiter E-Scooter aktualisiert";
+    const updateText = "🚀 Update 3.4: Sozialvorschriften in Wissensbank implementiert";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
