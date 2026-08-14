@@ -6369,26 +6369,249 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
 
                     <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100">
                         {sozialView === 'gueterverkehr' && (
-                            <div className="animate-in fade-in text-center p-6 text-slate-400">
-                                <Clock className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                                <p className="text-sm font-bold uppercase">Inhalt folgt in Kürze</p>
-                                <p className="text-xs mt-1">Hier werden die Sozialvorschriften im Güterverkehr eingefügt.</p>
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-orange-600 pb-2 border-b border-slate-50">
+                                    <Clock className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Lenk- und Ruhezeiten (VO (EG) 561/2006 & FPersV)</h3>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {/* Geltungsbereich */}
+                                    <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl shadow-sm text-sm text-orange-900 leading-relaxed">
+                                        <h4 className="font-bold mb-1">Geltungsbereich (Güterverkehr)</h4>
+                                        <p><strong>FPersV (National):</strong> Fahrzeuge über 2,8 t bis 3,5 t zGM.</p>
+
+                                        <p><strong>VO (EG) 561/2006 (EU):</strong> Fahrzeuge über 3,5 t zGM.</p>
+                                        <p><strong>AETR (Drittstaten) :</strong> Fahrzeuge über 3,5 t zGM.</p>
+
+
+                                        <div className="mt-3 p-3 bg-[#fef3c7] border-2 border-dashed border-emerald-700 rounded-lg shadow-sm">
+                                            <p className="text-[11px] text-slate-800 leading-snug mb-2 font-bold italic">
+                                                Mitgliedsstaaten des AETR: Albanien, Andorra, Armenien, Aserbaidschan, Bosnien und Herzegowina, Georgien, Kasachstan, Liechtenstein, Nordmazedonien, Moldawie, Monaco, Montenegro, Norwegen, die Russische Föderation, San Marino, Schweiz, Serbien, Tadschikistan, Türkei, Turkmenistan, Ukraine, Usbekistan und Weißrussland
+                                            </p>
+                                            <p className="text-xs font-black text-red-600">
+                                                Sobald ein Teil der Beförderungsstrecke ein Land des AETR berührt, gilt das AETR auf der gesamten Fahrtstrecke.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Lenkzeiten */}
+                                    <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><Gauge className="w-4 h-4 text-slate-400"/> Lenkzeiten</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg">
+                                                <span className="font-bold text-slate-700 text-xs">Tageslenkzeit</span>
+                                                <span className="text-xs text-slate-900 font-bold">Max. 9 Stunden <span className="font-normal text-slate-500">(2x wöchentlich 10 h)</span></span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg">
+                                                <span className="font-bold text-slate-700 text-xs">Wochenlenkzeit</span>
+                                                <span className="text-xs text-slate-900 font-bold">Max. 56 Stunden</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg">
+                                                <span className="font-bold text-slate-700 text-xs">Doppelwoche (2 aufeinanderf. Wochen)</span>
+                                                <span className="text-xs text-slate-900 font-bold">Max. 90 Stunden</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Lenkzeitunterbrechung */}
+                                    <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><Coffee className="w-4 h-4 text-slate-400"/> Lenkzeitunterbrechung (Pause)</h4>
+                                        <p className="text-xs text-slate-600 mb-2">Nach spätestens <strong>4,5 Stunden</strong> Lenkzeit muss eine Unterbrechung eingelegt werden.</p>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1 bg-slate-50 p-3 rounded-lg text-center border border-slate-100">
+                                                <span className="block text-[10px] text-slate-400 font-bold uppercase mb-0.5">Am Stück</span>
+                                                <span className="font-black text-slate-700 text-sm">mind. 45 Minuten</span>
+                                            </div>
+                                            <div className="flex-1 bg-slate-50 p-3 rounded-lg text-center border border-slate-100">
+                                                <span className="block text-[10px] text-slate-400 font-bold uppercase mb-0.5">Aufgeteilt (Nur in dieser Reihenfolge!)</span>
+                                                <span className="font-black text-slate-700 text-sm">mind. 15 Min. + den Rest der 45 Min.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Tägliche Ruhezeit */}
+                                    <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><Moon className="w-4 h-4 text-slate-400"/> Tägliche Ruhezeit (TRZ)</h4>
+                                        <p className="text-[10px] text-slate-500 font-medium mb-3 uppercase tracking-wide">Innerhalb von 24 Stunden nach Ende der letzten Ruhezeit</p>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border-l-4 border-l-emerald-500">
+                                                <span className="font-bold text-slate-700 text-xs">Regulär (Am Stück)</span>
+                                                <span className="text-xs text-slate-900 font-bold">Min. 11 Stunden</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border-l-4 border-l-emerald-500">
+                                                <span className="font-bold text-slate-700 text-xs">Regulär (Aufgeteilt)</span>
+                                                <span className="text-xs text-slate-900 font-bold">Min. 3 h + Min. 9 h (12 h)</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-amber-50 p-2.5 rounded-lg border-l-4 border-l-amber-500">
+                                                <span className="font-bold text-amber-900 text-xs">Reduziert (Max. 3x zw. 2 wöchtl. RZ)</span>
+                                                <span className="text-xs text-amber-900 font-bold">Min. 9 Stunden</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border-l-4 border-l-blue-500">
+                                                <span className="font-bold text-slate-700 text-xs">Mehrfahrerbetrieb (Innerhalb 30h)</span>
+                                                <span className="text-xs text-slate-900 font-bold">Min. 9 Stunden</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Wöchentliche Ruhezeit */}
+                                    <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-slate-400"/> Wöchentliche Ruhezeit (WRZ)</h4>
+                                        <p className="text-[10px] text-slate-500 font-medium mb-3 uppercase tracking-wide">Spätestens nach 6x 24h-Zeiträumen</p>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border-l-4 border-l-emerald-500">
+                                                <span className="font-bold text-slate-700 text-xs">Regulär</span>
+                                                <span className="text-xs text-slate-900 font-bold">Min. 45 Stunden</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-amber-50 p-2.5 rounded-lg border-l-4 border-l-amber-500">
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-amber-900 text-xs">Verkürzte WRZ</span>
+                                                    <span className="text-[9px] text-amber-700">Ausgleich der reduzierten Zeit (Differenz zu 45h)</span>
+                                                </div>
+                                                <span className="text-xs text-amber-900 font-bold">Min. 24 Stunden</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3 bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs text-slate-700 font-medium">
+                                            <strong className="block text-slate-800 mb-1">Ausgleich der reduzierten WRZ:</strong>
+                                            Der Ausgleich muss <strong>zusammenhängend vor dem Ende der dritten Woche</strong> erfolgen, die auf die betreffende Woche folgt. Der Ausgleich muss an eine andere Ruhezeit von mindestens 9 Stunden angehängt werden (Art. 8 (6b) VO (EG) 561/2006).
+                                        </div>
+                                        <div className="mt-2 bg-indigo-50 border border-indigo-200 p-3 rounded-lg flex items-start gap-3">
+                                            <Globe className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                                            <div className="text-xs text-indigo-900">
+                                                <strong>Grenzüberschreitender Güterverkehr:</strong> Wenn die Firma des Fahrers einen anderen Wohnort (Land) hat als der Fahrer, gilt:<br/>
+                                                1. Woche: regelmäßige WRZ<br/>
+                                                2. und 3. Woche: reduzierte WRZ (max. 1 reduzierte, dann wieder regelmäßige WRZ erforderlich).
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 bg-red-50 border border-red-100 p-3 rounded-lg flex items-start gap-3">
+                                            <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                            <p className="text-xs text-red-900">In 2 aufeinanderfolgenden Wochen müssen mind. <strong>zwei reguläre (45h)</strong> ODER <strong>eine reguläre (45h) und eine reduzierte (24h)</strong> wöchentliche Ruhezeit eingelegt werden.</p>
+                                        </div>
+                                        <div className="mt-2 bg-red-50 border border-red-100 p-3 rounded-lg flex items-start gap-3">
+                                            <Home className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                            <p className="text-xs text-red-900">Die <strong>reguläre wöchentliche Ruhezeit (45h)</strong> darf <u>nicht</u> im Fahrzeug verbracht werden.</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Nachrüstpflicht DiKO */}
+                                    <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm mt-4">
+                                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><CreditCard className="w-4 h-4 text-slate-400"/> Nachrüstpflicht Digitales Kontrollgerät</h4>
+                                        <p className="text-[10px] text-slate-500 font-medium mb-3 uppercase tracking-wide">Für den internationalen Verkehr</p>
+                                        
+                                        <div className="space-y-3 text-sm text-slate-700">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                                <span>KFZ mit analogem / digitalem DiKO <strong>über 3,5 t</strong></span>
+                                                <div className="text-right">
+                                                    <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200 text-xs">ab 31.12.2024</span>
+                                                    <span className="block text-[10px] text-slate-500 mt-1">mit intelligentem DiKO (Version 2)</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                                <span>KFZ mit intelligentem DiKO <strong>über 3,5 t</strong></span>
+                                                <div className="text-right">
+                                                    <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200 text-xs">ab 18.08.2025</span>
+                                                    <span className="block text-[10px] text-slate-500 mt-1">mit intelligentem DiKO (Version 2)</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                                <span>KFZ <strong>über 2,5 t</strong></span>
+                                                <div className="text-right">
+                                                    <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200 text-xs">ab 01.07.2026</span>
+                                                    <span className="block text-[10px] text-slate-500 mt-1">mit intelligentem DiKO (Version 2)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
                             </div>
                         )}
                         
                         {sozialView === 'fahrer' && (
-                            <div className="animate-in fade-in text-center p-6 text-slate-400">
-                                <User className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                                <p className="text-sm font-bold uppercase">Inhalt folgt in Kürze</p>
-                                <p className="text-xs mt-1">Hier werden die Verstöße für den Fahrzeugführer eingefügt.</p>
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-orange-600 pb-2 border-b border-slate-50">
+                                    <User className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Verstöße Fahrer (Auszug Bußgeldkatalog LASI LV 48 Auflage 4)</h3>
+                                </div>
+                                
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1 mb-4">
+                                    <BkatRow title="Tageskontrollblatt nicht ausgefüllt / falsch ausgefüllt (§ 1 (6) FPersV)" fines={[{ tbnr: 'TBNr.: 515 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="Bescheinigung über berücksichtigungsfreie Tage nicht mitgeführt (§ 20 (1) FPersV)" fines={[{ tbnr: 'TBNr.: 547 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="Abgelaufene Fahrerkarte (muss mind. 28 Tage mitgeführt werden) (§ 6 FPersV)" fines={[{ tbnr: 'TBNr.: 543 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="Abgelaufene/keine Berufskraftfahrerqualifikation (§ 2 (1) BKrFQG)" fines={[{ tbnr: 'TBNr (BKrFQG).: 3 ', cost: '500 €', note: 'Klassen C1, C1E, C, CE, D1, D1E, D, DE' }]} />
+                                    <div className="px-2 py-1 mb-1 bg-red-50 text-red-800 text-[10px] font-bold rounded">Drittstaatler braucht Fahrerbescheinigung bei Beschäftigung bei einer EU-Firma (auch Beifahrer zur Berufsausbildung)</div>
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+                                    
+                                    
+                                    <BkatRow title="Manueller Nachtrag nicht getätigt (Kontrolle nicht möglich) (§ 2 (2) FPersV) / Art. 34 (3b) VO (EG) 165/2014" fines={[{ tbnr: 'TBNr.: 531 / 315', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="Manueller Nachtrag nicht getätigt (Kontrolle erschwert) (§ 2 (2) FPersV) / Art. 34 (3b) VO (EG) 165/2014" fines={[{ tbnr: 'TBNr.: 315 / 531', cost: '75 €', note: 'erster 24 h Zeitraum, danach 37,50 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+
+                                    <BkatRow title="EU-Lizenz / CEMT- / Bilaterale-Genehmigung (CH) nicht mitgeführt" fines={[{ tbnr: 'TBNr.: (GüKG) II-1.1', cost: '125 €', note: 'ab 21.05.2022 > über 2,5 t im grenzüberschreitenden Güterverkehr' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+
+                                    <BkatRow title="Länderkennung nicht gesetzt (Beginn/Ende)" fines={[{ tbnr: 'TBNr.: 320 (FPersG)', cost: '75 €', note: 'erster 24 h Zeitraum, danach 37,50 €' }]} />
+                                    <div className="px-2 py-1 mb-1 bg-red-50 text-red-800 text-[10px] font-bold rounded">Bei VO (EG) 165/2024 nur innerhalb Deutschlands möglich (Beginn/Ende)<br/>Bei AETR innerhalb/außerhalb Deutschlands möglich (Beginn/Ende)</div>
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+
+                                    <BkatRow title="28 Tage (Tachoscheiben) bei analogem Tachograph nicht vorweisen (Art. 36 (1,2) VO)" fines={[{ tbnr: 'TBNr.: 322 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="DiKO verbaut, jedoch nicht benutzt (Deutsches Fahrzeug) (§ 2 (1) FPersV)" fines={[{ tbnr: 'TBNr.: 530 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="DiKO verbaut, jedoch nicht benutzt (EU) (Art. 3 (1) VO (EG) 165/2014)" fines={[{ tbnr: 'TBNr.: 301 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="DiKO verbaut, jedoch nicht benutzt (AETR) (§19 S. 2 FPersV)" fines={[{ tbnr: 'TBNr.: 546 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="Fahrerkarte nicht mitgeführt (§ 5 (4) S.2 FPersV)" fines={[{ tbnr: 'TBNr.: 542 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <BkatRow title="Fahrerkarte von einem anderen benutzt (§ 23 (2) Nr. 1a FPersV)" fines={[{ tbnr: 'TBNr.: 302 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                    <div className="px-2 py-1 mb-1 bg-red-50 text-red-800 text-[10px] font-bold rounded">Verdacht Straftat § 269 StGB &gt; Fahren auf fremder Fahrerkarte</div>
+                                    <BkatRow title="Fahren ohne eingelegte Fahrerkarte (Art. 34 (1) (EG) 165/2014)" fines={[{ tbnr: 'TBNr.: 313 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 €' }]} />
+                                </div>
+                                
+                                <div className="bg-slate-800 text-white p-4 rounded-xl text-xs font-bold text-center shadow-sm">
+                                    Alle Tatbestände beruhen auf Vorsatz. Bei Vorlage von Fahrlässigkeit um 50 % reduzieren (vgl. Nr. 2 LASI LV 48 4. Auflage).
+                                    <br/>
+                                    Liegen mehrere Verstöße vor, so ist der teuerste Verstoß zu 100 % und alle weiteren zu 50 % zu ahnden (vgl. Nr.4 LASI LV 48 4 Auflage).
+                                </div>
                             </div>
                         )}
                         
                         {sozialView === 'unternehmer' && (
-                            <div className="animate-in fade-in text-center p-6 text-slate-400">
-                                <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                                <p className="text-sm font-bold uppercase">Inhalt folgt in Kürze</p>
-                                <p className="text-xs mt-1">Hier werden die Verstöße für den Unternehmer eingefügt.</p>
+                            <div className="animate-in fade-in">
+                                <div className="flex items-center gap-2 mb-4 text-orange-600 pb-2 border-b border-slate-50">
+                                    <Briefcase className="w-5 h-5" />
+                                    <h3 className="font-black uppercase tracking-wide text-xs">Verstöße Unternehmer (Auszug Bußgeldkatalog LASI LV 48 4. Auflage)</h3>
+                                </div>
+
+                                <div className="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-200 space-y-1 mb-4">
+                                    <BkatRow title="Tageskontrollblatt nicht mitgegeben (§ 1 (6) FPersV)" fines={[{ tbnr: 'TBNr.: 517 (FPersG)', cost: '250 €', note: 'erster 24 h Zeitraum, danach 125 € (Schwierig, da nicht formgebunden)' }]} />
+                                    <BkatRow title="Unternehmenssperre nicht gesetzt (§ 9 (3) FPersV)" fines={[{ tbnr: 'TBNr.: 544 (FPersG)', cost: '250 €', note: 'Mietfahrzeug TBNr.: 533 (FPersG)' }]} />
+                                    <BkatRow title="Download länger als 90 Tage her (§ 2 (5) S.1/2 FPersV + Art. 1 (3) VO (EG) Nr. 581/2010)" fines={[{ tbnr: 'TBNr.: 535 (FPersG)', cost: '750 €', note: 'erster 24 h Zeitraum, danach 375 €.'}]} />
+                                    <BkatRow title="Fahrer hat keine Berufskraftfahrerqualifikation (§ 2 (1) BKrFQG)" fines={[{ tbnr: 'TBNr BKrFQG.: 3', cost: '1.000 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+                                    
+                                    <BkatRow title="DiKO nicht eingebaut (EU) Art. 3 (1) VO (EG) 165/2014)" fines={[{ tbnr: 'TBNr.: 301a', cost: '1.500 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+                                    <BkatRow title="DiKO nicht eingebaut (AETR) § 19 S. 1 FPersV)" fines={[{ tbnr: 'TBNr.: 545', cost: '1.500 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+                                   
+                                    <BkatRow title="Keine EU-Lizenz / CEMT- / Bilaterale-Genehmigung (CH) über 2,5 t im grenzüberschreitenden Güterverkehr Art. 1 (5) ca) VO (EG) 1072/2009 / §§ 19 (1) Nr. 1b, 3 (1) GüKG" fines={[{ tbnr: 'TBNr (GüKG).: I - 1.1.1/1.1.4 (GüKG)', cost: '1.250 €', note: 'Achtung: bei Schweizer Fahrzeugen /AETR Fahrzeugen erst über 3,5 t' }]} />
+                                    <BkatRow title="EU-Lizenz / CEMT- / Bilaterale-Genehmigung (CH) nicht mitgeführt §§ 19 (1) Nr. 3, 7 (1) S. 1 GüKG" fines={[{ tbnr: 'TBNr (GüKG).: I - 2.1/2.2 (GüKG)', cost: '180 €' }]} />
+                                    <div className="h-px bg-slate-200 w-full my-2"></div>
+
+                                    <BkatRow title="Defektes DiKO muss innerhalb von 7 Tagen repariert werden (Art. 37 VO (EG) 165/2014)" fines={[{ tbnr: 'TBNr.: 311, 312 (FPersG)', cost: '250 €' }]} />
+                                    
+                                    <BkatRow title="Regelmäßige wöchentliche Ruhezeit nicht außerhalb des LKWs verbracht (zGm. über 2,8- 3,5 t) Art. 8 (8) VO (EG) Nr. 561/2006 + § 21 (1) Nr.1 FPersG" fines={[{ tbnr: 'TBNr.: 113 (FPersV)', cost: '3.000 €', note: 'Ahndung bei AETR nicht möglich' }]} />
+                                    <BkatRow title="Regelmäßige wöchentliche Ruhezeit nicht außerhalb der SZM verbracht (zGm. über 3,5 t) Art. 8 (8) VO (EG) Nr. 561/2006 + § 8 (1) Nr. 1a FPersG" fines={[{ tbnr: 'TBNr.: 113 (FPersV)', cost: '3.000 €', note: 'Ahndung bei AETR nicht möglich' }]} />
+                                    
+                                    <div className="flex gap-2 text-xs mt-2 px-1">
+                                        <div className="flex-1 bg-slate-100 p-2 rounded text-center"><span className="block font-bold">Unternehmerhaftung:</span>Art. 10 VO (EG) 561/2006</div>
+                                        <div className="flex-1 bg-slate-100 p-2 rounded text-center"><span className="block font-bold"> Unternehmerhaftung:</span>Art. 33 VO (EG) 165/2014</div>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-800 text-white p-4 rounded-xl text-xs font-bold text-center shadow-sm">
+                                    Alle Tatbestände beruhen auf Vorsatz. Bei Vorlage von Fahrlässigkeit um 50 % reduzieren (vgl. Nr. 2 LASI LV 48 4. Auflage).
+                                    <br/>
+                                    Liegen mehrere Verstöße vor, so ist der teuerste Verstoß zu 100 % und alle weiteren zu 50 % zu ahnden (vgl. Nr.4 LASI LV 48 4 Auflage).
+                                </div>
                             </div>
                         )}
                     </div>
