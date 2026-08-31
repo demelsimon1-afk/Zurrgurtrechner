@@ -1391,44 +1391,41 @@ function SpeedCalculator() {
             <div className="p-2 space-y-2 no-print">
                 <div className="bg-white p-1 rounded-xl flex shadow-sm border border-slate-100 mb-2">
                     <button onClick={() => setMode('laser')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'laser' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Laser</button>
-                    <button onClick={() => { setMode('follow'); setVehicleType('pkw'); }} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'follow' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Hinterherfahren</button>
+                    <button onClick={() => setMode('follow')} className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all ${mode === 'follow' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Hinterherfahren</button>
                 </div>
 
                 <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                    {mode === 'laser' && (
-                        <div className="mb-4">
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Ort der Messung</label>
-                            <div className="flex gap-2">
-                                <button onClick={() => { setLocation('igo'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'igo' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Home className="w-4 h-4" /><span className="text-[10px] font-bold">Innerorts</span></button>
-                                <button onClick={() => { setLocation('ago'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'ago' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Trees className="w-4 h-4" /><span className="text-[10px] font-bold">Außerorts</span></button>
-                                <button onClick={() => { setLocation('autobahn'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'autobahn' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><AutobahnIcon className="w-4 h-4" /><span className="text-[10px] font-bold">Autobahn</span></button>
-                            </div>
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Ort der Messung</label>
+                        <div className="flex gap-2">
+                            <button onClick={() => { setLocation('igo'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'igo' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Home className="w-4 h-4" /><span className="text-[10px] font-bold">Innerorts</span></button>
+                            <button onClick={() => { setLocation('ago'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'ago' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Trees className="w-4 h-4" /><span className="text-[10px] font-bold">Außerorts</span></button>
+                            <button onClick={() => { setLocation('autobahn'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'autobahn' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><AutobahnIcon className="w-4 h-4" /><span className="text-[10px] font-bold">Autobahn</span></button>
                         </div>
-                    )}
+                    </div>
                     
-                    {mode !== 'follow' && (
-                        <div className="mb-4">
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
-                            <div className="flex gap-2">
-                                <button onClick={() => { setVehicleType('pkw'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>
-                                    <Car className="w-6 h-6" />
-                                    <span className="text-[10px] font-bold">PKW</span>
-                                </button>
-                                <button onClick={() => { setVehicleType('pkw_trailer'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>
-                                    <div className="flex items-center gap-1.5 h-8">
-                                        <Truck className="w-6 h-6" />
-                                        <span className="text-slate-300 text-[10px] font-black">/</span>
-                                        <CarWithTrailerIcon className="w-8 h-8" />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-center">LKW / PKW<br/>mit Anhänger</span>
-                                </button>
-                            </div>
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
+                        <div className="flex gap-2">
+                            <button onClick={() => { setVehicleType('pkw'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>
+                                <Car className="w-6 h-6" />
+                                <span className="text-[10px] font-bold">PKW</span>
+                            </button>
+                            <button onClick={() => { setVehicleType('pkw_trailer'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>
+                                <div className="flex items-center gap-1.5 h-8">
+                                    <Truck className="w-6 h-6" />
+                                    <span className="text-slate-300 text-[10px] font-black">/</span>
+                                    <CarWithTrailerIcon className="w-8 h-8" />
+                                </div>
+                                <span className="text-[10px] font-bold text-center">LKW / PKW<br/>mit Anhänger</span>
+                            </button>
                         </div>
-                    )}
+                    </div>
+                    
                     <div className="space-y-4 mb-4">
                         <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Zulässige Höchstgeschwindigkeit</label>
                         <div className="flex flex-wrap justify-center gap-2 px-1">
-                            {(location === 'igo' ? ['VB', 20, 30, 40, 50] : location === 'ago' ? (vehicleType === 'pkw_trailer' ? [30, 50, 60, 70, 80] : [30, 50, 60, 70, 80, 100]) : (vehicleType === 'pkw_trailer' ? [60, 80, 100] : [60, 70, 80, 100, 120])).map(v => (<TrafficSign key={v} value={v} selected={allowedSpeed == (v === 'VB' ? '10' : v)} onClick={() => setAllowedSpeed(v === 'VB' ? '10' : v.toString())} />))}
+                            {(location === 'igo' ? ['VB', 20, 30, 40, 50] : location === 'ago' ? (vehicleType === 'pkw_trailer' ? [30, 50, 60, 70, 80] : [30, 50, 60, 70, 80, 100]) : (vehicleType === 'pkw_trailer' ? [60, 70, 80, 100] : [60, 70, 80, 100, 120, 130])).map(v => (<TrafficSign key={v} value={v} selected={allowedSpeed == (v === 'VB' ? '10' : v)} onClick={() => setAllowedSpeed(v === 'VB' ? '10' : v.toString())} />))}
                         </div>
                     </div>
                     <div className="space-y-3">
