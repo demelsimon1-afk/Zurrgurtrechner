@@ -7071,8 +7071,8 @@ function DonateView() {
             </div>
             <h3 className="font-black uppercase tracking-wide text-slate-800 mb-3 text-lg">Unterstützen Sie das Projekt</h3>
             <p className="text-slate-600 text-sm leading-relaxed mb-8">
-                Diese App wurde mit viel Herzblut entwickelt und wird kostenlos zur Verfügung gestellt. 
-                Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Kaffeekasse freuen!
+                Diese Webseite wurde mit viel Herzblut entwickelt und wird kostenlos zur Verfügung gestellt. 
+                Wenn Ihnen das Tool im Alltag hilft, würde ich mich riesig über einen kleinen Obolus für die Teekasse freuen!
             </p>
             <a 
                 href="https://www.paypal.com/donate/?business=simondemel@gmx.de&currency_code=EUR" 
@@ -7371,7 +7371,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 3.4: Sozialvorschriften in Wissensbank implementiert";
+    const updateText = "🚀 Update 3.4: Sozialvorschriften in Wissensdatenbank implementiert";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
