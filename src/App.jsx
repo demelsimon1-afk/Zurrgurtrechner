@@ -432,7 +432,7 @@ const HeaderLogo = () => {
 
 const AppVersionFooter = () => (
     <div className="text-center text-[10px] text-slate-300 font-mono py-2 select-none no-print">
-        RoadTool v. 3.4
+        RoadTool v. 3.5
     </div>
 );
 
@@ -1258,6 +1258,17 @@ function SpeedCalculator() {
         if (exceedance <= 0) return null;
 
         if (loc === 'igo') {
+            if (type === 'pkw_trailer') {
+                if (exceedance <= 10) return { cost: '40 €', points: '-', ban: '-', id: '141224' };
+                if (exceedance <= 15) return { cost: '60 €', points: '-', ban: '-', id: '141664' };
+                if (exceedance <= 20) return { cost: '160 €', points: '1', ban: '-', id: '141665' };
+                if (exceedance <= 25) return { cost: '175 €', points: '1', ban: '-', id: '141666' };
+                if (exceedance <= 30) return { cost: '235 €', points: '2', ban: '1 M', id: '141667' };
+                if (exceedance <= 40) return { cost: '340 €', points: '2', ban: '1 M', id: '141668' };
+                if (exceedance <= 50) return { cost: '560 €', points: '2', ban: '2 M', id: '141669' };
+                if (exceedance <= 60) return { cost: '700 €', points: '2', ban: '3 M', id: '141670' };
+                return { cost: '800 €', points: '2', ban: '3 M', id: '141671' };
+            }
             if (allowedSpeedVal === '10') { // Verkehrsberuhigter Bereich
                 if (exceedance <= 10) return { cost: '30 €', points: '-', ban: '-', id: '142130' };
                 if (exceedance <= 15) return { cost: '50 €', points: '-', ban: '-', id: '142131' };
@@ -1284,20 +1295,33 @@ function SpeedCalculator() {
             return { cost: '800 €', points: '2', ban: '3 M', id: '141718'};
         }
 
-        if (exceedance < 16) return null;
         if (type === 'pkw_trailer') {
-            if (loc !== 'autobahn') return null; // NEU: PKW mit Anhänger nur auf Autobahn
-            if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '118632'};
-            if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '118633'};
-            if (exceedance <= 30) return { cost: '175 €', points: '1', ban: '-', id: '118634'};
-            if (exceedance <= 40) return { cost: '255 €', points: '2', ban: '1 M', id: '118635'};
-            if (exceedance <= 50) return { cost: '480 €', points: '2', ban: '1 M', id: '118636'};
-            if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '118637'}; 
-            if (exceedance <= 70) return { cost: '700 €', points: '2', ban: '3 M', id: '118638'}; 
-            return { cost: '800 €', points: '2', ban: '3 M', id: '118639'}; 
+            if (loc === 'ago') {
+                if (exceedance <= 10) return { cost: '30 €', points: '-', ban: '-', id: '141227' };
+                if (exceedance <= 15) return { cost: '50 €', points: '-', ban: '-', id: '141228' };
+                if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '141677' };
+                if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '141678' };
+                if (exceedance <= 30) return { cost: '175 €', points: '1', ban: '-', id: '141679' };
+                if (exceedance <= 40) return { cost: '255 €', points: '2', ban: '1 M', id: '141680' };
+                if (exceedance <= 50) return { cost: '480 €', points: '2', ban: '1 M', id: '141681' };
+                if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '141682' };
+                return { cost: '700 €', points: '2', ban: '3 M', id: '141683' };
+            }
+            if (loc === 'autobahn') {
+                if (exceedance <= 10) return { cost: '30 €', points: '-', ban: '-', id: '118160' };
+                if (exceedance <= 15) return { cost: '50 €', points: '-', ban: '-', id: '118161' };
+                if (exceedance <= 20) return { cost: '140 €', points: '1', ban: '-', id: '118632'};
+                if (exceedance <= 25) return { cost: '150 €', points: '1', ban: '-', id: '118633'};
+                if (exceedance <= 30) return { cost: '175 €', points: '1', ban: '-', id: '118634'};
+                if (exceedance <= 40) return { cost: '255 €', points: '2', ban: '1 M', id: '118635'};
+                if (exceedance <= 50) return { cost: '480 €', points: '2', ban: '1 M', id: '118636'};
+                if (exceedance <= 60) return { cost: '600 €', points: '2', ban: '2 M', id: '118637'}; 
+                return { cost: '700 €', points: '2', ban: '3 M', id: '118638'}; 
+            }
         }
         
         // Für PKW (loc ist hier 'ago' oder 'autobahn')
+        if (exceedance < 16) return null;
         if (exceedance <= 20) return { cost: '60 €', points: '-', ban: '-', id: '141720' };
         if (exceedance <= 25) return { cost: '100 €', points: '1', ban: '-', id: '141721'};
         if (exceedance <= 30) return { cost: '150 €', points: '1', ban: '-', id: '141722'};
@@ -1375,26 +1399,36 @@ function SpeedCalculator() {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Ort der Messung</label>
                             <div className="flex gap-2">
-                                <button onClick={() => { setLocation('igo'); setAllowedSpeed(''); setVehicleType('pkw'); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'igo' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Home className="w-4 h-4" /><span className="text-[10px] font-bold">Innerorts</span></button>
-                                <button onClick={() => { setLocation('ago'); setAllowedSpeed(''); setVehicleType('pkw'); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'ago' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Trees className="w-4 h-4" /><span className="text-[10px] font-bold">Außerorts</span></button>
+                                <button onClick={() => { setLocation('igo'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'igo' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Home className="w-4 h-4" /><span className="text-[10px] font-bold">Innerorts</span></button>
+                                <button onClick={() => { setLocation('ago'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'ago' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Trees className="w-4 h-4" /><span className="text-[10px] font-bold">Außerorts</span></button>
                                 <button onClick={() => { setLocation('autobahn'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex items-center justify-center gap-1 transition-all ${location === 'autobahn' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><AutobahnIcon className="w-4 h-4" /><span className="text-[10px] font-bold">Autobahn</span></button>
                             </div>
                         </div>
                     )}
                     
-                    {location === 'autobahn' && mode !== 'follow' && (
+                    {mode !== 'follow' && (
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Fahrzeugtyp</label>
                             <div className="flex gap-2">
-                                <button onClick={() => { setVehicleType('pkw'); if (allowedSpeed && !['60', '70', '80', '100', '120'].includes(allowedSpeed)) setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><Car className="w-6 h-6" /><span className="text-[10px] font-bold">PKW</span></button>
-                                <button onClick={() => { setVehicleType('pkw_trailer'); if (allowedSpeed && !['80', '100'].includes(allowedSpeed)) setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}><CarWithTrailerIcon className="w-8 h-8" /><span className="text-[10px] font-bold text-center">PKW mit<br/>Anhänger</span></button>
+                                <button onClick={() => { setVehicleType('pkw'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>
+                                    <Car className="w-6 h-6" />
+                                    <span className="text-[10px] font-bold">PKW</span>
+                                </button>
+                                <button onClick={() => { setVehicleType('pkw_trailer'); setAllowedSpeed(''); }} className={`flex-1 p-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${vehicleType === 'pkw_trailer' ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}>
+                                    <div className="flex items-center gap-1.5 h-8">
+                                        <Truck className="w-6 h-6" />
+                                        <span className="text-slate-300 text-[10px] font-black">/</span>
+                                        <CarWithTrailerIcon className="w-8 h-8" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-center">LKW / PKW<br/>mit Anhänger</span>
+                                </button>
                             </div>
                         </div>
                     )}
                     <div className="space-y-4 mb-4">
                         <label className="block text-xs font-bold text-slate-400 uppercase mb-0.5 ml-1">Zulässige Höchstgeschwindigkeit</label>
                         <div className="flex flex-wrap justify-center gap-2 px-1">
-                            {(location === 'igo' ? ['VB', 20, 30, 40, 50] : location === 'ago' ? [30, 50, 60, 70, 80, 100] : (vehicleType === 'pkw_trailer' ? [80, 100] : [60, 70, 80, 100, 120])).map(v => (<TrafficSign key={v} value={v} selected={allowedSpeed == (v === 'VB' ? '10' : v)} onClick={() => setAllowedSpeed(v === 'VB' ? '10' : v.toString())} />))}
+                            {(location === 'igo' ? ['VB', 20, 30, 40, 50] : location === 'ago' ? (vehicleType === 'pkw_trailer' ? [30, 50, 60, 70, 80] : [30, 50, 60, 70, 80, 100]) : (vehicleType === 'pkw_trailer' ? [60, 80, 100] : [60, 70, 80, 100, 120])).map(v => (<TrafficSign key={v} value={v} selected={allowedSpeed == (v === 'VB' ? '10' : v)} onClick={() => setAllowedSpeed(v === 'VB' ? '10' : v.toString())} />))}
                         </div>
                     </div>
                     <div className="space-y-3">
@@ -1450,7 +1484,7 @@ function SpeedCalculator() {
                                     <div><div className="text-[10px] text-slate-400 uppercase font-bold">TBNR</div><div className="text-sm font-mono bg-slate-700 px-2 py-0.5 rounded inline-block mt-0.5">{result.violation.id}</div></div>
                                 </div>
                             </div>
-                        ) : (<div className="bg-green-50 text-green-700 p-3 rounded-xl text-center text-xs font-bold border border-green-200">{vehicleType === 'pkw_trailer' && location !== 'autobahn' ? 'Tatbestände für PKW mit Anhänger nur für Autobahn verfügbar' : (location === 'igo' ? 'Keine Maßnahmen im hinterlegten Bereich' : 'Keine Maßnahmen im hinterlegten Bereich (< 16 km/h)')}</div>)}
+                        ) : (<div className="bg-green-50 text-green-700 p-3 rounded-xl text-center text-xs font-bold border border-green-200">{location === 'igo' ? 'Keine Maßnahmen im hinterlegten Bereich' : 'Keine Maßnahmen im hinterlegten Bereich (< 16 km/h)'}</div>)}
                     </div>
                 )}
             </div>
@@ -4784,11 +4818,11 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                             dürfen nur befahren werden, wenn das Zusatzzeichen angebracht ist:<br/>
                                             <div className="flex items-center gap-2 mt-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm w-max">
                                                 <Sign1010_66 className="w-14 h-10 shrink-0" />
-                                                <span className="text-[10px] font-bold">VZ 1010-66</span>
+                                                <span className="text-[10px] font-bold">VZ 1010-68</span>
                                             </div>
                                             <span className="text-red-700 font-bold block mt-2">WICHTIG: Das Verkehrszeichen „Radverkehr frei“ VZ 1022-10 reicht hierfür nicht aus!</span>
                                             <div className="mt-2 text-[10px] text-emerald-700 font-normal leading-snug">
-                                                Hinweis: ab dem 01.03.2027 fallen Elektrokleinstfahrzeuge unter das Verkehrszeichen VZ 1022-10. Das VZ 1010-66 wird somit obsolet.
+                                                Hinweis: ab dem 01.03.2027 fallen Elektrokleinstfahrzeuge unter das Verkehrszeichen VZ 1022-10. Das VZ 1010-68 wird somit obsolet.
                                             </div>
                                         </div>
                                     </div>
@@ -7371,7 +7405,7 @@ const HomeView = ({ onSelect }) => {
     const dateTime = useDateTime();
     
     // --- HIER UPDATE TEXT EINTRAGEN ---
-    const updateText = "🚀 Update 3.4: Sozialvorschriften in Wissensdatenbank implementiert";
+    const updateText = "🚀 Update 3.5: Geschwindigkeitsreiter innerorts/außerorts auf PKW mit Anhänger und LKW erweitert";
 
     const tiles = [
         { id: 'age', title: 'Altersrechner', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50', desc: '' },
