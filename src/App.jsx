@@ -4852,6 +4852,9 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                                 <li>Promille-/ BTM-Grenzen sind gleich wie beim PKW (§§ 24a, 24c StVG, § 316 StGB)</li>
                                                 <li>Führerscheinrechtliche Maßnahmen (z.B. Beschlagnahme FS) sind ebenfalls anwendbar</li>
                                                 <li>Eine Deckung innerhalb der Haftpflichtversicherung ist ausreichend, um keinen Verstoß nach dem PflVG bzw. AuslPflVG zu begehen. Bestehen Zweifel liegt ein Anfangsverdacht für eine Straftat vor und es sollte die Versicherungs-Police auf entsprechende Deckung überprüft werden.</li>
+                                                <li> Das bloße Tunen eines E-Scooters zur Erhöhung der Geschwindigkeit führt <strong>nicht automatisch</strong> zu einem Fahren ohne Versicherungsschutz. Eine solche Straftat liegt erst dann vor, wenn der Versicherer von der technischen Veränderung Kenntnis erlangt und den Versicherungsvertrag daraufhin wirksam kündigt.</li>
+
+
                                                 <li>Sobald ein Mangel beim Fahrzeugführer festgestellt wird, sollte nach § 2 (12) StVG eine Meldung an die zuständige Führerscheinstelle erfolgen.</li>
                                             </ul>
                                         </div>
@@ -4931,6 +4934,9 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                                 <li>Promille-/ BTM-Grenzen sind gleich wie beim PKW (§§ 24a, 24c StVG, § 316 StGB)</li>
                                                 <li>Führerscheinrechtliche Maßnahmen (z.B. Beschlagnahme FS) sind ebenfalls anwendbar</li>
                                                 <li>Eine Deckung innerhalb der Haftpflichtversicherung ist ausreichend, um keinen Verstoß nach dem PflVG bzw. AuslPflVG zu begehen. Bestehen Zweifel liegt ein Anfangsverdacht für eine Straftat vor und es sollte die Versicherungs-Police auf entsprechende Deckung überprüft werden.</li>
+                                                <li> Das bloße Tunen eines E-Scooters zur Erhöhung der Geschwindigkeit führt <strong>nicht automatisch</strong> zu einem Fahren ohne Versicherungsschutz. Eine solche Straftat liegt erst dann vor, wenn der Versicherer von der technischen Veränderung Kenntnis erlangt und den Versicherungsvertrag daraufhin wirksam kündigt.</li>
+
+
                                                 <li>Sobald ein Mangel beim Fahrzeugführer festgestellt wird, sollte nach § 2 (12) StVG eine Meldung an die zuständige Führerscheinstelle erfolgen.</li>
                                             </ul>
                                         </div>
@@ -5018,6 +5024,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                                 <li>Promille-/ BTM-Grenzen sind gleich wie beim PKW (§§ 24a, 24c StVG, § 316 StGB)</li>
                                                 <li>Führerscheinrechtliche Maßnahmen (z.B. Beschlagnahme FS) sind ebenfalls anwendbar</li>
                                                 <li>Eine Deckung innerhalb der Haftpflichtversicherung ist ausreichend, um keinen Verstoß nach dem PflVG zu begehen. Im Zweifelsfall Polizei/Versicherung prüfen.</li>
+                                                <li> Das bloße Tunen eines E-Scooters zur Erhöhung der Geschwindigkeit führt <strong>nicht automatisch</strong> zu einem Fahren ohne Versicherungsschutz. Eine solche Straftat liegt erst dann vor, wenn der Versicherer von der technischen Veränderung Kenntnis erlangt und den Versicherungsvertrag daraufhin wirksam kündigt.</li>
+
                                                 <li>Sobald ein Mangel beim Fahrzeugführer festgestellt wird, sollte nach § 2 (12) StVG eine Meldung an die zuständige Führerscheinstelle erfolgen.</li>
                                             </ul>
                                         </div>
@@ -5109,6 +5117,8 @@ function KnowledgeBaseView({ initialView = 'overview', onBack }) {
                                                 <li>Promille-/ BTM-Grenzen sind gleich wie beim PKW (§§ 24a, 24c StVG, § 316 StGB)</li>
                                                 <li>Führerscheinrechtliche Maßnahmen (z.B. Beschlagnahme FS) sind ebenfalls anwendbar</li>
                                                 <li>Eine Deckung innerhalb der Haftpflichtversicherung ist ausreichend, um keinen Verstoß nach dem PflVG bzw. AuslPflVG zu begehen. Im Zweifelsfall Polizei/Versicherung prüfen.</li>
+                                                <li> Das bloße Tunen eines E-Scooters zur Erhöhung der Geschwindigkeit führt <strong>nicht automatisch</strong> zu einem Fahren ohne Versicherungsschutz. Eine solche Straftat liegt erst dann vor, wenn der Versicherer von der technischen Veränderung Kenntnis erlangt und den Versicherungsvertrag daraufhin wirksam kündigt.</li>
+
                                                 <li>Sobald ein Mangel beim Fahrzeugführer festgestellt wird, sollte nach § 2 (12) StVG eine Meldung an die zuständige Führerscheinstelle erfolgen.</li>
                                             </ul>
                                         </div>
